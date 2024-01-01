@@ -20,7 +20,7 @@ node ace configure adonisjs-livewire
 
 ## Configuration
 
-Enable ALS in `start/app.ts` https://docs.adonisjs.com/guides/async-local-storage#usage
+Enable ALS in `config/app.ts` https://docs.adonisjs.com/guides/async-local-storage#usage
 
 ```ts
 // config/app.ts
