@@ -59,6 +59,40 @@ export default class LivewireProvider {
                     }
                 })
 
+                let regex = /<livewire:([a-zA-Z0-9\.\-]+)([^>]*)\/>/g;
+
+                View.processor.process('raw', (value) => {
+                    let raw = value.raw;
+                    let matches = raw.match(regex);
+
+                    if (!matches) {
+                        return;
+                    }
+
+
+                    for (const match of matches) {
+                        let [_, component, props] = match.match(/<livewire:([a-zA-Z0-9\.\-]+)([^>]*)\/>/) || [];
+                        let attributes: any = {};
+                       
+                        if (props) {
+                            let regex = /([a-zA-Z0-9\-]+)\s*=\s*['"]([^'"]*)['"]/g;
+
+                            let matches = props.match(regex);
+
+                            if (matches) {
+                                for (const match of matches) {
+                                    let [_, key, value] = match.match(/([a-zA-Z0-9\-]+)\s*=\s*['"]([^'"]*)['"]/) || [];
+                                    attributes[key] = value;
+                                }
+                            }
+                        }
+
+                        raw = raw.replace(match, `@livewire('${component}', ${JSON.stringify(attributes)})`);
+                    }
+
+                    return raw;
+                })
+
                 Route.get('/livewire.css', async ({ response }) => {
                     response.type('text/css')
 

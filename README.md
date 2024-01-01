@@ -128,4 +128,8 @@ Now, applications with your package installed can consume your component in thei
 @livewire('custom-component', {
   title: 'My Component'
 })
+
+// or
+
+<livewire:custom-component title="My Component" />
 ```
