@@ -43,7 +43,9 @@ export default class LivewireProvider {
                     block: false,
                     seekable: false,
                     compile(_parser, buffer, _token) {
-                        buffer.outputRaw(`<script src="livewire.js" data-csrf="nvnrOE25xFjKzLdFnBRLG7rdK6jgAhuW13ltx2xk" data-update-uri="/livewire/update" data-navigate-once="true"></script>`)
+                        let csrfToken = "NA"
+                        
+                        buffer.outputRaw(`<script src="livewire.js" data-csrf="${csrfToken}" data-update-uri="/livewire/update" data-navigate-once="true"></script>`)
                     }
                 })
 

@@ -140,7 +140,10 @@ export default class Livewire {
 
                 returns.push(result);
             } catch (error) {
-                if (error.name !== 'ValidationException') {
+                console.error(error);
+                if (error.name === 'ValidationException' && error.flashToSession) {
+                    this.httpContext.get()?.session?.flash("errors", error.messages);
+                }else {
                     throw error;
                 }
             }
@@ -208,8 +211,14 @@ export default class Livewire {
     public async render(component: Component, defaultValue?: string) {
         let data = await component.data() || {};
         let content = await component.render() || defaultValue || "<div></div>";
+        let ctx = this.httpContext.get();
 
-        this.httpContext.get()?.session?.flashAll();
+        if (ctx) {
+            await ctx.session.commit()
+            ctx.session.initiated = false;
+            ctx.session.responseFlashMessages.clear()
+            await ctx.session.initiate(false)
+        }
 
         let html = await this.view.renderRaw(content, {
             ...component,
@@ -219,6 +228,12 @@ export default class Livewire {
         html = insertAttributesIntoHtmlRoot(html, {
             'wire:id': component.getId(),
         });
+
+        if (ctx) {
+            ctx.session.responseFlashMessages.clear()
+            ctx.session.flashMessages.clear()
+            ctx.session.clear()
+        }
 
         return html;
     }

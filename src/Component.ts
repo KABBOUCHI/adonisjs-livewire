@@ -1,5 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { RedirectContract } from "@ioc:Adonis/Core/Response"
+import { TypedSchema, ParsedTypedSchema, CustomMessages } from '@ioc:Adonis/Core/Validator';
 
 export class Component {
     protected __id;
@@ -16,11 +17,11 @@ export class Component {
     protected __ctx: HttpContextContract | null = null;
 
     constructor(ctx: HttpContextContract | null = null) {
-       this.__ctx = ctx;
+        this.__ctx = ctx;
     }
 
     get ctx() {
-        if(!this.__ctx) throw new Error("Cannot access http context. Please enable ASL.");
+        if (!this.__ctx) throw new Error("Cannot access http context. Please enable ASL.");
 
         return this.__ctx;
     }
@@ -77,5 +78,22 @@ export class Component {
 
     public js(expression: string) {
         this.__store.js.push(expression);
+    }
+
+    public schema(): ParsedTypedSchema<TypedSchema> {
+        throw new Error("Schema not implemented");
+    }
+
+    public messages(): CustomMessages {
+        return {}
+    }
+
+    public async validate(bail: boolean = true) {
+        await this.ctx.request.validate({
+            schema: this.schema(),
+            data: this,
+            messages: this.messages(),
+            bail,
+        })
     }
 }
