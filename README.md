@@ -79,15 +79,16 @@ Create layout file in `resources/views/layouts/main.edge`
 ```ts
 // start/routes.ts
 
-Route.livewire("/", "Counter");
+Route.livewire("/", "Counter"); // App/Livewire/Counter.ts
 Route.livewire("/", "counter", [
   {
     initialCounter: 10,
   },
 ]); // args
 Route.livewire("/", "counter", { initialCounter: 10 }); // args[0] shorthand
-Route.livewire("/search-users", "search-users");
-Route.livewire("/search-users");
+Route.livewire("/search-users", "search-users"); // App/Livewire/SearchUsers.ts
+Route.livewire("/search-users"); // App/Livewire/SearchUsers.ts
+Route.livewire("/search-users", "search-users.index"); // App/Livewire/SearchUsers/Index.ts
 ```
 
 

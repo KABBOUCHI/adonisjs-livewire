@@ -86,7 +86,7 @@ export default class Livewire {
         if (this.components.has(name)) {
             LivewireComponent = this.components.get(name)!;
         } else {
-            name = this.helpers.string.pascalCase(name);
+            name = name.split('.').map(s => this.helpers.string.pascalCase(s)).join('/');
             LivewireComponent = await import(`${process.cwd()}/app/Livewire/${name}`).then(module => module.default);
         }
 
