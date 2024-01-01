@@ -113,6 +113,13 @@ export default class Livewire {
 
         let data = JSON.parse(JSON.stringify(component));
 
+        if (data.__store) {
+            if(data.__store.js.length > 0) {
+                context.addEffect('xjs', data.__store.js);
+            }
+            delete data.__store;
+        }
+
         delete data.__id;
         delete  data.__name;
 

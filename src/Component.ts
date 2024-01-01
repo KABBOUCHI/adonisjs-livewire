@@ -1,6 +1,9 @@
 export class Component {
     protected __id;
     protected __name;
+    protected __store = {
+        js: [] as string[],
+    };
 
     public id() {
         return this.getId();
@@ -28,5 +31,10 @@ export class Component {
 
     public async data() : Promise<any> {
         return {};
+    }
+
+    public js(expression: string) 
+    {
+        this.__store.js.push(expression);
     }
 }
