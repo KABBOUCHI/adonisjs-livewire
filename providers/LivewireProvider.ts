@@ -59,12 +59,11 @@ export default class LivewireProvider {
 
                 Route.livewire = (pattern: string, component: string, params: any[] = []) => {
                     Route.get(pattern, async ({ view }) => {
-                        return await view.renderRaw(`
-                            @layout('layouts/main')
+                        return await view.renderRaw(`@layout('layouts/main')
                           
-                            @section('body')
-                                @livewire('${component}', ${JSON.stringify(params)})
-                            @end
+@section('body')
+    @livewire('${component}', ${JSON.stringify(params)})
+@end
                         `);
                     });
 
