@@ -17,6 +17,20 @@ Next, configure the package by running the following command.
 ```bash
 node ace configure adonisjs-livewire
 ```
+
+## Configuration
+
+Enable ALS in `start/app.ts` https://docs.adonisjs.com/guides/async-local-storage#usage
+
+```ts
+// config/app.ts
+export const http: ServerConfig = {
+  useAsyncLocalStorage: true,
+}
+```
+
+now you can use `this.ctx` in your Livewire components.
+
 ## Create a Livewire component
 
 ```sh

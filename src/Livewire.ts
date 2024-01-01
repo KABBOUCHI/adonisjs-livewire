@@ -1,5 +1,6 @@
 import { ViewContract } from "@ioc:Adonis/Core/View";
 import { ApplicationContract } from "@ioc:Adonis/Core/Application";
+import { HttpContextConstructorContract } from "@ioc:Adonis/Core/HttpContext";
 import Helpers from "@ioc:Adonis/Core/Helpers";
 import { Component } from "./Component";
 import ComponentContext from "./ComponentContext";
@@ -7,20 +8,32 @@ import ComponentContext from "./ComponentContext";
 export default class Livewire {
     app: ApplicationContract
     view: ViewContract
+    httpContext: HttpContextConstructorContract
     helpers: typeof Helpers
 
-    constructor(app: ApplicationContract, view: ViewContract, helpers: typeof Helpers) {
+    constructor(app: ApplicationContract, view: ViewContract, helpers: typeof Helpers, httpContext: HttpContextConstructorContract) {
         this.app = app;
         this.view = view;
         this.helpers = helpers;
+        this.httpContext = httpContext;
     }
 
-    public async mount(name: string, params: any[] = [], _key?: string) {
+    public async mount(name: string, params: any[] = [], options: { layout?: any } = {}) {
         let component = await this.new(name);
         let context = new ComponentContext(component, true);
         params = Array.isArray(params) ? params : [params];
-        if (component.mount) {
+
+        //@ts-ignore
+        if (typeof component.mount === 'function') {
+            //@ts-ignore
             await component.mount(...params);
+        }
+
+        if (options.layout && (!component.__decorators || !component.__decorators.some(d => d.type === 'layout'))) {
+            component.pushDecorator("layout", {
+                layout: options.layout.name,
+                section: options.layout.section || 'body'
+            });
         }
 
         let html = await this.render(component, '<div></div>');
@@ -49,8 +62,10 @@ export default class Livewire {
     }
 
     public async new(name: string, id: string | null = null) {
-        let Component = await import(`${process.cwd()}/app/Livewire/${name}`).then(module => module.default) as typeof Component;
-        let component = new Component;
+        let LivewireComponent = await import(`${process.cwd()}/app/Livewire/${name}`).then(module => module.default) as typeof Component;
+        let component = new LivewireComponent(
+            this.httpContext.get()
+        );
 
         component.setId(id ?? this.helpers.string.generateRandom(20));
         component.setName(name);
@@ -110,18 +125,19 @@ export default class Livewire {
 
     public snapshot(component: any, context: any = null): any {
         context = context ?? new ComponentContext(component);
-
-        let data = JSON.parse(JSON.stringify(component));
-
-        if (data.__store) {
-            if(data.__store.js.length > 0) {
-                context.addEffect('xjs', data.__store.js);
+        if (component.__store) {
+            if (component.__store.js.length > 0) {
+                context.addEffect('xjs', component.__store.js);
             }
-            delete data.__store;
+            delete component.__store;
         }
 
-        delete data.__id;
-        delete  data.__name;
+        let data = JSON.parse(JSON.stringify(component, (key, value) => {
+            if (key.startsWith('__')) return undefined;
+
+            return value;
+        }));
+
 
         let snapshot = {
             data: data,
@@ -164,7 +180,16 @@ export default class Livewire {
 
     public async render(component: Component, defaultValue?: string) {
         let data = await component.data() || {};
-        let html = await this.view.renderRaw(await component.render() || defaultValue || "<div></div>", {
+        let decorators = component.getDecorators();
+        let pageTitle = decorators.find(d => d.type === 'title')?.title;
+        let content = await component.render() || defaultValue || "<div></div>";
+        let layout = decorators.find(d => d.type === 'layout');
+
+        if (layout) {
+            content = `@layout('${layout.layout}')\n@set('title', ${pageTitle ? `'${pageTitle}'` : null})\n@section('${layout.section}')\n${content}\n@endsection`
+        }
+
+        let html = await this.view.renderRaw(content, {
             ...component,
             ...data
         });

@@ -6,3 +6,4 @@ declare module '@ioc:Adonis/Core/Route' {
 }
 
 export { Component } from "../providers";
+export * from '../src/decorators';

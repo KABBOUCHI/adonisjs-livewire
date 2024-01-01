@@ -16,14 +16,16 @@ export default class LivewireProvider {
                 'Adonis/Core/Helpers',
                 'Adonis/Core/View',
                 'Adonis/Core/Route',
+                'Adonis/Core/HttpContext',
             ],
-            async (Application, Helpers, View, Route) => {
+            async (Application, Helpers, View, Route, HttpContext) => {
                 const Livewire = (await import('../src/Livewire')).default;
                 const LivewireTag = (await import('../src/LivewireTag')).default;
                 View.global("livewire", new Livewire(
                     Application,
                     View,
                     Helpers,
+                    HttpContext,
                 ));
                 View.registerTag(new LivewireTag)
 
@@ -59,19 +61,14 @@ export default class LivewireProvider {
 
                 Route.livewire = (pattern: string, component: string, params: any[] = []) => {
                     Route.get(pattern, async ({ view }) => {
-                        return await view.renderRaw(`@layout('layouts/main')
-                          
-@section('body')
-    @livewire('${component}', ${JSON.stringify(params)})
-@end
-                        `);
+                        return await view.renderRaw(`@livewire('${component}', ${JSON.stringify(params)}, { layout: { name: 'layouts/main', section: 'body' } })`);
                     });
 
                     return Route;
                 };
 
-                Route.post('/livewire/update', async ({ request }) => {
-                    let components = request.input('components', []);
+                Route.post('/livewire/update', async (ctx) => {
+                    let components = ctx.request.input('components', []);
                     let result: any = {
                         components: [],
                         assets: [],
@@ -80,6 +77,7 @@ export default class LivewireProvider {
                         Application,
                         View,
                         Helpers,
+                        HttpContext,
                     );
 
                     for (const component of components) {

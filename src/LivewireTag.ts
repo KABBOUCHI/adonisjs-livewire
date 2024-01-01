@@ -14,7 +14,8 @@ export default class LivewireTag implements TagContract {
         if (parsed.expressions) {
             const componentClass = parser.utils.stringify(parsed.expressions[0]);
             const componentParams = parser.utils.stringify(parsed.expressions[1]);
-            buffer.outputExpression(`await state.livewire.mount(${componentClass}, ${componentParams})`, token.filename, token.loc.start.line, false);
+            const componentOptions = parser.utils.stringify(parsed.expressions[2]);
+            buffer.outputExpression(`await state.livewire.mount(${componentClass}, ${componentParams}, ${componentOptions})`, token.filename, token.loc.start.line, false);
         } else {
             const componentClass = parser.utils.stringify(parsed);
             buffer.outputExpression(`await state.livewire.mount(${componentClass})`, token.filename, token.loc.start.line, false);
