@@ -7,6 +7,8 @@ export class Component {
     protected __store = {
         js: [] as string[],
     };
+    protected __assets: string[] = [];
+    protected __scripts: string[] = [];
     public __decorators: {
         type: string,
         [key: string]: any
@@ -14,20 +16,18 @@ export class Component {
     protected __ctx: HttpContextContract | null = null;
 
     constructor(ctx: HttpContextContract | null = null) {
-        this.__ctx = ctx;
+       this.__ctx = ctx;
     }
 
     get ctx() {
+        if(!this.__ctx) throw new Error("Cannot access http context. Please enable ASL.");
+
         return this.__ctx;
     }
 
     redirect(): RedirectContract;
     redirect(path: string, forwardQueryString?: boolean, statusCode?: number): void;
     public redirect(...args: any[]) {
-        if (!this.ctx) {
-            throw new Error("Cannot redirect without http context. Please enable ASL.");
-        }
-
         if (args.length === 0) return this.ctx.response.redirect();
 
         return this.ctx.response.redirect(args[0], args[1], args[2]);
@@ -68,10 +68,6 @@ export class Component {
     }
 
     get view() {
-        if (!this.ctx) {
-            throw new Error("Cannot render view without http context. Please enable ASL.");
-        }
-
         return this.ctx.view
     }
 

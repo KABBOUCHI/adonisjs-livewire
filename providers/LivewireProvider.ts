@@ -48,13 +48,13 @@ export default class LivewireProvider {
                 })
 
                 Route.get('/livewire.css', async ({ response }) => {
-                    response.type('css')
+                    response.type('text/css')
 
                     return livewireCss
                 })
 
                 Route.get('/livewire.js', async ({ response }) => {
-                    response.type('js')
+                    response.type('text/javascript')
 
                     return livewireJs
                 })
@@ -83,7 +83,6 @@ export default class LivewireProvider {
                     for (const component of components) {
                         let snapshot = JSON.parse(component.snapshot);
                         let [newSnapshot, effects] = await livewire.update(snapshot, component.updates, component.calls)
-
                         result.components.push({
                             snapshot: JSON.stringify(newSnapshot),
                             effects,

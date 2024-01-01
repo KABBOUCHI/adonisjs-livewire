@@ -7,15 +7,26 @@ import ComponentContext from "./ComponentContext";
 
 export default class Livewire {
     app: ApplicationContract
-    view: ViewContract
+    _view: ViewContract
     httpContext: HttpContextConstructorContract
     helpers: typeof Helpers
 
     constructor(app: ApplicationContract, view: ViewContract, helpers: typeof Helpers, httpContext: HttpContextConstructorContract) {
         this.app = app;
-        this.view = view;
+        this._view = view;
         this.helpers = helpers;
         this.httpContext = httpContext;
+    }
+
+    get view() {
+        let ctx = this.httpContext.get();
+        let v = this._view;
+
+        if (ctx) {
+            v = ctx.view as any;
+        }
+
+        return v;
     }
 
     public async mount(name: string, params: any[] = [], options: { layout?: any } = {}) {
@@ -41,7 +52,7 @@ export default class Livewire {
 
         html = insertAttributesIntoHtmlRoot(html, {
             'wire:snapshot': snapshot,
-            'wire:effects': Object.keys(context.effects).length > 0 ? context.effects as any : [],
+            'wire:effects': Object.keys(context.effects).length > 0 ? context.effects as any : [], // TODO: send scripts
         });
 
         let decorators = component.getDecorators();
@@ -118,12 +129,21 @@ export default class Livewire {
         let returns: any[] = [];
 
         for (const call of calls) {
-            let method = call['method'];
-            let params = call['params'];
+            try {
+                let method = call['method'];
+                let params = call['params'];
 
-            let result = await component[method](...params);
+                if (typeof component[method] !== 'function') {
+                    throw new Error(`Method \`${method}\` does not exist on component ${component.getName()}`);
+                }
+                let result = await component[method](...params);
 
-            returns.push(result);
+                returns.push(result);
+            } catch (error) {
+                if (error.name !== 'ValidationException') {
+                    throw error;
+                }
+            }
         }
 
         context.addEffect('returns', returns);
@@ -188,12 +208,14 @@ export default class Livewire {
     public async render(component: Component, defaultValue?: string) {
         let data = await component.data() || {};
         let content = await component.render() || defaultValue || "<div></div>";
-        
+
+        this.httpContext.get()?.session?.flashAll();
+
         let html = await this.view.renderRaw(content, {
             ...component,
             ...data
         });
-        
+
         html = insertAttributesIntoHtmlRoot(html, {
             'wire:id': component.getId(),
         });
