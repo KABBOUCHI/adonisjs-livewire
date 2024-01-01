@@ -16,3 +16,12 @@ export function layout(layout: string = "layouts/main", section: string = 'body'
         });
     }
 }
+
+export function computed(name?: string) {
+    return function (target: any, propertyKey: string, _descriptor: PropertyDescriptor) {
+        target.pushDecorator("computed", {
+            name: name || propertyKey,
+            function: propertyKey
+        });
+    }
+}

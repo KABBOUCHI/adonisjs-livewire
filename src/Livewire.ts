@@ -234,6 +234,13 @@ export default class Livewire {
 
     public async render(component: Component, defaultValue?: string) {
         let data = await component.data() || {};
+        let decorators = component.getDecorators();
+        let computedDecorators = decorators.filter(d => d.type === 'computed');
+
+        for (const decorator of computedDecorators) {
+            data[decorator.name] = await component[decorator.function]();
+        }
+
         let content = await component.render() || defaultValue || "<div></div>";
         let ctx = this.httpContext.get();
 

@@ -7,10 +7,10 @@ declare module '@ioc:Adonis/Core/Route' {
 declare module '@ioc:Adonis/Addons/Livewire' {
     export const Component: typeof import("../src/Component").Component;
     export const Livewire: import("../src/Livewire").default;
-    export const { title, layout }: typeof import("../src/decorators");
+    export const { title, layout, computed }: typeof import("../src/decorators");
 }
 
 declare module 'adonisjs-livewire' {
     export const Component: typeof import("../src/Component").Component;
-    export const { title, layout }: typeof import("../src/decorators");
+    export const { title, layout, computed }: typeof import("../src/decorators");
 }
