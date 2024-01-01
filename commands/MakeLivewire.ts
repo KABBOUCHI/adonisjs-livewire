@@ -18,7 +18,7 @@ export default class InspireCommand extends BaseCommand {
             .addFile(this.name + ".ts", {
                 pattern: "pascalcase",
             })
-            .stub(join(__dirname, '..', '..', 'templates', 'livewire.txt'))
+            .stub(join(__dirname, '..', 'templates', 'livewire.txt'))
             .useMustache()
             .destinationDir('app/Livewire')
             .appRoot(this.application.appRoot)
