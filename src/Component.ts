@@ -1,13 +1,11 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { RedirectContract } from "@ioc:Adonis/Core/Response"
 import { TypedSchema, ParsedTypedSchema, CustomMessages } from '@ioc:Adonis/Core/Validator';
+import { store } from './store';
 
 export class Component {
     protected __id;
     protected __name;
-    protected __store = {
-        js: [] as string[],
-    };
     protected __assets: string[] = [];
     protected __scripts: string[] = [];
     public __decorators: {
@@ -15,6 +13,7 @@ export class Component {
         [key: string]: any
     }[]
     protected __ctx: HttpContextContract | null = null;
+    protected listeners: { [key: string]: string|any } = {};
 
     constructor(ctx: HttpContextContract | null = null) {
         this.__ctx = ctx;
@@ -77,7 +76,7 @@ export class Component {
     }
 
     public js(expression: string) {
-        this.__store.js.push(expression);
+        store(this).push('js', expression);
     }
 
     public schema(): ParsedTypedSchema<TypedSchema> {
@@ -94,6 +93,13 @@ export class Component {
             data: this,
             messages: this.messages(),
             bail,
+        })
+    }
+
+    public dispatch(name: string, params: any) {
+        store(this).push('dispatched', {
+            name,
+            params,
         })
     }
 }
