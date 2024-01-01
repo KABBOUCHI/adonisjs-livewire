@@ -1,0 +1,1 @@
+export default ['adonisjs-livewire/build/commands/MakeLivewire'];

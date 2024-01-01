@@ -1,0 +1,77 @@
+{
+  "name": "adonisjs-livewire",
+  "version": "0.0.1",
+	"description": "A front-end framework for AdonisJS",
+	"homepage": "https://github.com/KABBOUCHI/adonisjs-livewire",
+	"license": "MIT",
+	"keywords": [
+		"adonisjs",
+		"livewire",
+		"components"
+	],
+	"author": "Georges KABBOUCHI <georges.kabbouchi@gmail.com>",
+  "typings": "./build/adonis-typings/index.d.ts",
+  "main": "build/providers/index.js",
+  "files": [
+    "build",
+    "LICENSE.md",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "mrm": "mrm --preset=@adonisjs/mrm-preset",
+    "test": "node -r @adonisjs/require-ts/build/register bin/test.ts",
+    "clean": "del-cli build",
+    "compile": "npm run clean && tsc",
+    "build": "npm run compile && npm run copyfiles",
+    "copyfiles": "copyfiles assets/**/* build && copyfiles \"templates/**/*.txt\" build",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@adonisjs/core": "^5.1.0",
+    "@adonisjs/mrm-preset": "^5.0.3",
+    "@adonisjs/require-ts": "^2.0.13",
+    "@adonisjs/session": "^6.0.0",
+    "@adonisjs/view": "^6.0.0",
+    "@types/node": "^20.10.6",
+    "del-cli": "^5.1.0",
+    "mrm": "^4.1.22",
+    "typescript": "^5.3.3",
+    "copyfiles": "^2.4.1"
+  },
+  "peerDependencies": {
+    "@adonisjs/core": "^5.1.0",
+    "@adonisjs/session": "^6.0.0",
+    "@adonisjs/view": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@adonisjs/session": {
+      "optional": true
+    }
+  },
+  "mrmConfig": {
+    "core": false,
+    "license": "MIT",
+    "services": [],
+    "minNodeVersion": "16.13.1",
+    "probotApps": []
+  },
+  "adonisjs": {
+    "types": "adonisjs-livewire",
+    "commands": [
+			"adonisjs-livewire/build/commands"
+		],
+    "providers": [
+      "adonisjs-livewire"
+    ],
+    "templates": {
+			"basePath": "./build/templates",
+			"start": [
+				{
+					"src": "livewire.txt",
+					"dest": "livewire"
+				}
+			]
+		}
+  }
+}

@@ -1,0 +1,9 @@
+import { Component } from 'adonisjs-livewire';
+
+export default class {{ filename }} extends Component {
+    public async render() {
+        return /*html*/`<div wire:poll> 
+            \{\{ Date.now()  \}\} 
+        </div>`
+    }
+}
