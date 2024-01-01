@@ -10,6 +10,7 @@ export default class Livewire {
     _view: ViewContract
     httpContext: HttpContextConstructorContract
     helpers: typeof Helpers
+    components = new Map<string, typeof Component>();
 
     constructor(app: ApplicationContract, view: ViewContract, helpers: typeof Helpers, httpContext: HttpContextConstructorContract) {
         this.app = app;
@@ -80,7 +81,15 @@ export default class Livewire {
     }
 
     public async new(name: string, id: string | null = null) {
-        let LivewireComponent = await import(`${process.cwd()}/app/Livewire/${name}`).then(module => module.default) as typeof Component;
+        let LivewireComponent: typeof Component;
+
+        if (this.components.has(name)) {
+            LivewireComponent = this.components.get(name)!;
+        } else {
+            name = this.helpers.string.pascalCase(name);
+            LivewireComponent = await import(`${process.cwd()}/app/Livewire/${name}`).then(module => module.default);
+        }
+
         let component = new LivewireComponent(
             this.httpContext.get()
         );
@@ -143,7 +152,7 @@ export default class Livewire {
                 console.error(error);
                 if (error.name === 'ValidationException' && error.flashToSession) {
                     this.httpContext.get()?.session?.flash("errors", error.messages);
-                }else {
+                } else {
                     throw error;
                 }
             }
@@ -236,6 +245,10 @@ export default class Livewire {
         }
 
         return html;
+    }
+
+    public component(name: string, component: typeof Component) {
+        return this.components.set(name, component);
     }
 }
 

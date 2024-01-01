@@ -1,4 +1,6 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
+import { Component } from '../src/Component';
+import * as decorators from '../src/decorators';
 import fs from 'fs';
 
 export default class LivewireProvider {
@@ -21,12 +23,20 @@ export default class LivewireProvider {
             async (Application, Helpers, View, Route, HttpContext) => {
                 const Livewire = (await import('../src/Livewire')).default;
                 const LivewireTag = (await import('../src/LivewireTag')).default;
-                View.global("livewire", new Livewire(
+
+                const livewire = new Livewire(
                     Application,
                     View,
                     Helpers,
                     HttpContext,
-                ));
+                )
+                this.app.container.singleton('Adonis/Addons/Livewire', () => ({
+                    Livewire: livewire,
+                    Component,
+                    ...decorators,
+                }))
+
+                View.global("livewire", livewire);
                 View.registerTag(new LivewireTag)
 
                 View.registerTag({
@@ -44,7 +54,7 @@ export default class LivewireProvider {
                     seekable: false,
                     compile(_parser, buffer, _token) {
                         let csrfToken = "NA"
-                        
+
                         buffer.outputRaw(`<script src="livewire.js" data-csrf="${csrfToken}" data-update-uri="/livewire/update" data-navigate-once="true"></script>`)
                     }
                 })
@@ -61,8 +71,16 @@ export default class LivewireProvider {
                     return livewireJs
                 })
 
-                Route.livewire = (pattern: string, component: string, params: any[] = []) => {
+                Route.livewire = (pattern: string, component?: string, params: any[] = []) => {
                     Route.get(pattern, async ({ view }) => {
+                        component = component || pattern;
+
+                        component = component.replace(/^\//, '');
+                        component = component.replace(/\/$/, '');
+                        component = component.replace(/\//g, '.');
+
+                        console.log(`@livewire('${component}', ${JSON.stringify(params)}, { layout: { name: 'layouts/main', section: 'body' } })`);
+                        
                         return await view.renderRaw(`@livewire('${component}', ${JSON.stringify(params)}, { layout: { name: 'layouts/main', section: 'body' } })`);
                     });
 
@@ -75,13 +93,6 @@ export default class LivewireProvider {
                         components: [],
                         assets: [],
                     }
-                    let livewire = new Livewire(
-                        Application,
-                        View,
-                        Helpers,
-                        HttpContext,
-                    );
-
                     for (const component of components) {
                         let snapshot = JSON.parse(component.snapshot);
                         let [newSnapshot, effects] = await livewire.update(snapshot, component.updates, component.calls)
