@@ -24,9 +24,13 @@ export class Component {
     redirect(): RedirectContract;
     redirect(path: string, forwardQueryString?: boolean, statusCode?: number): void;
     public redirect(...args: any[]) {
-        if (args.length === 0) return this.ctx!.response.redirect();
+        if (!this.ctx) {
+            throw new Error("Cannot redirect without http context. Please enable ASL.");
+        }
 
-        return this.ctx!.response.redirect(args[0], args[1], args[2]);
+        if (args.length === 0) return this.ctx.response.redirect();
+
+        return this.ctx.response.redirect(args[0], args[1], args[2]);
     }
 
     public id() {
@@ -61,6 +65,14 @@ export class Component {
 
     public async render(): Promise<string> {
         return '<div></div>';
+    }
+
+    get view() {
+        if (!this.ctx) {
+            throw new Error("Cannot render view without http context. Please enable ASL.");
+        }
+
+        return this.ctx.view
     }
 
     public async data(): Promise<any> {

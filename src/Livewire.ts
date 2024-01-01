@@ -37,13 +37,20 @@ export default class Livewire {
         }
 
         let html = await this.render(component, '<div></div>');
-
         let snapshot = this.snapshot(component, context);
 
         html = insertAttributesIntoHtmlRoot(html, {
             'wire:snapshot': snapshot,
             'wire:effects': Object.keys(context.effects).length > 0 ? context.effects as any : [],
         });
+
+        let decorators = component.getDecorators();
+        let pageTitle = decorators.find(d => d.type === 'title')?.title;
+        let layout = decorators.find(d => d.type === 'layout');
+
+        if (layout) {
+            html = await this.view.renderRaw(`@layout('${layout.layout}')\n@set('title', ${pageTitle ? `'${pageTitle}'` : null})\n@section('${layout.section}')\n${html}\n@endsection`)
+        }
 
         return html
     }
@@ -180,20 +187,13 @@ export default class Livewire {
 
     public async render(component: Component, defaultValue?: string) {
         let data = await component.data() || {};
-        let decorators = component.getDecorators();
-        let pageTitle = decorators.find(d => d.type === 'title')?.title;
         let content = await component.render() || defaultValue || "<div></div>";
-        let layout = decorators.find(d => d.type === 'layout');
-
-        if (layout) {
-            content = `@layout('${layout.layout}')\n@set('title', ${pageTitle ? `'${pageTitle}'` : null})\n@section('${layout.section}')\n${content}\n@endsection`
-        }
-
+        
         let html = await this.view.renderRaw(content, {
             ...component,
             ...data
         });
-
+        
         html = insertAttributesIntoHtmlRoot(html, {
             'wire:id': component.getId(),
         });
