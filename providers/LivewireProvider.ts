@@ -79,8 +79,6 @@ export default class LivewireProvider {
                         component = component.replace(/\/$/, '');
                         component = component.replace(/\//g, '.');
 
-                        console.log(`@livewire('${component}', ${JSON.stringify(params)}, { layout: { name: 'layouts/main', section: 'body' } })`);
-                        
                         return await view.renderRaw(`@livewire('${component}', ${JSON.stringify(params)}, { layout: { name: 'layouts/main', section: 'body' } })`);
                     });
 
