@@ -122,7 +122,7 @@ export default class AppProvider {
 }
 
 Now, applications with your package installed can consume your component in their views like so:
-
+```
 
 ```blade
 @livewire('custom-component', {
