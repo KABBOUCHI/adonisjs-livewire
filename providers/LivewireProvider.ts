@@ -63,6 +63,12 @@ export default class LivewireProvider {
 
                 View.processor.process('raw', (value) => {
                     let raw = value.raw;
+
+                    raw = raw.replace("<livewire:styles/>", "@livewireStyles")
+                    raw = raw.replace("<livewire:styles />", "@livewireStyles")
+                    raw = raw.replace("<livewire:scripts/>", "@livewireScripts")
+                    raw = raw.replace("<livewire:scripts />", "@livewireScripts")
+
                     let matches = raw.match(regex);
 
                     if (!matches) {
@@ -73,23 +79,35 @@ export default class LivewireProvider {
                     for (const match of matches) {
                         let [_, component, props] = match.match(/<livewire:([a-zA-Z0-9\.\-]+)([^>]*)\/>/) || [];
                         let attributes: any = {};
-                       
+                        let options: any = {};
                         if (props) {
-                            let regex = /([a-zA-Z0-9\-]+)\s*=\s*['"]([^'"]*)['"]/g;
+                            let regex = /(@|:|wire:)?([a-zA-Z0-9\-]+)\s*=\s*['"]([^'"]*)['"]/g;
 
                             let matches = props.match(regex);
 
                             if (matches) {
                                 for (const match of matches) {
-                                    let [_, key, value] = match.match(/([a-zA-Z0-9\-]+)\s*=\s*['"]([^'"]*)['"]/) || [];
-                                    attributes[key] = value;
+                                    let [_, prefix, key, value] = match.match(/(@|:|wire:)?([a-zA-Z0-9\-]+)\s*=\s*['"]([^'"]*)['"]/) || [];
+                                    if (prefix === ':') {
+                                        attributes[key] = `_____${value}_____`
+                                    } else if (prefix === 'wire:' && key === 'key') {
+                                        options.key = `_____${value}_____`
+                                    } else if (prefix === '@') {
+                                        attributes[`@${key}`] = value
+                                    }
+                                    else {
+                                        attributes[key] = value
+                                    }
                                 }
                             }
                         }
 
-                        raw = raw.replace(match, `@livewire('${component}', ${JSON.stringify(attributes)})`);
-                    }
+                        const attrs = JSON.stringify(attributes).replace(/"_____([^"]*)_____"/g, "$1")
+                        const opts = JSON.stringify(options).replace(/"_____([^"]*)_____"/g, "$1")
 
+                        raw = raw.replace(match, `@livewire('${component}', ${attrs}, ${opts})`);
+
+                    }
                     return raw;
                 })
 

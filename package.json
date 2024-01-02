@@ -1,15 +1,15 @@
 {
   "name": "adonisjs-livewire",
-  "version": "0.0.14",
-	"description": "A front-end framework for AdonisJS",
-	"homepage": "https://github.com/KABBOUCHI/adonisjs-livewire",
-	"license": "MIT",
-	"keywords": [
-		"adonisjs",
-		"livewire",
-		"components"
-	],
-	"author": "Georges KABBOUCHI <georges.kabbouchi@gmail.com>",
+  "version": "0.0.15",
+  "description": "A front-end framework for AdonisJS",
+  "homepage": "https://github.com/KABBOUCHI/adonisjs-livewire",
+  "license": "MIT",
+  "keywords": [
+    "adonisjs",
+    "livewire",
+    "components"
+  ],
+  "author": "Georges KABBOUCHI <georges.kabbouchi@gmail.com>",
   "typings": "./build/adonis-typings/index.d.ts",
   "main": "build/providers/index.js",
   "files": [
@@ -34,10 +34,11 @@
     "@adonisjs/session": "^6.0.0",
     "@adonisjs/view": "^6.0.0",
     "@types/node": "^20.10.6",
+    "copyfiles": "^2.4.1",
     "del-cli": "^5.1.0",
     "mrm": "^4.1.22",
     "typescript": "^5.3.3",
-    "copyfiles": "^2.4.1"
+    "watch": "^1.0.2"
   },
   "peerDependencies": {
     "@adonisjs/core": "^5.1.0",
@@ -59,19 +60,19 @@
   "adonisjs": {
     "types": "adonisjs-livewire",
     "commands": [
-			"adonisjs-livewire/build/commands"
-		],
+      "adonisjs-livewire/build/commands"
+    ],
     "providers": [
       "adonisjs-livewire"
     ],
     "templates": {
-			"basePath": "./build/templates",
-			"start": [
-				{
-					"src": "livewire.txt",
-					"dest": "livewire"
-				}
-			]
-		}
+      "basePath": "./build/templates",
+      "start": [
+        {
+          "src": "livewire.txt",
+          "dest": "livewire"
+        }
+      ]
+    }
   }
 }

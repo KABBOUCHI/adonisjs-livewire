@@ -1,10 +1,11 @@
 import { BaseCommand, args } from '@adonisjs/core/build/standalone'
 import { join } from 'path'
 
-export default class InspireCommand extends BaseCommand {
+export default class MakeLivewire extends BaseCommand {
     public static commandName = 'make:livewire'
     public static description = 'Make a new livewire component'
 
+    static aliases: string[] = ['livewire:make']
     public static settings = {
         loadApp: false,
         stayAlive: false,

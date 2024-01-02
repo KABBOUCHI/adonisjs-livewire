@@ -13,7 +13,6 @@ export class Component {
         [key: string]: any
     }[]
     protected __ctx: HttpContextContract | null = null;
-    protected listeners: { [key: string]: string|any } = {};
 
     constructor(ctx: HttpContextContract | null = null) {
         this.__ctx = ctx;
@@ -75,19 +74,19 @@ export class Component {
         return {};
     }
 
-    public js(expression: string) {
+    protected js(expression: string) {
         store(this).push('js', expression);
     }
 
-    public schema(): ParsedTypedSchema<TypedSchema> {
+    protected schema(): ParsedTypedSchema<TypedSchema> {
         throw new Error("Schema not implemented");
     }
 
-    public messages(): CustomMessages {
+    protected messages(): CustomMessages {
         return {}
     }
 
-    public async validate(bail: boolean = true) {
+    protected async validate(bail: boolean = true) {
         await this.ctx.request.validate({
             schema: this.schema(),
             data: this,
@@ -96,10 +95,21 @@ export class Component {
         })
     }
 
-    public dispatch(name: string, params: any) {
+    public getListeners(): { [key: string]: string } {
+        return {};
+    }
+
+    protected dispatch(name: string, params: any, to?: string) {
         store(this).push('dispatched', {
             name,
             params,
+            to,
         })
+    }
+
+    public __dispatch(event: string, params: any) {
+        if (!this.getListeners()[event]) return;
+
+        this[this.getListeners()[event]](params);
     }
 }

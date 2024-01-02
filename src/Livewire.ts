@@ -31,7 +31,7 @@ export default class Livewire {
         return v;
     }
 
-    public async mount(name: string, params: any[] = [], options: { layout?: any } = {}) {
+    public async mount(name: string, params: any[] = [], options: { layout?: any, key?: string } = {}) {
         return await dataStoreContext.run(new DataStore(), async () => {
 
             let component = await this.new(name);
@@ -51,8 +51,30 @@ export default class Livewire {
                 });
             }
 
+            const listeners=  Object.keys(component.getListeners());
+
+            if (listeners.length > 0) {
+                context.addEffect('listeners', listeners);
+            }
+
             let html = await this.render(component, '<div></div>');
             let snapshot = this.snapshot(component, context);
+
+            for (const param of params) {
+                for (const key of Object.keys(param)) {
+                    if(key.startsWith('@')) {
+                        let value = param[key];
+                        let fullEvent = this.helpers.string.dashCase(key.replace('@', ''));
+                        let attributeKey = 'x-on:' + fullEvent;
+                        let attributeValue = `$wire.$parent.${value}`;
+
+                        html = insertAttributesIntoHtmlRoot(html, {
+                            [attributeKey]: attributeValue,
+                        });
+                    }
+                }
+            }
+            
 
             html = insertAttributesIntoHtmlRoot(html, {
                 'wire:snapshot': snapshot,
@@ -148,7 +170,11 @@ export default class Livewire {
                 let method = call['method'];
                 let params = call['params'];
 
-                if (typeof component[method] !== 'function') {
+                let methods = getPublicMethods(component);
+                methods = methods.filter(m => m !== 'render');
+                methods.push('__dispatch');
+
+                if (methods.includes(method) === false) {
                     throw new Error(`Method \`${method}\` does not exist on component ${component.getName()}`);
                 }
                 let result = await component[method](...params);
@@ -318,4 +344,10 @@ function htmlspecialchars(text: string): string {
     };
 
     return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+function getPublicMethods(obj) {
+    const proto = Object.getPrototypeOf(obj);
+    return Object.getOwnPropertyNames(proto)
+        .filter(prop => typeof proto[prop] === 'function' && prop !== 'constructor');
 }
