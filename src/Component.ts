@@ -67,7 +67,19 @@ export class Component {
     }
 
     get view() {
-        return this.ctx.view
+        return new Proxy(this.ctx.view, {
+            get: (target, prop) => {
+                if (prop === 'render') {
+                    return async (templatePath: string, state?: any) => {
+                        const rendered = await target.render(`livewire.${templatePath}`, state);
+
+                        return rendered;
+                    }
+                }
+
+                return target[prop];
+            }
+        })
     }
 
     public async data(): Promise<any> {
