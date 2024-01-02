@@ -1,6 +1,6 @@
 {
   "name": "adonisjs-livewire",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "A front-end framework for AdonisJS",
   "homepage": "https://github.com/KABBOUCHI/adonisjs-livewire",
   "license": "MIT",
@@ -66,13 +66,7 @@
       "adonisjs-livewire"
     ],
     "templates": {
-      "basePath": "./build/templates",
-      "start": [
-        {
-          "src": "livewire.txt",
-          "dest": "livewire"
-        }
-      ]
+      "basePath": "./build/templates"
     }
   }
 }
