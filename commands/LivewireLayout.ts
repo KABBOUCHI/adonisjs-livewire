@@ -12,7 +12,9 @@ export default class LivewireLayout extends BaseCommand {
 
     public async run() {
         this.generator
-            .addFile("main.edge")
+            .addFile("main", {
+                extname: ".edge",
+            })
             .stub(join(__dirname, '..', 'templates', 'layout.txt'))
             .destinationDir('resoures/views/layouts')
             .appRoot(this.application.appRoot)
