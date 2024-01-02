@@ -16,7 +16,7 @@ export default class LivewireLayout extends BaseCommand {
                 extname: ".edge",
             })
             .stub(join(__dirname, '..', 'templates', 'layout.txt'))
-            .destinationDir('resoures/views/layouts')
+            .destinationDir('resources/views/layouts')
             .appRoot(this.application.appRoot)
             
         await this.generator.run()
