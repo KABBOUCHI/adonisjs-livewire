@@ -6,6 +6,7 @@ import { store } from './store';
 export class Component {
     protected __id;
     protected __name;
+    protected __view_path;
     protected __assets: string[] = [];
     protected __scripts: string[] = [];
     public __decorators: {
@@ -13,7 +14,6 @@ export class Component {
         [key: string]: any
     }[]
     protected __ctx: HttpContextContract | null = null;
-
     constructor(ctx: HttpContextContract | null = null) {
         this.__ctx = ctx;
     }
@@ -48,6 +48,10 @@ export class Component {
         this.__name = name;
     }
 
+    public setViewPath(view: string) {
+        this.__view_path = view;
+    }
+
     public getName() {
         return this.__name;
     }
@@ -63,7 +67,7 @@ export class Component {
     }
 
     public async render(): Promise<string> {
-        return '<div></div>';
+        return this.view.render(this.__view_path);
     }
 
     get view() {
@@ -71,7 +75,23 @@ export class Component {
             get: (target, prop) => {
                 if (prop === 'render') {
                     return async (templatePath: string, state?: any) => {
-                        const rendered = await target.render(`livewire.${templatePath}`, state);
+                        const rendered = await target.render(`livewire/${templatePath}`, {
+                            ... await this.data(),
+                            ...this,
+                            ...state,
+                        });
+
+                        return rendered;
+                    }
+                }
+
+                if (prop === 'renderRaw') {
+                    return async (contents: string, state?: any) => {
+                        const rendered = await target.renderRaw(contents, {
+                            ... await this.data(),
+                            ...this,
+                            ...state,
+                        });
 
                         return rendered;
                     }

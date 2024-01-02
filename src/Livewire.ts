@@ -123,6 +123,9 @@ export default class Livewire {
         component.setId(id ?? this.helpers.string.generateRandom(20));
         component.setName(name);
 
+        let viewPath = name.split('.').map(s => this.helpers.string.dashCase(s)).join('/');
+        component.setViewPath(viewPath);
+
         return component
     }
 
@@ -267,9 +270,8 @@ export default class Livewire {
             data[decorator.name] = await component[decorator.function]();
         }
 
-        let content = await component.render() || defaultValue || "<div></div>";
         let ctx = this.httpContext.get();
-
+        
         if (ctx) {
             await ctx.session.commit()
             ctx.session.initiated = false;
@@ -277,6 +279,10 @@ export default class Livewire {
             await ctx.session.initiate(false)
         }
 
+        component.data = async () => data;
+
+        let content = await component.render() || defaultValue || "<div></div>";
+        
         let html = await this.view.renderRaw(content, {
             ...component,
             ...data
