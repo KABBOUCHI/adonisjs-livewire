@@ -111,6 +111,12 @@ export default class LivewireProvider {
                                         attributes[key] = `_____${value}_____`
                                     } else if (prefix === 'wire:' && key === 'key') {
                                         options.key = `_____${value}_____`
+                                    } else if (prefix === 'wire:') {
+                                        if(key === 'model') {
+                                            attributes[`wire:${key}`] = "$parent." + value
+                                        }else {
+                                            attributes[`wire:${key}`] = value
+                                        }
                                     } else if (prefix === '@') {
                                         attributes[`@${key}`] = value
                                     }
@@ -125,7 +131,6 @@ export default class LivewireProvider {
                         const opts = JSON.stringify(options).replace(/"_____([^"]*)_____"/g, "$1")
 
                         raw = raw.replace(match, `@livewire('${component}', ${attrs}, ${opts})`);
-
                     }
                     return raw;
                 })

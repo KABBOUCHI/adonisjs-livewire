@@ -37,8 +37,7 @@ export default class Livewire {
     }
 
     public async mount(name: string, params: any[] = [], options: { layout?: any, key?: string } = {}) {
-        return await dataStoreContext.run(new DataStore(), async () => {
-
+        return await dataStoreContext.run(new DataStore(this.helpers.string.generateRandom(32)), async () => {
             let component = await this.new(name);
             let context = new ComponentContext(component, true);
             params = Array.isArray(params) ? params : [params];
@@ -56,7 +55,11 @@ export default class Livewire {
                 });
             }
 
-            const listeners=  Object.keys(component.getListeners());
+            const s = store(component);
+            const listeners = [...new Set([
+                ...Object.keys(component.getListeners()),
+                ...s.get("listeners").map(l => l.name)
+            ])];
 
             if (listeners.length > 0) {
                 context.addEffect('listeners', listeners);
@@ -67,7 +70,7 @@ export default class Livewire {
 
             for (const param of params) {
                 for (const key of Object.keys(param)) {
-                    if(key.startsWith('@')) {
+                    if (key.startsWith('@')) {
                         let value = param[key];
                         let fullEvent = this.helpers.string.dashCase(key.replace('@', ''));
                         let attributeKey = 'x-on:' + fullEvent;
@@ -76,10 +79,26 @@ export default class Livewire {
                         html = insertAttributesIntoHtmlRoot(html, {
                             [attributeKey]: attributeValue,
                         });
+                    } else if (key.startsWith('wire:')) {
+                        let value = param[key];
+                        let attributeKey = key;
+                        let attributeValue = value;
+
+                        html = insertAttributesIntoHtmlRoot(html, {
+                            [attributeKey]: attributeValue,
+                        });
                     }
                 }
             }
-            
+
+
+            let binding = s.get("bindings")[0]
+
+            if (binding) {
+                html = insertAttributesIntoHtmlRoot(html, {
+                    "x-modelable": `$wire.${binding.inner}`,
+                });
+            }
 
             html = insertAttributesIntoHtmlRoot(html, {
                 'wire:snapshot': snapshot,
@@ -123,12 +142,28 @@ export default class Livewire {
             LivewireComponent = await import(`${process.cwd()}/app/Livewire/${path}`).then(module => module.default);
         }
 
-        let component = new LivewireComponent(
-            this.httpContext.get()
-        );
+        let componentId = id ?? this.helpers.string.generateRandom(20)
 
-        component.setId(id ?? this.helpers.string.generateRandom(20));
-        component.setName(name);
+        let component = new LivewireComponent({
+            ctx: this.httpContext.get(),
+            id: componentId,
+            name
+        });
+
+        // hack: decorators are not available yet in the constructor
+
+        // @ts-ignore
+        component.___store = component.___store || {};
+        // @ts-ignore
+        for (const key in component.___store) {
+            //@ts-ignore
+            for (const value of component.___store[key]) {
+                store(component).push(key, value);
+            }
+        }
+
+        // @ts-ignore
+        delete component.___store;
 
         let viewPath = name.split('.').map(s => this.helpers.string.dashCase(s)).join('/');
         component.setViewPath(viewPath);
@@ -145,7 +180,7 @@ export default class Livewire {
     }
 
     public async update(snapshot: any, updates: any, calls: any) {
-        return await dataStoreContext.run(new DataStore(), async () => {
+        return await dataStoreContext.run(new DataStore(this.helpers.string.generateRandom(32)), async () => {
             let data = snapshot['data'];
             // let memo = snapshot['memo'];
 
@@ -278,7 +313,7 @@ export default class Livewire {
         }
 
         let ctx = this.httpContext.get();
-        
+
         if (ctx) {
             await ctx.session.commit()
             ctx.session.initiated = false;
@@ -289,7 +324,7 @@ export default class Livewire {
         component.data = async () => data;
 
         let content = await component.render() || defaultValue || "<div></div>";
-        
+
         let html = await this.view.renderRaw(content, {
             ...component,
             ...data

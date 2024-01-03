@@ -1,5 +1,4 @@
 import { Component } from "../Component";
-import { store } from "../store";
 
 export function title(title: string) {
     return function (constructor: typeof Component) {
@@ -29,9 +28,32 @@ export function computed(name?: string) {
 
 export function on(name?: string) {
     return function (target: Component, propertyKey: string) {
-        store(target).push("listeners", {
+        // @ts-ignore
+        target.___store = target.___store || {};
+        // @ts-ignore
+        target.___store["listeners"] = target.___store["listeners"] || [];
+        // @ts-ignore
+        target.___store["listeners"].push({
             name: name || propertyKey,
             function: propertyKey
         })
+    }
+}
+
+export function modelable() {
+    return function (target: Component, propertyKey: string) {
+        // target is not fully initialized yet..
+        // so we have to store this in a temporary store
+
+        // @ts-ignore
+        target.___store = target.___store || {};
+        // @ts-ignore
+        target.___store["bindings"] = target.___store["bindings"] || [];
+        // @ts-ignore
+        target.___store["bindings"].push({
+            outer: "wire:model",
+            inner: propertyKey
+        })
+
     }
 }

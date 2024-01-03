@@ -3,6 +3,12 @@ import { RedirectContract } from "@ioc:Adonis/Core/Response"
 import { TypedSchema, ParsedTypedSchema, CustomMessages } from '@ioc:Adonis/Core/Validator';
 import { store } from './store';
 
+interface ComponentOptions {
+    ctx: HttpContextContract | null;
+    id: string;
+    name: string;
+}
+
 export class Component {
     protected __id;
     protected __name;
@@ -14,8 +20,10 @@ export class Component {
         [key: string]: any
     }[]
     protected __ctx: HttpContextContract | null = null;
-    constructor(ctx: HttpContextContract | null = null) {
+    constructor({ ctx, id, name }: ComponentOptions) {
         this.__ctx = ctx;
+        this.__id = id;
+        this.__name = name;
     }
 
     get ctx() {
@@ -30,10 +38,6 @@ export class Component {
         if (args.length === 0) return this.ctx.response.redirect();
 
         return this.ctx.response.redirect(args[0], args[1], args[2]);
-    }
-
-    public id() {
-        return this.getId();
     }
 
     public setId(id: string) {
@@ -139,9 +143,17 @@ export class Component {
         })
     }
 
-    public __dispatch(event: string, params: any) {
-        if (!this.getListeners()[event]) return;
+    public async __dispatch(event: string, params: any) {
+        let ev = store(this).get("listeners").find(l => l.name === event);
 
-        this[this.getListeners()[event]](params);
+        if (ev) {
+            await this[ev.function](params);
+        }
+
+        let ev2 = this.getListeners()[event];
+
+        if (!ev2) return;
+
+        await this[ev2](params);
     }
 }
