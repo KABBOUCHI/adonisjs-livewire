@@ -2,10 +2,11 @@ import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 import { Component } from '../src/Component';
 import * as decorators from '../src/decorators';
 import packageJson from '../package.json';
-import fs from 'fs';
+import fs, { existsSync } from 'fs';
 import { Exception } from '@adonisjs/core/build/standalone'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import inspect from '@poppinss/inspect'
+import { ViewContract } from '@ioc:Adonis/Core/View';
 
 class DumpException extends Exception {
     public async handle(error: this, ctx: HttpContextContract) {
@@ -112,9 +113,9 @@ export default class LivewireProvider {
                                     } else if (prefix === 'wire:' && key === 'key') {
                                         options.key = `_____${value}_____`
                                     } else if (prefix === 'wire:') {
-                                        if(key === 'model') {
+                                        if (key === 'model') {
                                             attributes[`wire:${key}`] = "$parent." + value
-                                        }else {
+                                        } else {
                                             attributes[`wire:${key}`] = value
                                         }
                                     } else if (prefix === '@') {
@@ -187,7 +188,114 @@ export default class LivewireProvider {
             },
         );
 
+        this.app.container.withBindings(
+        [
+            'Adonis/Core/View',
+        ],
+        async (View) => {
+            this.compileSelfClosingTags(View);
+            this.compileOpeningTags(View);
+        })
+    }
 
 
+    compileSelfClosingTags(view: ViewContract) {
+        let regex = /<x-([a-zA-Z0-9\.\-]+)([^>]*)\/>/g;
+
+        view.processor.process('raw', (data) => {
+            let raw = data.raw;
+
+            let matches = raw.match(regex);
+
+            if (!matches) {
+                return;
+            }
+
+            for (const match of matches) {
+                let [_, component, props] = match.match(/<x-([a-zA-Z0-9\.\-]+)([^>]*)\/>/) || [];
+                let attributes: any = {};
+                if (props) {
+                    let regex = /(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/g;
+
+                    let matches = props.match(regex);
+                    if (matches) {
+                        for (const match of matches) {
+                            let [_, prefix, key, value] = match.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
+                            if (prefix === ':') {
+                                attributes[key] = `_____${value}_____`
+                            }
+                            else {
+                                attributes[key] = value
+                            }
+                        }
+                    }
+                }
+                const attrs = JSON.stringify(attributes).replace(/"_____([^"]*)_____"/g, "$1")
+
+                let componentPath = component.replace(/\./g, '/');
+
+                if (!existsSync(this.app.viewsPath(componentPath + '.edge'))) {
+                    componentPath = `components/${componentPath}`
+
+                    if (!existsSync(this.app.viewsPath(componentPath + '.edge'))) {
+                        componentPath = componentPath + '/index'
+                    }
+                }
+                raw = raw.replace(match, `@!component('${componentPath}', ${attrs})`);
+
+            }
+            return raw;
+        })
+    }
+
+    compileOpeningTags(view: ViewContract) {
+        let regex = /<x-([a-zA-Z0-9\.\-]+)([^>]*)>([\s\S]*?)<\/x-([a-zA-Z0-9\.\-]+)>/g;
+
+        view.processor.process('raw', (data) => {
+            let raw = data.raw;
+
+            let matches = raw.match(regex);
+
+            if (!matches) {
+                return;
+            }
+
+            for (const match of matches) {
+                let [_, component, props, content] = match.match(/<x-([a-zA-Z0-9\.\-]+)([^>]*)>([\s\S]*?)<\/x-([a-zA-Z0-9\.\-]+)>/) || [];
+
+                let attributes: any = {};
+                if (props) {
+                    let regex = /(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/g;
+
+                    let matches = props.match(regex);
+                    if (matches) {
+                        for (const match of matches) {
+                            let [_, prefix, key, value] = match.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
+                            if (prefix === ':') {
+                                attributes[key] = `_____${value}_____`
+                            }
+                            else {
+                                attributes[key] = value
+                            }
+                        }
+                    }
+                }
+                const attrs = JSON.stringify(attributes).replace(/"_____([^"]*)_____"/g, "$1")
+
+                let componentPath = component.replace(/\./g, '/');
+
+                if (!existsSync(this.app.viewsPath(componentPath + '.edge'))) {
+                    componentPath = `components/${componentPath}`
+
+                    if (!existsSync(this.app.viewsPath(componentPath + '.edge'))) {
+                        componentPath = componentPath + '/index'
+                    }
+                }
+
+                raw = raw.replace(match, `@component('${componentPath}', ${attrs}) ${content} @end`);
+            }
+
+            return raw;
+        })
     }
 }
