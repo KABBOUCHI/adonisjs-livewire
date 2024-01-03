@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ title ?? 'Page Title' }}</title>
     
-    <livewire:styles />
+    @livewireStyles
   </head>
   <body>
     @!section('body')
     
-    <livewire:scripts />
+    @livewireScripts
   </body>
 </html>

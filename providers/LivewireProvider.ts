@@ -83,10 +83,10 @@ export default class LivewireProvider {
                 View.processor.process('raw', (value) => {
                     let raw = value.raw;
 
-                    raw = raw.replace("<livewire:styles/>", "@livewireStyles")
-                    raw = raw.replace("<livewire:styles />", "@livewireStyles")
-                    raw = raw.replace("<livewire:scripts/>", "@livewireScripts")
-                    raw = raw.replace("<livewire:scripts />", "@livewireScripts")
+                    // raw = raw.replace("<livewire:styles/>", "@livewireStyles")
+                    // raw = raw.replace("<livewire:styles />", "@livewireStyles")
+                    // raw = raw.replace("<livewire:scripts/>", "@livewireScripts")
+                    // raw = raw.replace("<livewire:scripts />", "@livewireScripts")
 
                     let matches = raw.match(regex);
 
