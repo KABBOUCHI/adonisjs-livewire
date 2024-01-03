@@ -1,6 +1,6 @@
 declare module '@ioc:Adonis/Core/Route' {
     interface RouterContract {
-        livewire: (pattern: string, component?: string, params?: any[]) => RouterContract;
+        livewire: (pattern: string, component?: string | undefined, params?: any[] | Record<string, any> | undefined) => RouteContract;
     }
 }
 

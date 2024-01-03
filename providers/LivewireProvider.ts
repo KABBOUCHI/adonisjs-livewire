@@ -1,6 +1,7 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 import { Component } from '../src/Component';
 import * as decorators from '../src/decorators';
+import packageJson from '../package.json';
 import fs from 'fs';
 
 export default class LivewireProvider {
@@ -44,7 +45,7 @@ export default class LivewireProvider {
                     block: false,
                     seekable: false,
                     compile(_parser, buffer, _token) {
-                        buffer.outputRaw(`<link rel="stylesheet" href="livewire.css">`)
+                        buffer.outputRaw(`<link rel="stylesheet" href="/livewire.css?v=${packageJson.version}">`)
                     }
                 })
 
@@ -55,7 +56,7 @@ export default class LivewireProvider {
                     compile(_parser, buffer, _token) {
                         let csrfToken = "NA"
 
-                        buffer.outputRaw(`<script src="livewire.js" data-csrf="${csrfToken}" data-update-uri="/livewire/update" data-navigate-once="true"></script>`)
+                        buffer.outputRaw(`<script src="/livewire.js?v=${packageJson.version}" data-csrf="${csrfToken}" data-update-uri="/livewire/update" data-navigate-once="true"></script>`)
                     }
                 })
 
@@ -113,28 +114,34 @@ export default class LivewireProvider {
 
                 Route.get('/livewire.css', async ({ response }) => {
                     response.type('text/css')
+                    response.header('Cache-Control', 'public, max-age=31536000')
 
                     return livewireCss
                 })
 
                 Route.get('/livewire.js', async ({ response }) => {
                     response.type('text/javascript')
+                    response.header('Cache-Control', 'public, max-age=31536000')
 
                     return livewireJs
                 })
 
-                Route.livewire = (pattern: string, component?: string, params: any[] = []) => {
-                    Route.get(pattern, async ({ view }) => {
+
+                Route.livewire = (pattern: string, component?: string | undefined, params: any[] | Record<string, any> | undefined = {}) => {
+                    return Route.get(pattern, async ({ view, request }) => {
                         component = component || pattern;
 
                         component = component.replace(/^\//, '');
                         component = component.replace(/\/$/, '');
                         component = component.replace(/\//g, '.');
 
-                        return await view.renderRaw(`@livewire('${component}', ${JSON.stringify(params)}, { layout: { name: 'layouts/main', section: 'body' } })`);
-                    });
+                        let parameters = {
+                            ...request.params(),
+                            ...params,
+                        };
 
-                    return Route;
+                        return await view.renderRaw(`@livewire('${component}', ${JSON.stringify(parameters)}, { layout: { name: 'layouts/main', section: 'body' } })`);
+                    })
                 };
 
                 Route.post('/livewire/update', async (ctx) => {
