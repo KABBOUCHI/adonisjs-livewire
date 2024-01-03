@@ -3,6 +3,24 @@ import { Component } from '../src/Component';
 import * as decorators from '../src/decorators';
 import packageJson from '../package.json';
 import fs from 'fs';
+import { Exception } from '@adonisjs/core/build/standalone'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import inspect from '@poppinss/inspect'
+
+class DumpException extends Exception {
+    public async handle(error: this, ctx: HttpContextContract) {
+        ctx.response.send(error.message)
+    }
+}
+
+function dd(...args: any[]) {
+    throw new DumpException(
+        args.map(inspect.string.html).join('\n'),
+    );
+}
+
+// @ts-ignore
+globalThis.dd = dd;
 
 export default class LivewireProvider {
     public static needsApplication = true

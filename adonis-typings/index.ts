@@ -14,3 +14,5 @@ declare module 'adonisjs-livewire' {
     export const Component: typeof import("../src/Component").Component;
     export const { title, layout, computed }: typeof import("../src/decorators");
 }
+
+declare const dd: (...args: any[]) => void
