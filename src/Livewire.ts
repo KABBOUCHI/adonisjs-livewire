@@ -5,6 +5,7 @@ import Helpers from "@ioc:Adonis/Core/Helpers";
 import { Component } from "./Component";
 import ComponentContext from "./ComponentContext";
 import { DataStore, dataStoreContext, store } from "./store";
+import { Checksum } from "./Checksum";
 
 export default class Livewire {
     app: ApplicationContract
@@ -12,12 +13,16 @@ export default class Livewire {
     httpContext: HttpContextConstructorContract
     helpers: typeof Helpers
     components = new Map<string, typeof Component>();
+    checksum: Checksum;
 
     constructor(app: ApplicationContract, view: ViewContract, helpers: typeof Helpers, httpContext: HttpContextConstructorContract) {
         this.app = app;
         this._view = view;
         this.helpers = helpers;
         this.httpContext = httpContext;
+        this.checksum = new Checksum(
+            this.app.env.get('APP_KEY')!,
+        );
     }
 
     get view() {
@@ -94,6 +99,8 @@ export default class Livewire {
     }
 
     public async fromSnapshot(snapshot: any) {
+        this.checksum.verify(snapshot);
+
         let data = snapshot['data'];
         let name = snapshot['memo']['name'];
         let id = snapshot['memo']['id'];
@@ -238,7 +245,7 @@ export default class Livewire {
             },
         };
 
-        snapshot['checksum'] = '610bd7dc25db1d00eb50c18764fb10087823eaec952b98d8ebeb5829d6fb6081' // TODO
+        snapshot['checksum'] = this.checksum.generate(snapshot);
 
         return snapshot;
     }

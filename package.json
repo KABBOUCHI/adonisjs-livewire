@@ -1,6 +1,6 @@
 {
   "name": "adonisjs-livewire",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "A front-end framework for AdonisJS",
   "homepage": "https://github.com/KABBOUCHI/adonisjs-livewire",
   "license": "MIT",
@@ -33,6 +33,7 @@
     "@adonisjs/require-ts": "^2.0.13",
     "@adonisjs/session": "^6.0.0",
     "@adonisjs/view": "^6.0.0",
+    "@types/crypto-js": "^4.2.1",
     "@types/node": "^20.10.6",
     "copyfiles": "^2.4.1",
     "del-cli": "^5.1.0",
@@ -68,5 +69,8 @@
     "templates": {
       "basePath": "./build/templates"
     }
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0"
   }
 }
