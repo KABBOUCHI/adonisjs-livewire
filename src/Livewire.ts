@@ -188,10 +188,9 @@ export default class Livewire {
 
             // this.pushOntoComponentStack(component);
 
-            this.updateProperties(component, updates, data, context);
+            await this.updateProperties(component, updates, data, context);
 
             await this.callMethods(component, calls, context);
-
 
             let html = await this.render(component);
             if (html) {
@@ -285,7 +284,7 @@ export default class Livewire {
         return snapshot;
     }
 
-    protected updateProperties(component: Component, updates: any, data: any, _context: ComponentContext) {
+    protected async updateProperties(component: Component, updates: any, data: any, _context: ComponentContext) {
         Object.keys(data).forEach(key => {
             if (!(key in component)) return;
 
@@ -294,13 +293,33 @@ export default class Livewire {
             component[key] = child;
         });
 
-        Object.keys(updates).forEach(key => {
+        for (const key in updates) {
             if (!(key in component)) return;
 
             const child = updates[key];
 
+            if(typeof component["updating"] === 'function') {
+                await component["updating"](key, child);
+            }
+
+            let updatingPropMethod = `updating${this.helpers.string.titleCase(key)}`;
+
+            if (typeof component[updatingPropMethod] === 'function') {
+                await component[updatingPropMethod](child);
+            }
+
             component[key] = child;
-        });
+
+            if(typeof component["updated"] === 'function') {
+                await component["updated"](key, child);
+            }
+
+            let updatedPropMethod = `updated${this.helpers.string.titleCase(key)}`;
+
+            if (typeof component[updatedPropMethod] === 'function') {
+                await component[updatedPropMethod](child);
+            }
+        }
     }
 
     public async render(component: Component, defaultValue?: string) {
