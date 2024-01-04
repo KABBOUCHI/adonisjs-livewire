@@ -1,5 +1,4 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { RedirectContract } from "@ioc:Adonis/Core/Response"
 import { TypedSchema, ParsedTypedSchema, CustomMessages } from '@ioc:Adonis/Core/Validator';
 import { store } from './store';
 
@@ -31,13 +30,12 @@ export class Component {
 
         return this.__ctx;
     }
+    
+    public redirect(url: string, navigate: boolean = false)
+    {
+        store(this).push('redirect', url);
 
-    redirect(): RedirectContract;
-    redirect(path: string, forwardQueryString?: boolean, statusCode?: number): void;
-    public redirect(...args: any[]) {
-        if (args.length === 0) return this.ctx.response.redirect();
-
-        return this.ctx.response.redirect(args[0], args[1], args[2]);
+        if (navigate) store(this).push('redirectUsingNavigate', true);
     }
 
     public setId(id: string) {

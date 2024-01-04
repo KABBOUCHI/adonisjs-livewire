@@ -66,6 +66,18 @@ export default class Livewire {
             }
 
             let html = await this.render(component, '<div></div>');
+
+
+            let to = s.get('redirect')[0];
+
+            if (to) {
+                context.addEffect('redirect', to);
+            }
+
+            if (s.has('redirectUsingNavigate')) {
+                context.addEffect('redirectUsingNavigate', true);
+            }
+
             let snapshot = this.snapshot(component, context);
 
             for (const param of params) {
@@ -195,6 +207,17 @@ export default class Livewire {
             let html = await this.render(component);
             if (html) {
                 context.addEffect('html', html);
+            }
+
+            let s = store(component);
+            let to = s.get('redirect')[0];
+
+            if (to) {
+                context.addEffect('redirect', to);
+            }
+
+            if (s.has('redirectUsingNavigate')) {
+                context.addEffect('redirectUsingNavigate', true);
             }
 
             let newSnapshot = this.snapshot(component, context);
