@@ -2,8 +2,8 @@ import { Component } from '@ioc:Adonis/Addons/Livewire';
 
 export default class {{ filename }} extends Component {
     public async render() {
-        return /*html*/`<div wire:poll> 
-            \{\{ Date.now()  \}\} 
+        return /*html*/`<div> 
+            ...
         </div>`
     }
 }

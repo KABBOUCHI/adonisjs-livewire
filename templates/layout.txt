@@ -8,8 +8,10 @@
     @livewireStyles
   </head>
   <body>
-    @!section('body')
-    
+    <main>
+      @!section('body')
+    </main>
+
     @livewireScripts
   </body>
 </html>

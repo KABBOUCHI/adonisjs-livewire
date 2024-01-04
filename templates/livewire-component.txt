@@ -1,0 +1,5 @@
+import { Component } from '@ioc:Adonis/Addons/Livewire';
+
+export default class {{ filename }} extends Component {
+   
+}
