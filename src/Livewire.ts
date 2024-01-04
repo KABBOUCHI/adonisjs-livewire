@@ -293,8 +293,14 @@ export default class Livewire {
             component[key] = child;
         });
 
+        const locked = store(component).get("locked")
+
         for (const key in updates) {
             if (!(key in component)) return;
+
+            if (locked.includes(key)) {
+                throw new Error(`Cannot update property \`${key}\` because it is locked.`);
+            }
 
             const child = updates[key];
 

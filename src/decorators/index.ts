@@ -57,3 +57,14 @@ export function modelable() {
 
     }
 }
+
+export function locked() {
+    return function (target: Component, propertyKey: string) {
+        // @ts-ignore
+        target.___store = target.___store || {};
+        // @ts-ignore
+        target.___store["locked"] = target.___store["locked"] || [];
+        // @ts-ignore
+        target.___store["locked"].push(propertyKey)
+    }
+}
