@@ -1,70 +1,51 @@
 import { Component } from "../Component";
+import Computed from "../Features/SupportComputed/Computed";
+import On from "../Features/SupportEvents/On";
+import Locked from "../Features/SupportLockedProperties/Locked";
+import Modelable from "../Features/SupportModels/Modelable";
+import Layout from "../Features/SupportPageComponents/Layout";
+import Title from "../Features/SupportPageComponents/Title";
+import Url from "../Features/SupportQueryString/Url";
 
 export function title(title: string) {
     return function (constructor: typeof Component) {
-        constructor.prototype.pushDecorator("title", {
-            title
-        });
+        constructor.prototype.addDecorator(new Title(title))
     }
 }
 
-export function layout(layout: string = "layouts/main", section: string = 'body') {
+export function layout(path: string = "layouts/main", section: string = 'body') {
     return function (constructor: typeof Component) {
-        constructor.prototype.pushDecorator("layout", {
-            layout,
-            section
-        });
+        constructor.prototype.addDecorator(new Layout(path, section))
     }
 }
 
 export function computed(name?: string) {
     return function (target: Component, propertyKey: string, _descriptor: PropertyDescriptor) {
-        target.pushDecorator("computed", {
-            name: name || propertyKey,
-            function: propertyKey
-        });
+        target.addDecorator(new Computed(name || propertyKey, propertyKey));
     }
 }
 
 export function on(name?: string) {
     return function (target: Component, propertyKey: string) {
-        // @ts-ignore
-        target.___store = target.___store || {};
-        // @ts-ignore
-        target.___store["listeners"] = target.___store["listeners"] || [];
-        // @ts-ignore
-        target.___store["listeners"].push({
-            name: name || propertyKey,
-            function: propertyKey
-        })
+        target.addDecorator(new On(name || propertyKey, propertyKey));
     }
 }
 
 export function modelable() {
     return function (target: Component, propertyKey: string) {
-        // target is not fully initialized yet..
-        // so we have to store this in a temporary store
-
-        // @ts-ignore
-        target.___store = target.___store || {};
-        // @ts-ignore
-        target.___store["bindings"] = target.___store["bindings"] || [];
-        // @ts-ignore
-        target.___store["bindings"].push({
-            outer: "wire:model",
-            inner: propertyKey
-        })
-
+       target.addDecorator(new Modelable("wire:model", propertyKey));
     }
 }
 
 export function locked() {
     return function (target: Component, propertyKey: string) {
-        // @ts-ignore
-        target.___store = target.___store || {};
-        // @ts-ignore
-        target.___store["locked"] = target.___store["locked"] || [];
-        // @ts-ignore
-        target.___store["locked"].push(propertyKey)
+       target.addDecorator(new Locked(propertyKey));
+    }
+}
+
+
+export function url() {
+    return function (target: Component, propertyKey: string) {
+       target.addDecorator(new Url(propertyKey));
     }
 }

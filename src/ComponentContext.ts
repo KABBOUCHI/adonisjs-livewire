@@ -17,7 +17,7 @@ export default class ComponentContext {
     }
 
     public pushEffect(key: string, value: any, iKey?: string | number): void {
-        if (!this.effects[key]) this.effects[key] = [];
+        if (!this.effects[key]) this.effects[key] = {};
 
         if (iKey !== undefined) {
             this.effects[key][iKey] = value;

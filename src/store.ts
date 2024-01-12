@@ -1,39 +1,56 @@
 import { AsyncLocalStorage } from 'async_hooks'
 import { Component } from "./Component";
+import { BaseComponent } from './BaseComponent';
+import ComponentContext from './ComponentContext';
+import ComponentHook from './ComponentHook';
 
 export class DataStore {
-    public lookup: WeakMap<Component, any> = new WeakMap();
+    public lookup: WeakMap<Component | any, any> = new WeakMap();
     constructor(public id: string) { }
 
-    public push(component: Component, key: string, value: any) {
+    public push(component: Component | BaseComponent, key: string, value: any, iKey?: string) {
         if (!this.lookup.has(component)) this.lookup.set(component, {});
         if (!this.lookup.get(component)[key]) this.lookup.get(component)[key] = [];
 
-        this.lookup.get(component)[key].push(value);
+        if (iKey) {
+            this.lookup.get(component)[key][iKey] = value;
+        } else {
+            this.lookup.get(component)[key].push(value);
+        }
+
     }
 
-    public get(component: Component, key: string) {
+    public set(component: Component | BaseComponent, key: string, value: any) {
+        if (!this.lookup.has(component)) this.lookup.set(component, {});
+        this.lookup.get(component)[key] = value;
+    }
+
+    public get(component: Component | BaseComponent, key: string) {
         return this.lookup.get(component)?.[key] || []
     }
 
-    public has(component: Component, key: string) {
+    public has(component: Component | BaseComponent, key: string) {
         return this.lookup.has(component) && this.lookup.get(component)?.[key] || false
     }
 }
 
-export const dataStoreContext = new AsyncLocalStorage<DataStore>()
+export const livewireContext = new AsyncLocalStorage<{
+    dataStore: DataStore,
+    context: ComponentContext
+    features: ComponentHook[]
+}>()
 
-export const getStore = () => dataStoreContext.getStore()
+export const getLivewireContext = () => livewireContext.getStore()
 
-export function store(component: Component) {
+export function store(component: Component | BaseComponent) {
     const s = () => {
-        let st = getStore()
+        let st = getLivewireContext()
 
         if (!st) {
             throw new Error("No store found")
         }
 
-        return st
+        return st.dataStore
     }
     return {
         get lookup() {
@@ -42,8 +59,8 @@ export function store(component: Component) {
         id() {
             return s().id
         },
-        push: (key: string, value: any) => {
-            s().push(component, key, value)
+        push: (key: string, value: any, iKey?: string) => {
+            s().push(component, key, value, iKey)
         },
         get: (key: string) => {
             return s().get(component, key)

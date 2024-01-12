@@ -4,8 +4,22 @@ import { HttpContextConstructorContract } from "@ioc:Adonis/Core/HttpContext";
 import Helpers from "@ioc:Adonis/Core/Helpers";
 import { Component } from "./Component";
 import ComponentContext from "./ComponentContext";
-import { DataStore, dataStoreContext, store } from "./store";
+import { DataStore, getLivewireContext, livewireContext, store } from "./store";
 import { Checksum } from "./Checksum";
+import { SupportDecorators } from "./Features/SupportDecorators/SupportDecorators";
+import { SupportEvents } from "./Features/SupportEvents/SupportEvents";
+import Layout from "./Features/SupportPageComponents/Layout";
+import Computed from "./Features/SupportComputed/Computed";
+import { SupportJsEvaluation } from "./Features/SupportJsEvaluation/SupportJsEvaluation";
+import { SupportRedirects } from "./Features/SupportRedirects/SupportRedirects";
+
+
+const FEATURES = [
+    SupportDecorators,
+    SupportEvents,
+    SupportJsEvaluation,
+    SupportRedirects,
+]
 
 export default class Livewire {
     app: ApplicationContract
@@ -36,47 +50,65 @@ export default class Livewire {
         return v;
     }
 
-    public async mount(name: string, params: any[] = [], options: { layout?: any, key?: string } = {}) {
-        return await dataStoreContext.run(new DataStore(this.helpers.string.generateRandom(32)), async () => {
-            let component = await this.new(name);
-            let context = new ComponentContext(component, true);
-            params = Array.isArray(params) ? params : [params];
+    async trigger(event: string, component: Component, ...params: any[]) {
+        const { context, features } = getLivewireContext()!
 
+        const callbacks = await Promise.all(
+            features.map(async feature => {
+                feature.setComponent(component);
+
+                if (event === 'mount') {
+                    await feature.callBoot();
+                    await feature.callMount(...params);
+                } else if (event === 'hydrate') {
+                    await feature.callBoot();
+                    await feature.callHydrate(context.memo, context);
+                } else if (event === 'dehydrate') {
+                    await feature.callDehydrate(context);
+                } else if (event === 'render') {
+                    return await feature.callRender(...params);
+                } else if (event === 'update') {
+                    await feature.callUpdate(params[0], params[1], params[2]);
+                }
+            })
+        )
+
+        return callbacks
+    }
+
+    public async mount(name: string, params: any[] = [], options: { layout?: any, key?: string } = {}) {
+        let component = await this.new(name);
+        let context = new ComponentContext(component, true);
+        let dataStore = new DataStore(this.helpers.string.generateRandom(32));
+        let features = FEATURES.map(Feature => {
+            let feature = new Feature();
+            feature.setComponent(component);
+            return feature
+        })
+        return await livewireContext.run({ dataStore, context, features }, async () => {
+
+            params = Array.isArray(params) ? params : [params];
+            if (options.layout && (!component.__decorators || !component.__decorators.some(d => d instanceof Layout))) {
+                component.addDecorator(new Layout(
+                    options.layout.name,
+                    options.layout.section || 'body'
+                ));
+            }
+
+            await this.trigger('mount', component, params, options.key);
             //@ts-ignore
             if (typeof component.mount === 'function') {
                 //@ts-ignore
                 await component.mount(...params);
             }
 
-            if (options.layout && (!component.__decorators || !component.__decorators.some(d => d.type === 'layout'))) {
-                component.pushDecorator("layout", {
-                    layout: options.layout.name,
-                    section: options.layout.section || 'body'
-                });
-            }
-
             const s = store(component);
-            const listeners = [...new Set([
-                ...Object.keys(component.getListeners()),
-                ...s.get("listeners").map(l => l.name)
-            ])];
 
-            if (listeners.length > 0) {
-                context.addEffect('listeners', listeners);
-            }
+            await this.trigger('render', component, this.view, []) as any;
 
             let html = await this.render(component, '<div></div>');
 
-
-            let to = s.get('redirect')[0];
-
-            if (to) {
-                context.addEffect('redirect', to);
-            }
-
-            if (s.has('redirectUsingNavigate')) {
-                context.addEffect('redirectUsingNavigate', true);
-            }
+            await this.trigger('dehydrate', component, context);
 
             let snapshot = this.snapshot(component, context);
 
@@ -103,9 +135,7 @@ export default class Livewire {
                 }
             }
 
-
             let binding = s.get("bindings")[0]
-
             if (binding) {
                 html = insertAttributesIntoHtmlRoot(html, {
                     "x-modelable": `$wire.${binding.inner}`,
@@ -114,15 +144,15 @@ export default class Livewire {
 
             html = insertAttributesIntoHtmlRoot(html, {
                 'wire:snapshot': snapshot,
-                'wire:effects': Object.keys(context.effects).length > 0 ? context.effects as any : [], // TODO: send scripts
+                'wire:effects': JSON.stringify(context.effects),
             });
 
             let decorators = component.getDecorators();
-            let pageTitle = decorators.find(d => d.type === 'title')?.title;
-            let layout = decorators.find(d => d.type === 'layout');
+            let layout = decorators.find(d => d instanceof Layout) as Layout;
 
+            // TODO: find a better way to do this
             if (layout) {
-                html = await this.view.renderRaw(`@layout('${layout.layout}')\n@set('title', ${pageTitle ? `'${pageTitle}'` : null})\n@section('${layout.section}')\n${html}\n@endsection`)
+                html = await this.view.renderRaw(`@layout('${layout.path}')\n@section('${layout.section}')\n${html}\n@endsection`)
             }
 
             return html
@@ -160,22 +190,7 @@ export default class Livewire {
             ctx: this.httpContext.get(),
             id: componentId,
             name
-        });
-
-        // hack: decorators are not available yet in the constructor
-
-        // @ts-ignore
-        component.___store = component.___store || {};
-        // @ts-ignore
-        for (const key in component.___store) {
-            //@ts-ignore
-            for (const value of component.___store[key]) {
-                store(component).push(key, value);
-            }
-        }
-
-        // @ts-ignore
-        delete component.___store;
+        })
 
         let viewPath = name.split('.').map(s => this.helpers.string.dashCase(s)).join('/');
         component.setViewPath(viewPath);
@@ -192,38 +207,34 @@ export default class Livewire {
     }
 
     public async update(snapshot: any, updates: any, calls: any) {
-        return await dataStoreContext.run(new DataStore(this.helpers.string.generateRandom(32)), async () => {
+        let dataStore = new DataStore(this.helpers.string.generateRandom(32));
+        let [component, context] = await this.fromSnapshot(snapshot);
+        let features = FEATURES.map(Feature => {
+            let feature = new Feature();
+            feature.setComponent(component);
+            return feature
+        })
+
+        return await livewireContext.run({ dataStore, context, features }, async () => {
             let data = snapshot['data'];
-            // let memo = snapshot['memo'];
+            let memo = snapshot['memo'];
 
-            let [component, context] = await this.fromSnapshot(snapshot);
-
-            // this.pushOntoComponentStack(component);
+            await this.trigger('hydrate', component, memo, context);
 
             await this.updateProperties(component, updates, data, context);
 
             await this.callMethods(component, calls, context);
 
             let html = await this.render(component);
+
             if (html) {
                 context.addEffect('html', html);
             }
 
-            let s = store(component);
-            let to = s.get('redirect')[0];
-
-            if (to) {
-                context.addEffect('redirect', to);
-            }
-
-            if (s.has('redirectUsingNavigate')) {
-                context.addEffect('redirectUsingNavigate', true);
-            }
+            await this.trigger('dehydrate', component, context);
 
             let newSnapshot = this.snapshot(component, context);
 
-
-            // this.popOffComponentStack();
 
             return [newSnapshot, context.effects] as const;
         })
@@ -240,13 +251,18 @@ export default class Livewire {
                 let methods = getPublicMethods(component);
                 methods = methods.filter(m => m !== 'render');
                 methods.push('__dispatch');
-
                 if (methods.includes(method) === false) {
                     throw new Error(`Method \`${method}\` does not exist on component ${component.getName()}`);
                 }
-                let result = await component[method](...params);
 
-                returns.push(result);
+                if (method === '__dispatch') {
+                    const features = getLivewireContext()!.features;
+                    let result = await features[1].callCall('__dispatch', params)
+                    returns.push(result);
+                } else {
+                    let result = await component[method](...params);
+                    returns.push(result);
+                }
             } catch (error) {
                 console.error(error);
                 if (error.name === 'ValidationException' && error.flashToSession) {
@@ -264,6 +280,12 @@ export default class Livewire {
     public snapshot(component: any, context: any = null): any {
         context = context ?? new ComponentContext(component);
 
+        let data = JSON.parse(JSON.stringify(component, (key, value) => {
+            if (key.startsWith('__')) return undefined;
+
+            return value;
+        }));
+
         const s = store(component);
 
         // if (context.mounting) {
@@ -275,16 +297,6 @@ export default class Livewire {
         if (s.has("dispatched")) {
             context.addEffect('dispatches', s.get("dispatched"));
         }
-
-        if (s.has("js")) {
-            context.addEffect('xjs', s.get("js"));
-        }
-
-        let data = JSON.parse(JSON.stringify(component, (key, value) => {
-            if (key.startsWith('__')) return undefined;
-
-            return value;
-        }));
 
         let snapshot = {
             data: data,
@@ -308,7 +320,9 @@ export default class Livewire {
     }
 
     protected async updateProperties(component: Component, updates: any, data: any, _context: ComponentContext) {
+        const computedDecorators: Computed[] = component.getDecorators().filter(d => d instanceof Computed) as any
         Object.keys(data).forEach(key => {
+            if (computedDecorators.some(d => d.name === key)) return;
             if (!(key in component)) return;
 
             const child = data[key];
@@ -316,18 +330,15 @@ export default class Livewire {
             component[key] = child;
         });
 
-        const locked = store(component).get("locked")
 
         for (const key in updates) {
             if (!(key in component)) return;
 
-            if (locked.includes(key)) {
-                throw new Error(`Cannot update property \`${key}\` because it is locked.`);
-            }
-
             const child = updates[key];
 
-            if(typeof component["updating"] === 'function') {
+            await this.trigger('update', component, key, key, child);
+
+            if (typeof component["updating"] === 'function') {
                 await component["updating"](key, child);
             }
 
@@ -339,7 +350,7 @@ export default class Livewire {
 
             component[key] = child;
 
-            if(typeof component["updated"] === 'function') {
+            if (typeof component["updated"] === 'function') {
                 await component["updated"](key, child);
             }
 
@@ -353,12 +364,12 @@ export default class Livewire {
 
     public async render(component: Component, defaultValue?: string) {
         let data = await component.data() || {};
-        let decorators = component.getDecorators();
-        let computedDecorators = decorators.filter(d => d.type === 'computed');
+        // let decorators = component.getDecorators();
+        // let computedDecorators = decorators.filter(d => d.type === 'computed');
 
-        for (const decorator of computedDecorators) {
-            data[decorator.name] = await component[decorator.function]();
-        }
+        // for (const decorator of computedDecorators) {
+        //     data[decorator.name] = await component[decorator.function]();
+        // }
 
         let ctx = this.httpContext.get();
 
@@ -371,7 +382,9 @@ export default class Livewire {
 
         component.data = async () => data;
 
+
         let content = await component.render() || defaultValue || "<div></div>";
+        let finish = await this.trigger('render', component, this.view, []) as any;
 
         let html = await this.view.renderRaw(content, {
             ...component,
@@ -381,6 +394,16 @@ export default class Livewire {
         html = insertAttributesIntoHtmlRoot(html, {
             'wire:id': component.getId(),
         });
+
+        for (const callback of finish) {
+            if (typeof callback === 'function') {
+                await callback(html, (newHtml: string) => {
+                    html = newHtml;
+                })
+            }
+        }
+
+        html = await this.view.renderRaw(html)
 
         if (ctx) {
             ctx.session.responseFlashMessages.clear()
