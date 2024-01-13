@@ -7,6 +7,12 @@ import { Exception } from '@adonisjs/core/build/standalone'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import inspect from '@poppinss/inspect'
 import { ViewContract } from '@ioc:Adonis/Core/View';
+import { SupportDecorators } from '../src/Features/SupportDecorators/SupportDecorators';
+import { SupportEvents } from '../src/Features/SupportEvents/SupportEvents';
+import { SupportJsEvaluation } from '../src/Features/SupportJsEvaluation/SupportJsEvaluation';
+import { SupportRedirects } from '../src/Features/SupportRedirects/SupportRedirects';
+import { SupportScriptsAndAssets } from '../src/Features/SupportScriptsAndAssets/SupportScriptsAndAssets';
+import { SupportAutoInjectedAssets } from '../src/Features/SupportAutoInjectedAssets/SupportAutoInjectedAssets';
 
 class DumpException extends Exception {
     public async handle(error: this, ctx: HttpContextContract) {
@@ -189,15 +195,36 @@ export default class LivewireProvider {
         );
 
         this.app.container.withBindings(
-        [
-            'Adonis/Core/View',
-        ],
-        async (View) => {
-            this.compileSelfClosingTags(View);
-            this.compileOpeningTags(View);
-        })
+            [
+                'Adonis/Core/View',
+            ],
+            async (View) => {
+                this.compileSelfClosingTags(View);
+                this.compileOpeningTags(View);
+            })
     }
 
+    public async register() {
+        const Livewire = (await import('../src/Livewire')).default;
+
+        const FEATURES = [
+            SupportDecorators,
+            SupportEvents,
+            SupportJsEvaluation,
+            SupportRedirects,
+            SupportScriptsAndAssets,
+            SupportAutoInjectedAssets,
+        ]
+
+        for (const feature of FEATURES) {
+            Livewire.componentHook(feature);
+            if(feature['provide']) {
+                await feature['provide'](
+                    this.app
+                );
+            }
+        }
+    }
 
     compileSelfClosingTags(view: ViewContract) {
         let regex = /<x-([a-zA-Z0-9\.\-]+)([^>]*)\/>/g;

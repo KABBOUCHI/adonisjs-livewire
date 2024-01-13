@@ -6,8 +6,6 @@ export class BaseComponent {
     protected __id;
     protected __name;
     protected __view_path;
-    protected __assets: string[] = [];
-    protected __scripts: string[] = [];
 
     get ctx() {
         if (!this.__ctx) throw new Error("Cannot access http context. Please enable ASL.");

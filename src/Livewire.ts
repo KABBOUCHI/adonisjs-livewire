@@ -6,20 +6,8 @@ import { Component } from "./Component";
 import ComponentContext from "./ComponentContext";
 import { DataStore, getLivewireContext, livewireContext, store } from "./store";
 import { Checksum } from "./Checksum";
-import { SupportDecorators } from "./Features/SupportDecorators/SupportDecorators";
-import { SupportEvents } from "./Features/SupportEvents/SupportEvents";
 import Layout from "./Features/SupportPageComponents/Layout";
 import Computed from "./Features/SupportComputed/Computed";
-import { SupportJsEvaluation } from "./Features/SupportJsEvaluation/SupportJsEvaluation";
-import { SupportRedirects } from "./Features/SupportRedirects/SupportRedirects";
-
-
-const FEATURES = [
-    SupportDecorators,
-    SupportEvents,
-    SupportJsEvaluation,
-    SupportRedirects,
-]
 
 export default class Livewire {
     app: ApplicationContract
@@ -28,6 +16,7 @@ export default class Livewire {
     helpers: typeof Helpers
     components = new Map<string, typeof Component>();
     checksum: Checksum;
+    static FEATURES: any[] = [];
 
     constructor(app: ApplicationContract, view: ViewContract, helpers: typeof Helpers, httpContext: HttpContextConstructorContract) {
         this.app = app;
@@ -37,6 +26,10 @@ export default class Livewire {
         this.checksum = new Checksum(
             this.app.env.get('APP_KEY')!,
         );
+    }
+
+    public static componentHook(feature: any) {
+        this.FEATURES.push(feature);
     }
 
     get view() {
@@ -80,7 +73,7 @@ export default class Livewire {
         let component = await this.new(name);
         let context = new ComponentContext(component, true);
         let dataStore = new DataStore(this.helpers.string.generateRandom(32));
-        let features = FEATURES.map(Feature => {
+        let features = Livewire.FEATURES.map(Feature => {
             let feature = new Feature();
             feature.setComponent(component);
             return feature
@@ -209,7 +202,7 @@ export default class Livewire {
     public async update(snapshot: any, updates: any, calls: any) {
         let dataStore = new DataStore(this.helpers.string.generateRandom(32));
         let [component, context] = await this.fromSnapshot(snapshot);
-        let features = FEATURES.map(Feature => {
+        let features = Livewire.FEATURES.map(Feature => {
             let feature = new Feature();
             feature.setComponent(component);
             return feature

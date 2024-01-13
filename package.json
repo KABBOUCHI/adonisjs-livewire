@@ -1,6 +1,6 @@
 {
   "name": "adonisjs-livewire",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "A front-end framework for AdonisJS",
   "homepage": "https://github.com/KABBOUCHI/adonisjs-livewire",
   "license": "MIT",
@@ -73,6 +73,7 @@
   "dependencies": {
     "@poppinss/inspect": "^1.0.1",
     "crypto-js": "^4.2.0",
+    "edge-parser": "^8.2.2",
     "ts-mixer": "^6.0.3"
   }
 }

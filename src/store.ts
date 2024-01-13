@@ -10,7 +10,8 @@ export class DataStore {
 
     public push(component: Component | BaseComponent, key: string, value: any, iKey?: string) {
         if (!this.lookup.has(component)) this.lookup.set(component, {});
-        if (!this.lookup.get(component)[key]) this.lookup.get(component)[key] = [];
+        if (!this.lookup.get(component)[key] && !iKey) this.lookup.get(component)[key] = [];
+        if (!this.lookup.get(component)[key] && iKey) this.lookup.get(component)[key] = {};
 
         if (iKey) {
             this.lookup.get(component)[key][iKey] = value;
@@ -68,5 +69,8 @@ export function store(component: Component | BaseComponent) {
         has: (key: string) => {
             return s().has(component, key)
         },
+        set: (key: string, value: any) => {
+            s().set(component, key, value)
+        }
     }
 }
