@@ -9,7 +9,8 @@
       "@types/node",
       "@adonisjs/core",
       "@adonisjs/session",
-      "@adonisjs/view"
+      "@adonisjs/view",
+      "reflect-metadata"
     ]
   }
 }

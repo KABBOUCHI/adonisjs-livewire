@@ -2,17 +2,17 @@ import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 import { Component } from '../src/Component';
 import * as decorators from '../src/decorators';
 import packageJson from '../package.json';
-import fs, { existsSync } from 'fs';
+import fs from 'fs';
 import { Exception } from '@adonisjs/core/build/standalone'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import inspect from '@poppinss/inspect'
-import { ViewContract } from '@ioc:Adonis/Core/View';
 import { SupportDecorators } from '../src/Features/SupportDecorators/SupportDecorators';
 import { SupportEvents } from '../src/Features/SupportEvents/SupportEvents';
 import { SupportJsEvaluation } from '../src/Features/SupportJsEvaluation/SupportJsEvaluation';
 import { SupportRedirects } from '../src/Features/SupportRedirects/SupportRedirects';
 import { SupportScriptsAndAssets } from '../src/Features/SupportScriptsAndAssets/SupportScriptsAndAssets';
 import { SupportAutoInjectedAssets } from '../src/Features/SupportAutoInjectedAssets/SupportAutoInjectedAssets';
+import { ComponentTagCompiler } from '../src/ComponentTagCompiler';
 
 class DumpException extends Exception {
     public async handle(error: this, ctx: HttpContextContract) {
@@ -199,8 +199,9 @@ export default class LivewireProvider {
                 'Adonis/Core/View',
             ],
             async (View) => {
-                this.compileSelfClosingTags(View);
-                this.compileOpeningTags(View);
+                View.processor.process('raw', (value) => {
+                    return ComponentTagCompiler.compile(value.raw, this.app);
+                })
             })
     }
 
@@ -218,111 +219,11 @@ export default class LivewireProvider {
 
         for (const feature of FEATURES) {
             Livewire.componentHook(feature);
-            if(feature['provide']) {
+            if (feature['provide']) {
                 await feature['provide'](
                     this.app
                 );
             }
         }
-    }
-
-    compileSelfClosingTags(view: ViewContract) {
-        let regex = /<x-([a-zA-Z0-9\.\-]+)([^>]*)\/>/g;
-
-        view.processor.process('raw', (data) => {
-            let raw = data.raw;
-
-            let matches = raw.match(regex);
-
-            if (!matches) {
-                return;
-            }
-
-            for (const match of matches) {
-                let [_, component, props] = match.match(/<x-([a-zA-Z0-9\.\-]+)([^>]*)\/>/) || [];
-                let attributes: any = {};
-                if (props) {
-                    let regex = /(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/g;
-
-                    let matches = props.match(regex);
-                    if (matches) {
-                        for (const match of matches) {
-                            let [_, prefix, key, value] = match.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
-                            if (prefix === ':') {
-                                attributes[key] = `_____${value}_____`
-                            }
-                            else {
-                                attributes[key] = value
-                            }
-                        }
-                    }
-                }
-                const attrs = JSON.stringify(attributes).replace(/"_____([^"]*)_____"/g, "$1")
-
-                let componentPath = component.replace(/\./g, '/');
-
-                if (!existsSync(this.app.viewsPath(componentPath + '.edge'))) {
-                    componentPath = `components/${componentPath}`
-
-                    if (!existsSync(this.app.viewsPath(componentPath + '.edge'))) {
-                        componentPath = componentPath + '/index'
-                    }
-                }
-                raw = raw.replace(match, `@!component('${componentPath}', ${attrs})`);
-
-            }
-            return raw;
-        })
-    }
-
-    compileOpeningTags(view: ViewContract) {
-        let regex = /<x-([a-zA-Z0-9\.\-]+)([^>]*)>([\s\S]*?)<\/x-([a-zA-Z0-9\.\-]+)>/g;
-
-        view.processor.process('raw', (data) => {
-            let raw = data.raw;
-
-            let matches = raw.match(regex);
-
-            if (!matches) {
-                return;
-            }
-
-            for (const match of matches) {
-                let [_, component, props, content] = match.match(/<x-([a-zA-Z0-9\.\-]+)([^>]*)>([\s\S]*?)<\/x-([a-zA-Z0-9\.\-]+)>/) || [];
-
-                let attributes: any = {};
-                if (props) {
-                    let regex = /(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/g;
-
-                    let matches = props.match(regex);
-                    if (matches) {
-                        for (const match of matches) {
-                            let [_, prefix, key, value] = match.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
-                            if (prefix === ':') {
-                                attributes[key] = `_____${value}_____`
-                            }
-                            else {
-                                attributes[key] = value
-                            }
-                        }
-                    }
-                }
-                const attrs = JSON.stringify(attributes).replace(/"_____([^"]*)_____"/g, "$1")
-
-                let componentPath = component.replace(/\./g, '/');
-
-                if (!existsSync(this.app.viewsPath(componentPath + '.edge'))) {
-                    componentPath = `components/${componentPath}`
-
-                    if (!existsSync(this.app.viewsPath(componentPath + '.edge'))) {
-                        componentPath = componentPath + '/index'
-                    }
-                }
-
-                raw = raw.replace(match, `@component('${componentPath}', ${attrs}) ${content} @end`);
-            }
-
-            return raw;
-        })
     }
 }
