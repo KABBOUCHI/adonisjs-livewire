@@ -8,6 +8,7 @@ import { DataStore, getLivewireContext, livewireContext, store } from "./store";
 import { Checksum } from "./Checksum";
 import Layout from "./Features/SupportPageComponents/Layout";
 import Computed from "./Features/SupportComputed/Computed";
+import { SupportLazyLoading } from "./Features/SupportLazyLoading/SupportLazyLoading";
 
 export default class Livewire {
     app: ApplicationContract
@@ -49,6 +50,7 @@ export default class Livewire {
         const callbacks = await Promise.all(
             features.map(async feature => {
                 feature.setComponent(component);
+                feature.setApp(this.app);
 
                 if (event === 'mount') {
                     await feature.callBoot();
@@ -76,6 +78,7 @@ export default class Livewire {
         let features = Livewire.FEATURES.map(Feature => {
             let feature = new Feature();
             feature.setComponent(component);
+            feature.setApp(this.app);
             return feature
         })
         return await livewireContext.run({ dataStore, context, features }, async () => {
@@ -113,7 +116,7 @@ export default class Livewire {
                         let attributeKey = 'x-on:' + fullEvent;
                         let attributeValue = `$wire.$parent.${value}`;
 
-                        html = insertAttributesIntoHtmlRoot(html, {
+                        html = this.insertAttributesIntoHtmlRoot(html, {
                             [attributeKey]: attributeValue,
                         });
                     } else if (key.startsWith('wire:')) {
@@ -121,7 +124,7 @@ export default class Livewire {
                         let attributeKey = key;
                         let attributeValue = value;
 
-                        html = insertAttributesIntoHtmlRoot(html, {
+                        html = this.insertAttributesIntoHtmlRoot(html, {
                             [attributeKey]: attributeValue,
                         });
                     }
@@ -130,12 +133,12 @@ export default class Livewire {
 
             let binding = s.get("bindings")[0]
             if (binding) {
-                html = insertAttributesIntoHtmlRoot(html, {
+                html = this.insertAttributesIntoHtmlRoot(html, {
                     "x-modelable": `$wire.${binding.inner}`,
                 });
             }
 
-            html = insertAttributesIntoHtmlRoot(html, {
+            html = this.insertAttributesIntoHtmlRoot(html, {
                 'wire:snapshot': snapshot,
                 'wire:effects': JSON.stringify(context.effects),
             });
@@ -205,6 +208,7 @@ export default class Livewire {
         let features = Livewire.FEATURES.map(Feature => {
             let feature = new Feature();
             feature.setComponent(component);
+            feature.setApp(this.app);
             return feature
         })
 
@@ -244,6 +248,7 @@ export default class Livewire {
                 let methods = getPublicMethods(component);
                 methods = methods.filter(m => m !== 'render');
                 methods.push('__dispatch');
+                methods.push('__lazyLoad');
                 if (methods.includes(method) === false) {
                     throw new Error(`Method \`${method}\` does not exist on component ${component.getName()}`);
                 }
@@ -251,6 +256,10 @@ export default class Livewire {
                 if (method === '__dispatch') {
                     const features = getLivewireContext()!.features;
                     let result = await features[1].callCall('__dispatch', params)
+                    returns.push(result);
+                } else if (method === '__lazyLoad') {
+                    const feature = getLivewireContext()!.features.find(f => f instanceof SupportLazyLoading) as SupportLazyLoading;
+                    let result = await feature.callCall('__lazyLoad', params)
                     returns.push(result);
                 } else {
                     let result = await component[method](...params);
@@ -356,13 +365,18 @@ export default class Livewire {
     }
 
     public async render(component: Component, defaultValue?: string) {
-        let data = await component.data() || {};
-        // let decorators = component.getDecorators();
-        // let computedDecorators = decorators.filter(d => d.type === 'computed');
+        let skipRenderHtml = store(component).get('skipRender') ?? false;
+        skipRenderHtml = Array.isArray(skipRenderHtml) ? skipRenderHtml[0] : skipRenderHtml;
 
-        // for (const decorator of computedDecorators) {
-        //     data[decorator.name] = await component[decorator.function]();
-        // }
+        if (skipRenderHtml) {
+            skipRenderHtml = skipRenderHtml ?? defaultValue ?? "<div></div>";
+
+            return this.insertAttributesIntoHtmlRoot(skipRenderHtml, {
+                'wire:id': component.getId(),
+            });
+        }
+
+        let data = await component.data() || {};
 
         let ctx = this.httpContext.get();
 
@@ -384,7 +398,7 @@ export default class Livewire {
             ...data
         });
 
-        html = insertAttributesIntoHtmlRoot(html, {
+        html = this.insertAttributesIntoHtmlRoot(html, {
             'wire:id': component.getId(),
         });
 
@@ -410,27 +424,29 @@ export default class Livewire {
     public component(name: string, component: typeof Component) {
         return this.components.set(name, component);
     }
-}
 
+    public insertAttributesIntoHtmlRoot(html: string, attributes: { [key: string]: string }): string {
+        const attributesFormattedForHtmlElement = stringifyHtmlAttributes(attributes);
 
-function insertAttributesIntoHtmlRoot(html: string, attributes: { [key: string]: string }): string {
-    const attributesFormattedForHtmlElement = stringifyHtmlAttributes(attributes);
+        const regex = /(?:\n\s*|^\s*)<([a-zA-Z0-9\-]+)/;
+        const matches = html.match(regex);
 
-    const regex = /(?:\n\s*|^\s*)<([a-zA-Z0-9\-]+)/;
-    const matches = html.match(regex);
+        if (!matches || matches.length === 0) {
+            throw new Error('Could not find HTML tag in HTML string.');
+        }
 
-    if (!matches || matches.length === 0) {
-        throw new Error('Could not find HTML tag in HTML string.');
+        const tagName = matches[1];
+        const lengthOfTagName = tagName.length;
+        const positionOfFirstCharacterInTagName = html.indexOf(tagName);
+
+        return html.substring(0, positionOfFirstCharacterInTagName + lengthOfTagName) +
+            ' ' + attributesFormattedForHtmlElement +
+            html.substring(positionOfFirstCharacterInTagName + lengthOfTagName);
     }
-
-    const tagName = matches[1];
-    const lengthOfTagName = tagName.length;
-    const positionOfFirstCharacterInTagName = html.indexOf(tagName);
-
-    return html.substring(0, positionOfFirstCharacterInTagName + lengthOfTagName) +
-        ' ' + attributesFormattedForHtmlElement +
-        html.substring(positionOfFirstCharacterInTagName + lengthOfTagName);
 }
+
+
+
 
 function stringifyHtmlAttributes(attributes: { [key: string]: any }): string {
     return Object.entries(attributes)

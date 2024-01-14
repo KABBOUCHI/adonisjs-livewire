@@ -80,7 +80,7 @@ Create layout file in `resources/views/layouts/main.edge`
 // start/routes.ts
 
 Route.livewire("/", "Counter"); // App/Livewire/Counter.ts
-Route.livewire("/", "counter", [
+Route.livewire("/", "counter", [ // TODO: remove array support
   {
     initialCounter: 10,
   },

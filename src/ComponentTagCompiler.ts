@@ -20,17 +20,30 @@ export class ComponentTagCompiler {
                 let regex = /(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/g;
 
                 let matches = props.match(regex);
+                let propsRemainder = props
                 if (matches) {
                     for (const match of matches) {
-                        let [_, prefix, key, value] = match.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
+                        let [m, prefix, key, value] = match.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
                         if (prefix === ':') {
                             attributes[key] = `_____${value}_____`
                         }
                         else {
                             attributes[key] = value
                         }
+
+                        if (m) {
+                            propsRemainder = propsRemainder.replace(m, '')
+                        }
                     }
                 }
+
+                propsRemainder
+                    .split(' ')
+                    .map((prop) => prop.trim())
+                    .filter(Boolean)
+                    .forEach((prop) => {
+                        attributes[prop] = true
+                    })
             }
             const attrs = JSON.stringify(attributes).replace(/"_____([^"]*)_____"/g, "$1")
 
@@ -67,17 +80,30 @@ export class ComponentTagCompiler {
                 let regex = /(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/g;
 
                 let matches = props.match(regex);
+                let propsRemainder = props
                 if (matches) {
                     for (const match of matches) {
-                        let [_, prefix, key, value] = match.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
+                        let [m, prefix, key, value] = match.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
                         if (prefix === ':') {
                             attributes[key] = `_____${value}_____`
                         }
                         else {
                             attributes[key] = value
                         }
+
+                        if (m) {
+                            propsRemainder = propsRemainder.replace(m, '')
+                        }
                     }
                 }
+
+                propsRemainder
+                    .split(' ')
+                    .map((prop) => prop.trim())
+                    .filter(Boolean)
+                    .forEach((prop) => {
+                        attributes[prop] = true
+                    })
             }
             const attrs = JSON.stringify(attributes).replace(/"_____([^"]*)_____"/g, "$1")
 
@@ -96,7 +122,7 @@ export class ComponentTagCompiler {
             raw = raw.replace(match, `@component('${componentPath}', ${attrs}) ${content} @end`);
         }
 
-        if(raw.match(OPENING_REGEX)) {
+        if (raw.match(OPENING_REGEX)) {
             raw = ComponentTagCompiler.compileOpeningTags(raw, app);
         }
 

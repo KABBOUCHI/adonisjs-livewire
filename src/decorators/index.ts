@@ -1,6 +1,7 @@
 import { Component } from "../Component";
 import Computed from "../Features/SupportComputed/Computed";
 import On from "../Features/SupportEvents/On";
+import Lazy from "../Features/SupportLazyLoading/Lazy";
 import Locked from "../Features/SupportLockedProperties/Locked";
 import Modelable from "../Features/SupportModels/Modelable";
 import Layout from "../Features/SupportPageComponents/Layout";
@@ -16,6 +17,12 @@ export function title(title: string) {
 export function layout(path: string = "layouts/main", section: string = 'body') {
     return function (constructor: typeof Component) {
         constructor.prototype.addDecorator(new Layout(path, section))
+    }
+}
+
+export function lazy(isolate: boolean = true) {
+    return function (constructor: typeof Component) {
+        constructor.prototype.addDecorator(new Lazy(isolate))
     }
 }
 

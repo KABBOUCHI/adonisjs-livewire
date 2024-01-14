@@ -1,6 +1,7 @@
 import { Component } from "./Component";
 import ComponentContext from "./ComponentContext";
 import { store } from "./store";
+import type { ApplicationContract } from '@ioc:Adonis/Core/Application'
 
 export interface IComponentHook {
     boot?(params: any[]): Promise<void>;
@@ -14,9 +15,14 @@ export interface IComponentHook {
 
 export default abstract class ComponentHook {
     protected component: Component;
+    protected app: ApplicationContract;
 
     setComponent(component: Component): void {
         this.component = component;
+    }
+
+    setApp(app: ApplicationContract): void {
+        this.app = app;
     }
 
     async callBoot(...params: any[]) {

@@ -1,5 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { TypedSchema, ParsedTypedSchema, CustomMessages } from '@ioc:Adonis/Core/Validator';
+import { store } from './store';
 
 export class BaseComponent {
     protected __ctx: HttpContextContract | null = null;
@@ -88,5 +89,17 @@ export class BaseComponent {
             messages: this.messages(),
             bail,
         })
+    }
+
+    skipRender(html?: string) {
+        store(this).set('skipRender', html ?? true);
+    }
+
+    skipMount() {
+        store(this).set('skipMount', true);
+    }
+
+    skipHydrate() {
+        store(this).set('skipHydrate', true);
     }
 }

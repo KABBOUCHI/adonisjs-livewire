@@ -13,6 +13,7 @@ import { SupportRedirects } from '../src/Features/SupportRedirects/SupportRedire
 import { SupportScriptsAndAssets } from '../src/Features/SupportScriptsAndAssets/SupportScriptsAndAssets';
 import { SupportAutoInjectedAssets } from '../src/Features/SupportAutoInjectedAssets/SupportAutoInjectedAssets';
 import { ComponentTagCompiler } from '../src/ComponentTagCompiler';
+import { SupportLazyLoading } from '../src/Features/SupportLazyLoading/SupportLazyLoading';
 
 class DumpException extends Exception {
     public async handle(error: this, ctx: HttpContextContract) {
@@ -110,10 +111,11 @@ export default class LivewireProvider {
                             let regex = /(@|:|wire:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/g;
 
                             let matches = props.match(regex);
+                            let propsRemainder = props
 
                             if (matches) {
                                 for (const match of matches) {
-                                    let [_, prefix, key, value] = match.match(/(@|:|wire:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
+                                    let [m, prefix, key, value] = match.match(/(@|:|wire:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
                                     if (prefix === ':') {
                                         attributes[key] = `_____${value}_____`
                                     } else if (prefix === 'wire:' && key === 'key') {
@@ -126,12 +128,23 @@ export default class LivewireProvider {
                                         }
                                     } else if (prefix === '@') {
                                         attributes[`@${key}`] = value
-                                    }
-                                    else {
+                                    } else {
                                         attributes[key] = value
+                                    }
+
+                                    if (m) {
+                                        propsRemainder = propsRemainder.replace(m, '')
                                     }
                                 }
                             }
+
+                            propsRemainder
+                                .split(' ')
+                                .map((prop) => prop.trim())
+                                .filter(Boolean)
+                                .forEach((prop) => {
+                                    attributes[prop] = true
+                                })
                         }
 
                         const attrs = JSON.stringify(attributes).replace(/"_____([^"]*)_____"/g, "$1")
@@ -215,6 +228,7 @@ export default class LivewireProvider {
             SupportRedirects,
             SupportScriptsAndAssets,
             SupportAutoInjectedAssets,
+            SupportLazyLoading,
         ]
 
         for (const feature of FEATURES) {

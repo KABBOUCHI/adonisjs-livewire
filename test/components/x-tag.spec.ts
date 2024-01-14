@@ -103,4 +103,18 @@ test.group('x-tag', () => {
         assert.equal(compile(input), expected)
 
     })
+
+    test('self closing with flag', async ({ assert }) => {
+        let input = "<x-component a='b' lazy />"
+        let expected = `@!component('component', {"a":"b","lazy":true})`
+
+        assert.equal(compile(input), expected)
+    })
+
+    test('opening and closing with flag', async ({ assert }) => {
+        let input = "<x-component a='b' lazy></x-component>"
+        let expected = `@component('component', {"a":"b","lazy":true})  @end`
+
+        assert.equal(compile(input), expected)
+    });
 })
