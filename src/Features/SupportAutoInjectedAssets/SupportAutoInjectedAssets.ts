@@ -5,15 +5,9 @@ import ComponentHook, { IComponentHook } from "../../ComponentHook";
 import { SupportScriptsAndAssets } from '../SupportScriptsAndAssets/SupportScriptsAndAssets';
 
 export class SupportAutoInjectedAssets extends ComponentHook implements IComponentHook {
-    static hasRenderedAComponentThisRequest = false;
 
     public static async provide(app: ApplicationContract) {
         const Server = app.container.resolveBinding('Adonis/Core/Server');
-
-        // TODO: implement to flush-state
-        Server.hooks.before(async () => {
-            SupportAutoInjectedAssets.hasRenderedAComponentThisRequest = false;
-        })
 
         Server.hooks.after(async (ctx: HttpContextContract) => {
             let assetsHead = ''
@@ -35,9 +29,7 @@ export class SupportAutoInjectedAssets extends ComponentHook implements ICompone
             }
         })
     }
-    async dehydrate() {
-        SupportAutoInjectedAssets.hasRenderedAComponentThisRequest = true;
-    }
+    async dehydrate() { }
 
     static injectAssets(html: string, assetsHead: string, assetsBody: string) {
         let head = html.split('</head>');

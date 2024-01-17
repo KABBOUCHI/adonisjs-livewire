@@ -14,6 +14,7 @@ import { SupportScriptsAndAssets } from '../src/Features/SupportScriptsAndAssets
 import { SupportAutoInjectedAssets } from '../src/Features/SupportAutoInjectedAssets/SupportAutoInjectedAssets';
 import { ComponentTagCompiler } from '../src/ComponentTagCompiler';
 import { SupportLazyLoading } from '../src/Features/SupportLazyLoading/SupportLazyLoading';
+import { Mixin, hasMixin, decorate } from 'ts-mixer';
 
 class DumpException extends Exception {
     public async handle(error: this, ctx: HttpContextContract) {
@@ -61,6 +62,9 @@ export default class LivewireProvider {
                     Livewire: livewire,
                     Component,
                     ...decorators,
+                    Mixin,
+                    hasMixin,
+                    decorate,
                 }))
 
                 View.global("livewire", livewire);
