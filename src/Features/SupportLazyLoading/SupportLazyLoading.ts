@@ -4,8 +4,7 @@ import Lazy from "./Lazy";
 
 export class SupportLazyLoading extends ComponentHook implements IComponentHook {
     async mount(params) {
-        // TODO: remove support for params as an array
-        const args = params[0] ?? {};
+        const args = params ?? {};
         let hasLazyParam = args.hasOwnProperty('lazy');
         let lazyProperty = args.lazy ?? false;
         let isolate = false;
@@ -48,10 +47,12 @@ export class SupportLazyLoading extends ComponentHook implements IComponentHook 
         }
     }
 
-    async generatePlaceholderHtml(_params) {
+    async generatePlaceholderHtml(params) {
         const { Livewire } = await this.app.container.resolveBinding('Adonis/Addons/Livewire')
         let { context } = getLivewireContext()!
         let placeholder = await this.getPlaceholderHtml();
+
+        context.addMemo('__for_mount', params)
 
         let encoded = JSON.stringify(
             await Livewire.snapshot(this.component, context)
@@ -70,12 +71,52 @@ export class SupportLazyLoading extends ComponentHook implements IComponentHook 
         return await this.component.view.renderRaw(await this.component['placeholder']());
     }
 
-    async call(method, _params, _returnEarly) {
+    async call(method, params, _returnEarly) {
         if (method !== '__lazyLoad') return;
 
         // const { Livewire } = await this.app.container.resolveBinding('Adonis/Addons/Livewire')
-        // let data = JSON.parse(params[0]);
+        let data = JSON.parse(params[0]);
 
-        // call lifecycle mount hook
+        if (data.memo.__for_mount) {
+            // TODO: move this to a separate hook
+            let component = this.component;
+            if ( typeof component['mount'] === 'function') {
+                const resolvedParams = [data.memo.__for_mount]
+
+                const isResourceModel = (value: any) => {
+                    if (!value) {
+                        return false
+                    }
+
+                    return (
+                        typeof value['findForRequest'] === 'function' ||
+                        typeof value['findOrFail'] === 'function' ||
+                        typeof value['findRelatedForRequest'] === 'function'
+                    )
+                }
+
+                if (component['bindings'] && component['bindings']['mount']) {
+                    for (let index = 1; index < component['bindings']['mount'].length; index++) {
+                        const binding = component['bindings']['mount'][index];
+
+                        if (isResourceModel(binding.type)) {
+                            resolvedParams.push(
+                                await binding.type.findOrFail(data.memo.__for_mount[binding.name])
+                            )
+                        } else {
+                            resolvedParams.push(
+                                data.memo.__for_mount[binding.name]
+                            )
+                        }
+                    }
+                }
+
+                //@ts-ignore
+                await component.mount(...resolvedParams);
+            }
+
+
+            delete data.memo.for_mount;
+        }
     }
 }

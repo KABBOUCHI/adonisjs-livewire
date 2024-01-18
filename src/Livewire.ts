@@ -54,7 +54,7 @@ export default class Livewire {
 
                 if (event === 'mount') {
                     await feature.callBoot();
-                    await feature.callMount(...params);
+                    await feature.callMount(params[0]);
                 } else if (event === 'hydrate') {
                     await feature.callBoot();
                     await feature.callHydrate(context.memo, context);
@@ -71,7 +71,7 @@ export default class Livewire {
         return callbacks
     }
 
-    public async mount(name: string, params: any[] = [], options: { layout?: any, key?: string } = {}) {
+    public async mount(name: string, params: object = {}, options: { layout?: any, key?: string } = {}) {
         let component = await this.new(name);
         let context = new ComponentContext(component, true);
         let dataStore = new DataStore(this.helpers.string.generateRandom(32));
@@ -82,8 +82,6 @@ export default class Livewire {
             return feature
         })
         return await livewireContext.run({ dataStore, context, features }, async () => {
-
-            params = Array.isArray(params) ? params : [params];
             if (options.layout && (!component.__decorators || !component.__decorators.some(d => d instanceof Layout))) {
                 component.addDecorator(new Layout(
                     options.layout.name,
@@ -92,13 +90,47 @@ export default class Livewire {
             }
 
             await this.trigger('mount', component, params, options.key);
-            //@ts-ignore
-            if (typeof component.mount === 'function') {
-                //@ts-ignore
-                await component.mount(...params);
-            }
 
             const s = store(component);
+
+            let skipMount = s.get("skipMount") ?? false;
+            skipMount = Array.isArray(skipMount) ? skipMount[0] : skipMount;
+            //@ts-ignore
+            if (!skipMount && typeof component.mount === 'function') {
+                const resolvedParams = [params]
+
+                const isResourceModel = (value: any) => {
+                    if (!value) {
+                        return false
+                    }
+
+                    return (
+                        typeof value['findForRequest'] === 'function' ||
+                        typeof value['findOrFail'] === 'function' ||
+                        typeof value['findRelatedForRequest'] === 'function'
+                    )
+                }
+
+                if (component['bindings'] && component['bindings']['mount']) {
+                    for (let index = 1; index < component['bindings']['mount'].length; index++) {
+                        const binding = component['bindings']['mount'][index];
+
+                        if (isResourceModel(binding.type)) {
+                            resolvedParams.push(
+                                await binding.type.findOrFail(params[binding.name])
+                            )
+                        } else {
+                            resolvedParams.push(
+                                params[binding.name]
+                            )
+                        }
+                    }
+                }
+
+                //@ts-ignore
+                await component.mount(...resolvedParams);
+            }
+
 
             await this.trigger('render', component, this.view, []) as any;
 
@@ -108,26 +140,24 @@ export default class Livewire {
 
             let snapshot = this.snapshot(component, context);
 
-            for (const param of params) {
-                for (const key of Object.keys(param)) {
-                    if (key.startsWith('@')) {
-                        let value = param[key];
-                        let fullEvent = this.helpers.string.dashCase(key.replace('@', ''));
-                        let attributeKey = 'x-on:' + fullEvent;
-                        let attributeValue = `$wire.$parent.${value}`;
+            for (const key of Object.keys(params)) {
+                if (key.startsWith('@')) {
+                    let value = params[key];
+                    let fullEvent = this.helpers.string.dashCase(key.replace('@', ''));
+                    let attributeKey = 'x-on:' + fullEvent;
+                    let attributeValue = `$wire.$parent.${value}`;
 
-                        html = this.insertAttributesIntoHtmlRoot(html, {
-                            [attributeKey]: attributeValue,
-                        });
-                    } else if (key.startsWith('wire:')) {
-                        let value = param[key];
-                        let attributeKey = key;
-                        let attributeValue = value;
+                    html = this.insertAttributesIntoHtmlRoot(html, {
+                        [attributeKey]: attributeValue,
+                    });
+                } else if (key.startsWith('wire:')) {
+                    let value = params[key];
+                    let attributeKey = key;
+                    let attributeValue = value;
 
-                        html = this.insertAttributesIntoHtmlRoot(html, {
-                            [attributeKey]: attributeValue,
-                        });
-                    }
+                    html = this.insertAttributesIntoHtmlRoot(html, {
+                        [attributeKey]: attributeValue,
+                    });
                 }
             }
 

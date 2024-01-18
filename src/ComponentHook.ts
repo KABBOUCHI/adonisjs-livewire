@@ -5,7 +5,7 @@ import type { ApplicationContract } from '@ioc:Adonis/Core/Application'
 
 export interface IComponentHook {
     boot?(params: any[]): Promise<void>;
-    mount?(params: any[]): Promise<void>;
+    mount?(params: object): Promise<void>;
     hydrate?(params: any[]): Promise<void>;
     dehydrate?(context: ComponentContext): Promise<void>;
     destroy?(params: any[]): Promise<void>;
@@ -31,9 +31,9 @@ export default abstract class ComponentHook {
         }
     }
 
-    async callMount(...params: any[]) {
+    async callMount(params: object) {
         if (typeof this['mount'] === 'function') {
-            await this['mount'](...params);
+            await this['mount'](params);
         }
     }
 

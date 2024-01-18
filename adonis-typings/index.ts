@@ -1,13 +1,13 @@
 declare module '@ioc:Adonis/Core/Route' {
     interface RouterContract {
-        livewire: (pattern: string, component?: string | undefined, params?: any[] | Record<string, any> | undefined) => RouteContract;
+        livewire: (pattern: string, component?: string | undefined, params?: object | Record<string, any> | undefined) => RouteContract;
     }
 }
 
 declare module '@ioc:Adonis/Addons/Livewire' {
     export const Component: typeof import("../src/Component").Component;
     export const Livewire: import("../src/Livewire").default;
-    export const { title, layout, computed, locked, modelable, on, url, lazy }: typeof import("../src/decorators");
+    export const { title, layout, computed, locked, modelable, on, url, lazy, bind }: typeof import("../src/decorators");
     export const {Mixin, hasMixin, decorate }: typeof import("ts-mixer");
 }
 

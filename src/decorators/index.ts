@@ -40,19 +40,55 @@ export function on(name?: string) {
 
 export function modelable() {
     return function (target: Component, propertyKey: string) {
-       target.addDecorator(new Modelable("wire:model", propertyKey));
+        target.addDecorator(new Modelable("wire:model", propertyKey));
     }
 }
 
 export function locked() {
     return function (target: Component, propertyKey: string) {
-       target.addDecorator(new Locked(propertyKey));
+        target.addDecorator(new Locked(propertyKey));
     }
 }
 
 
 export function url() {
     return function (target: Component, propertyKey: string) {
-       target.addDecorator(new Url(propertyKey));
+        target.addDecorator(new Url(propertyKey));
+    }
+}
+
+
+export function bind() {
+    return function (target: Component, propertyKey: string, descriptor: PropertyDescriptor) {
+        const methodParams = Reflect.getMetadata('design:paramtypes', target, propertyKey)
+
+        if (!methodParams) {
+            return;
+        }
+
+        const functionString = descriptor.value.toString();
+        const match = functionString.match(/\(([^)]*)\)/);
+        if (!match || !match[1]) {
+            return;
+        }
+
+        const args = match[1].split(',').map((param) => param.trim());
+
+        const parentBindings = target['bindings']
+
+        if (!target.hasOwnProperty('bindings')) {
+            Object.defineProperty(target, 'bindings', {
+                value: parentBindings ? Object.assign({}, parentBindings) : {},
+            })
+        }
+
+        target['bindings'][propertyKey] = target['bindings'][propertyKey] || []
+
+        methodParams.forEach((param: any, index: number) => {
+            target['bindings'][propertyKey].push({
+                name: args[index],
+                type: param
+            })
+        })
     }
 }
