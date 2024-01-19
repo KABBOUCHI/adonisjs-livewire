@@ -24,7 +24,8 @@ export class SupportAutoInjectedAssets extends ComponentHook implements ICompone
             if (!assetsHead && !assetsBody) return;
 
             let html: string = ctx.response.lazyBody[0] || '';
-            if (html.includes('</html>')) {
+
+            if (typeof html === 'string' && html.includes('</html>')) {
                 ctx.response.lazyBody[0] = SupportAutoInjectedAssets.injectAssets(html, assetsHead, assetsBody);
             }
         })
