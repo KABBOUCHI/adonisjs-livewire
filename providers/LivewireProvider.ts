@@ -108,18 +108,18 @@ export default class LivewireProvider {
 
 
                     for (const match of matches) {
-                        let [_, component, props] = match.match(/<livewire:([a-zA-Z0-9\.\-]+)([^>]*)\/>/) || [];
+                        let [_, component, props] = match.match(/<livewire:([a-zA-Z0-9\.\-:.]+)([^>]*)\/>/) || [];
                         let attributes: any = {};
                         let options: any = {};
                         if (props) {
-                            let regex = /(@|:|wire:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/g;
+                            let regex = /(@|:|wire:)?([a-zA-Z0-9\-:.]+)\s*=\s*['"]([^'"]*)['"]/g;
 
                             let matches = props.match(regex);
                             let propsRemainder = props
 
                             if (matches) {
                                 for (const match of matches) {
-                                    let [m, prefix, key, value] = match.match(/(@|:|wire:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || [];
+                                    let [m, prefix, key, value] = match.match(/(@|:|wire:)?([a-zA-Z0-9\-:.]+)\s*=\s*['"]([^'"]*)['"]/) || [];
                                     if (prefix === ':') {
                                         attributes[key] = `_____${value}_____`
                                     } else if (prefix === 'wire:' && key === 'key') {

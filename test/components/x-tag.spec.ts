@@ -117,4 +117,18 @@ test.group('x-tag', () => {
 
         assert.equal(compile(input), expected)
     });
+
+    test("livewire model", async ({ assert }) => {
+        let input = "<x-component wire:model='foo' />"
+        let expected = `@!component('component', {"wire:model":"foo"})`
+
+        assert.equal(compile(input), expected)
+    })
+
+    test("livewire model live", async ({ assert }) => {
+        let input = "<x-component wire:model.live='foo' />"
+        let expected = `@!component('component', {"wire:model.live":"foo"})`
+
+        assert.equal(compile(input), expected)
+    })
 })
