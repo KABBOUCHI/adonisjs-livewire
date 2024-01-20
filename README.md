@@ -35,6 +35,10 @@ now you can use `this.ctx` in your Livewire components.
 
 ```sh
 node ace make:livewire Counter
+
+# or
+
+node ace make:livewire Counter --inline
 ```
 
 ## Basic Usage
@@ -47,8 +51,8 @@ node ace make:livewire Counter
   @livewireStyles
 </head>
 <body>
-  @livewire('counter') or  @livewire('Counter')
-  @livewire('search-users') or  @livewire('SearchUsers')
+  @livewire('counter') or  @livewire('Counter') or <livewire:counter />
+  @livewire('search-users') or  @livewire('SearchUsers') or <livewire:search-users />
 
   @livewireScripts
 </body>
@@ -57,24 +61,13 @@ node ace make:livewire Counter
 
 ## Component as Page
 
-Create layout file in `resources/views/layouts/main.edge`
+Create layout file
 
-```blade
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title ?? 'My App' }}</title>
-    @livewireStyles
-  </head>
-  <body>
-    @!section('body')
-
-    @livewireScripts
-  </body>
-</html>
+```sh
+node ace livewire:layout
 ```
+
+Add routes
 
 ```ts
 // start/routes.ts
@@ -116,8 +109,8 @@ export default class AppProvider {
   }
 }
 
-Now, applications with your package installed can consume your component in their views like so:
 ```
+Now, applications with your package installed can consume your component in their views like so:
 
 ```blade
 @livewire('custom-component', {
