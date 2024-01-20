@@ -120,7 +120,7 @@ export default class LivewireProvider {
                             if (matches) {
                                 for (const match of matches) {
                                     let [m, prefix, key, value] = match.match(/(@|:|wire:)?([a-zA-Z0-9\-:.]+)\s*=\s*['"]([^'"]*)['"]/) || [];
-                                    if (prefix === ':') {
+                                    if (prefix === ':' && key !== 'is' && key !== 'component') {
                                         attributes[key] = `_____${value}_____`
                                     } else if (prefix === 'wire:' && key === 'key') {
                                         options.key = `_____${value}_____`
@@ -151,10 +151,18 @@ export default class LivewireProvider {
                                 })
                         }
 
+                        if (component === 'dynamic-component' || component === 'is') {
+                            component = attributes['component'] ?? attributes['is']
+                            delete attributes['component'];
+                            delete attributes['is'];
+                        } else {
+                            component = `'${component}'`
+                        }
+
                         const attrs = JSON.stringify(attributes).replace(/"_____([^"]*)_____"/g, "$1")
                         const opts = JSON.stringify(options).replace(/"_____([^"]*)_____"/g, "$1")
 
-                        raw = raw.replace(match, `@livewire('${component}', ${attrs}, ${opts})`);
+                        raw = raw.replace(match, `@livewire(${component}, ${attrs}, ${opts})`);
                     }
                     return raw;
                 })
