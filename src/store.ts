@@ -1,8 +1,8 @@
 import { AsyncLocalStorage } from 'node:async_hooks'
-import { Component } from './Component.js'
-import { BaseComponent } from './BaseComponent.js'
-import ComponentContext from './ComponentContext.js'
-import ComponentHook from './ComponentHook.js'
+import { Component } from './component.js'
+import { BaseComponent } from './base_component.js'
+import ComponentContext from './component_context.js'
+import ComponentHook from './component_hook.js'
 
 export class DataStore {
   lookup: WeakMap<Component | any, any> = new WeakMap()

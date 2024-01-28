@@ -1,13 +1,13 @@
 import { ApplicationService } from '@adonisjs/core/types'
-import { HttpContext } from "@adonisjs/core/http"
+import { HttpContext } from '@adonisjs/core/http'
 import string from '@adonisjs/core/helpers/string'
-import { Component } from './Component.js'
-import ComponentContext from './ComponentContext.js'
+import { Component } from './component.js'
+import ComponentContext from './component_context.js'
 import { DataStore, getLivewireContext, livewireContext, store } from './store.js'
-import { Checksum } from './Checksum.js'
-import Layout from './Features/SupportPageComponents/Layout.js'
-import Computed from './Features/SupportComputed/Computed.js'
-import { SupportLazyLoading } from './Features/SupportLazyLoading/SupportLazyLoading.js'
+import { Checksum } from './checksum.js'
+import Layout from './features/support_page_components/layout.js'
+import Computed from './features/support_computed/computed.js'
+import { SupportLazyLoading } from './features/support_lazy_loading/support_lazy_loading.js'
 import { Secret } from '@adonisjs/core/helpers'
 
 export default class Livewire {
@@ -16,12 +16,10 @@ export default class Livewire {
   checksum: Checksum
   static FEATURES: any[] = []
 
-  constructor(
-    app: ApplicationService,
-  ) {
+  constructor(app: ApplicationService) {
     this.app = app
     this.checksum = new Checksum(
-      this.app.config.get<Secret<string>>('app.appKey', 'appKey').release(),
+      this.app.config.get<Secret<string>>('app.appKey', 'appKey').release()
     )
   }
 
@@ -123,7 +121,7 @@ export default class Livewire {
         await component.mount(...resolvedParams)
       }
 
-      ; (await this.trigger('render', component, this.view, [])) as any
+      ;(await this.trigger('render', component, this.view, [])) as any
 
       let html = await this.render(component, '<div></div>')
 

@@ -5,14 +5,8 @@ import { Exception } from '@adonisjs/core/exceptions'
 import { HttpContext, Route } from '@adonisjs/core/http'
 //@ts-ignore
 import inspect from '@poppinss/inspect'
-import { SupportDecorators } from '../src/Features/SupportDecorators/SupportDecorators.js'
-import { SupportEvents } from '../src/Features/SupportEvents/SupportEvents.js'
-import { SupportJsEvaluation } from '../src/Features/SupportJsEvaluation/SupportJsEvaluation.js'
-import { SupportRedirects } from '../src/Features/SupportRedirects/SupportRedirects.js'
-import { SupportScriptsAndAssets } from '../src/Features/SupportScriptsAndAssets/SupportScriptsAndAssets.js'
-import { SupportAutoInjectedAssets } from '../src/Features/SupportAutoInjectedAssets/SupportAutoInjectedAssets.js'
-import { ComponentTagCompiler } from '../src/ComponentTagCompiler.js'
-import { SupportLazyLoading } from '../src/Features/SupportLazyLoading/SupportLazyLoading.js'
+import { ComponentTagCompiler } from '../src/component_tag_compiler.js'
+import { SupportLazyLoading } from '../src/features/support_lazy_loading/support_lazy_loading.js'
 import { Constructor } from '@adonisjs/http-server/types'
 import edge, { type Edge } from 'edge.js'
 
@@ -31,7 +25,11 @@ globalThis.dd = dd
 
 declare module '@adonisjs/core/http' {
   interface Router {
-    livewire: <T extends Constructor<any>>(pattern: string, component?: string | undefined, params?: object | Record<string, any> | undefined) => Route<T>;
+    livewire: <T extends Constructor<any>>(
+      pattern: string,
+      component?: string | undefined,
+      params?: object | Record<string, any> | undefined
+    ) => Route<T>
   }
 }
 
@@ -48,24 +46,31 @@ const packageJson = {
 
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { SupportDecorators } from '../src/features/support_decorators/support_decorators.js'
+import { SupportEvents } from '../src/features/support_events/support_events.js'
+import { SupportJsEvaluation } from '../src/features/support_js_valuation/support_js_evaluation.js'
+import { SupportRedirects } from '../src/features/support_redirects/support_redirects.js'
+import { SupportScriptsAndAssets } from '../src/features/support_scripts_and_assets/support_scripts_and_assets.js'
+import { SupportAutoInjectedAssets } from '../src/features/support_auto_injected_assets/support_auto_injected_assets.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-
 export default class LivewireProvider {
-  constructor(protected app: ApplicationService) { }
+  constructor(protected app: ApplicationService) {}
 
   async boot() {
-    let livewireJs = fs.readFileSync(`${__dirname}/../assets/livewire.js`, 'utf-8').replace('_token', '_csrf')
+    let livewireJs = fs
+      .readFileSync(`${__dirname}/../assets/livewire.js`, 'utf-8')
+      .replace('_token', '_csrf')
 
-    const app = await this.app.container.make("app")
-    const router = await this.app.container.make("router")
+    const app = await this.app.container.make('app')
+    const router = await this.app.container.make('router')
 
     app.config.set('app.http.generateRequestId', true)
     app.config.set('app.http.useAsyncLocalStorage', true)
 
-    const Livewire = (await import('../src/Livewire.js')).default
-    const LivewireTag = (await import('../src/LivewireTag.js')).default
+    const Livewire = (await import('../src/livewire.js')).default
+    const LivewireTag = (await import('../src/livewire_tag.js')).default
 
     const livewire = new Livewire(app)
 
@@ -81,9 +86,7 @@ export default class LivewireProvider {
       block: false,
       seekable: false,
       compile(_parser, buffer, _token) {
-        buffer.outputRaw(
-          `<link rel="stylesheet" href="/livewire.css?v=${packageJson.version}">`
-        )
+        buffer.outputRaw(`<link rel="stylesheet" href="/livewire.css?v=${packageJson.version}">`)
       },
     })
 
@@ -118,8 +121,7 @@ export default class LivewireProvider {
       }
 
       for (const match of matches) {
-        let [_, component, props] =
-          match.match(/<livewire:([a-zA-Z0-9\.\-:.]+)([^>]*)\/>/) || []
+        let [_, component, props] = match.match(/<livewire:([a-zA-Z0-9\.\-:.]+)([^>]*)\/>/) || []
         let attributes: any = {}
         let options: any = {}
         if (props) {
@@ -236,9 +238,7 @@ export default class LivewireProvider {
         }
 
         return await view.renderRaw(
-          `@livewire('${component}', ${JSON.stringify(
-            parameters
-          )}, { layout: { name: 'main' } })`
+          `@livewire('${component}', ${JSON.stringify(parameters)}, { layout: { name: 'main' } })`
         )
       })
     }
@@ -271,7 +271,7 @@ export default class LivewireProvider {
   }
 
   async register() {
-    const Livewire = (await import('../src/Livewire.js')).default
+    const Livewire = (await import('../src/livewire.js')).default
 
     const FEATURES = [
       SupportDecorators,

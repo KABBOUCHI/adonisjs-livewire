@@ -1,16 +1,16 @@
-import { Component } from '../Component.js'
-import Computed from '../Features/SupportComputed/Computed.js'
-import On from '../Features/SupportEvents/On.js'
-import Lazy from '../Features/SupportLazyLoading/Lazy.js'
-import Locked from '../Features/SupportLockedProperties/Locked.js'
-import Modelable from '../Features/SupportModels/Modelable.js'
-import Layout from '../Features/SupportPageComponents/Layout.js'
-import Title from '../Features/SupportPageComponents/Title.js'
-import Url from '../Features/SupportQueryString/Url.js'
+import { Component } from '../component.js'
+import Computed from '../features/support_computed/computed.js'
+import On from '../features/support_events/on.js'
+import Lazy from '../features/support_lazy_loading/lazy.js'
+import Locked from '../features/support_locked_properties/locked.js'
+import Modelable from '../features/support_models/modelable.js'
+import Layout from '../features/support_page_components/layout.js'
+import Title from '../features/support_page_components/title.js'
+import Url from '../features/support_query_string/url.js'
 
-export function title(title: string) {
+export function title(value: string) {
   return function (constructor: typeof Component) {
-    constructor.prototype.addDecorator(new Title(title))
+    constructor.prototype.addDecorator(new Title(value))
   }
 }
 

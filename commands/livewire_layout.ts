@@ -13,13 +13,11 @@ export default class LivewireLayout extends BaseCommand {
   }
 
   @flags.string({ description: 'Name of layout', default: 'main' })
-  declare name;
+  declare name
 
   async run() {
     const codemods = await this.createCodemods()
 
-    codemods.makeUsingStub(stubsRoot, 'layout.stub', {
-
-    })
+    codemods.makeUsingStub(stubsRoot, 'layout.stub', {})
   }
 }

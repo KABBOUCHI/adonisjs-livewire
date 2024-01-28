@@ -1,9 +1,9 @@
-export { Component } from '../src/Component.js'
+export { Component } from '../src/component.js'
 export * from '../src/decorators/index.js'
 export { Mixin, hasMixin, decorate, mix } from 'ts-mixer'
 
 import app from '@adonisjs/core/services/app'
-import Livewire from '../src/Livewire.js'
+import Livewire from '../src/livewire.js'
 
 declare module '@adonisjs/core/types' {
   export interface ContainerBindings {
