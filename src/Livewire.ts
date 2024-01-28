@@ -170,7 +170,8 @@ export default class Livewire {
 
       // TODO: find a better way to do this
       if (layout) {
-        html = await this.view.renderRaw(`<x-${layout.name}>\n${html}\n</x-${layout.name}>`)
+        let layoutName = layout.name.replaceAll('/', '.')
+        html = await this.view.renderRaw(`<x-${layoutName}>\n${html}\n</x-${layoutName}>`)
       }
 
       return html
@@ -203,9 +204,13 @@ export default class Livewire {
         .map((s) => string.snakeCase(s))
         .join('/')
 
-      LivewireComponent = await import(`${process.cwd()}/app/livewire/${path}.js`).then(
-        (module) => module.default
-      )
+      LivewireComponent = await import(`${process.cwd()}/app/livewire/${path}.js`)
+        .then((module) => module.default)
+        .catch(async () => {
+          return await import(`${process.cwd()}/app/livewire/${path}/index.js`).then(
+            (module) => module.default
+          )
+        })
     }
 
     let componentId = id ?? string.generateRandom(20)

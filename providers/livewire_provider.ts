@@ -1,5 +1,4 @@
 import type { ApplicationService } from '@adonisjs/core/types'
-// import packageJson from '../package.json' assert { type: 'json' }
 import fs from 'node:fs'
 import { Exception } from '@adonisjs/core/exceptions'
 import { HttpContext, Route } from '@adonisjs/core/http'
@@ -9,6 +8,20 @@ import { ComponentTagCompiler } from '../src/component_tag_compiler.js'
 import { SupportLazyLoading } from '../src/features/support_lazy_loading/support_lazy_loading.js'
 import { Constructor } from '@adonisjs/http-server/types'
 import edge, { type Edge } from 'edge.js'
+import { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { SupportDecorators } from '../src/features/support_decorators/support_decorators.js'
+import { SupportEvents } from '../src/features/support_events/support_events.js'
+import { SupportJsEvaluation } from '../src/features/support_js_valuation/support_js_evaluation.js'
+import { SupportRedirects } from '../src/features/support_redirects/support_redirects.js'
+import { SupportScriptsAndAssets } from '../src/features/support_scripts_and_assets/support_scripts_and_assets.js'
+import { SupportAutoInjectedAssets } from '../src/features/support_auto_injected_assets/support_auto_injected_assets.js'
+import { Config, defaultConfig } from '../src/define_config.js'
+import type Livewire from '../src/livewire.js'
+
+const currentDirname = dirname(fileURLToPath(import.meta.url))
+
+const packageJson = JSON.parse(fs.readFileSync(`${currentDirname}/../../package.json`, 'utf-8'))
 
 class DumpException extends Exception {
   async handle(error: this, ctx: HttpContext) {
@@ -40,28 +53,18 @@ declare module '@adonisjs/core/http' {
   }
 }
 
-const packageJson = {
-  version: '0.1.1',
+declare module '@adonisjs/core/types' {
+  export interface ContainerBindings {
+    livewire: Livewire
+  }
 }
-
-import { dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { SupportDecorators } from '../src/features/support_decorators/support_decorators.js'
-import { SupportEvents } from '../src/features/support_events/support_events.js'
-import { SupportJsEvaluation } from '../src/features/support_js_valuation/support_js_evaluation.js'
-import { SupportRedirects } from '../src/features/support_redirects/support_redirects.js'
-import { SupportScriptsAndAssets } from '../src/features/support_scripts_and_assets/support_scripts_and_assets.js'
-import { SupportAutoInjectedAssets } from '../src/features/support_auto_injected_assets/support_auto_injected_assets.js'
-import { Config, defaultConfig } from '../src/define_config.js'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default class LivewireProvider {
   constructor(protected app: ApplicationService) {}
 
   async boot() {
     let livewireJs = fs
-      .readFileSync(`${__dirname}/../assets/livewire.js`, 'utf-8')
+      .readFileSync(`${currentDirname}/../assets/livewire.js`, 'utf-8')
       .replace('_token', '_csrf')
 
     const app = await this.app.container.make('app')
@@ -70,8 +73,8 @@ export default class LivewireProvider {
     app.config.set('app.http.generateRequestId', true)
     app.config.set('app.http.useAsyncLocalStorage', true)
 
-    const Livewire = (await import('../src/livewire.js')).default
-    const LivewireTag = (await import('../src/livewire_tag.js')).default
+    const Livewire = await import('../src/livewire.js').then((m) => m.default)
+    const LivewireTag = await import('../src/livewire_tag.js').then((m) => m.default)
 
     const config = this.app.config.get<Config>('livewire', defaultConfig)
     const livewire = new Livewire(app, config)
@@ -189,30 +192,29 @@ export default class LivewireProvider {
 
       let progressBarColor = config.navigate.progressBarColor
 
-      return `
-      [wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {
-          display: none;
-      }
-      
-      [wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {
-          display: none;
-      }
-      
-      [wire\:offline][wire\:offline] {
-          display: none;
-      }
-      
-      [wire\:dirty]:not(textarea):not(input):not(select) {
-          display: none;
-      }
-      
-      :root {
-          --livewire-progress-bar-color: ${progressBarColor};
-      }
-      
-      [x-cloak] {
-          display: none !important;
-      }`
+      return `[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {
+    display: none;
+}
+
+[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {
+    display: none;
+}
+
+[wire\:offline][wire\:offline] {
+    display: none;
+}
+
+[wire\:dirty]:not(textarea):not(input):not(select) {
+    display: none;
+}
+
+:root {
+    --livewire-progress-bar-color: ${progressBarColor};
+}
+
+[x-cloak] {
+    display: none !important;
+}`
     })
 
     router.get('/livewire.js', async ({ response }) => {
@@ -273,7 +275,7 @@ export default class LivewireProvider {
   }
 
   async register() {
-    const Livewire = (await import('../src/livewire.js')).default
+    const Livewire = await import('../src/livewire.js').then((m) => m.default)
 
     const FEATURES = [
       SupportDecorators,

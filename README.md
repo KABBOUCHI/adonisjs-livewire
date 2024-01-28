@@ -104,7 +104,7 @@ export default class AppProvider {
         }
 
         async render() {
-          return '<div>{{ title  }}</div>'
+          return '<div>{{ title }}</div>'
         }
       }
     )
