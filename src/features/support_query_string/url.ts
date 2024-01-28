@@ -8,8 +8,7 @@ export default class Url extends Decorator {
 
   mount() {
     let value = this.component.ctx.request.input(this.name)
-
-    this.component[this.name] = value
+    if (value) this.component[this.name] = value
   }
 
   dehydrate(context: ComponentContext) {

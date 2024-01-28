@@ -238,7 +238,9 @@ export default class Livewire {
     Object.keys(data).forEach((key) => {
       const child = data[key]
 
-      component[key] = child
+      if (typeof component[key] !== 'function') {
+        component[key] = child
+      }
     })
   }
 
@@ -439,8 +441,8 @@ export default class Livewire {
 
     component.data = async () => data
 
-    let content = (await component.render()) || defaultValue || '<div></div>'
     let finish = (await this.trigger('render', component, this.view, [])) as any
+    let content = (await component.render()) || defaultValue || '<div></div>'
 
     let html = await this.view.renderRaw(content, {
       ...component,

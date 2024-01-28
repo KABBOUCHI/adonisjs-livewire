@@ -1,9 +1,6 @@
 import type { ApplicationService } from '@adonisjs/core/types'
 import fs from 'node:fs'
-import { Exception } from '@adonisjs/core/exceptions'
 import { HttpContext, Route } from '@adonisjs/core/http'
-//@ts-ignore
-import inspect from '@poppinss/inspect'
 import { ComponentTagCompiler } from '../src/component_tag_compiler.js'
 import { SupportLazyLoading } from '../src/features/support_lazy_loading/support_lazy_loading.js'
 import { Constructor } from '@adonisjs/http-server/types'
@@ -22,19 +19,6 @@ import type Livewire from '../src/livewire.js'
 const currentDirname = dirname(fileURLToPath(import.meta.url))
 
 const packageJson = JSON.parse(fs.readFileSync(`${currentDirname}/../../package.json`, 'utf-8'))
-
-class DumpException extends Exception {
-  async handle(error: this, ctx: HttpContext) {
-    ctx.response.send(error.message)
-  }
-}
-
-function dd(...args: any[]) {
-  throw new DumpException(args.map(inspect.string.html).join('\n'))
-}
-
-// @ts-ignore
-globalThis.dd = dd
 
 declare module '@adonisjs/core/http' {
   interface Router {

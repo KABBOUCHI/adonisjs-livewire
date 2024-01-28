@@ -28,9 +28,9 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@adonisjs/http-server": "^7.0.2",
     "@adonisjs/core": "^6.2.2",
     "@adonisjs/eslint-config": "^1.2.1",
+    "@adonisjs/http-server": "^7.0.2",
     "@adonisjs/prettier-config": "^1.2.1",
     "@adonisjs/tsconfig": "^1.2.1",
     "@japa/assert": "^1.4.1",
@@ -51,16 +51,15 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@poppinss/inspect": "^1.0.1",
     "crypto-js": "^4.2.0",
     "edge-parser": "^8.2.2",
     "ts-mixer": "^6.0.3"
   },
   "peerDependencies": {
-    "@adonisjs/http-server": "^7.0.2",
-    "@adonisjs/shield": "^8.1.0",
     "@adonisjs/core": "^6.2.2",
+    "@adonisjs/http-server": "^7.0.2",
     "@adonisjs/session": "^7.1.1",
+    "@adonisjs/shield": "^8.1.0",
     "edge.js": "^6.0.1"
   },
   "author": "Georges KABBOUCHI <georges.kabbouchi@gmail.com>",
