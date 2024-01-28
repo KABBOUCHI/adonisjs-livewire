@@ -9,15 +9,18 @@ import Layout from './features/support_page_components/layout.js'
 import Computed from './features/support_computed/computed.js'
 import { SupportLazyLoading } from './features/support_lazy_loading/support_lazy_loading.js'
 import { Secret } from '@adonisjs/core/helpers'
+import type { Config } from './define_config.js'
 
 export default class Livewire {
   app: ApplicationService
+  config: Config
   components = new Map<string, typeof Component>()
   checksum: Checksum
   static FEATURES: any[] = []
 
-  constructor(app: ApplicationService) {
+  constructor(app: ApplicationService, config: Config) {
     this.app = app
+    this.config = config
     this.checksum = new Checksum(
       this.app.config.get<Secret<string>>('app.appKey', 'appKey').release()
     )
@@ -167,9 +170,7 @@ export default class Livewire {
 
       // TODO: find a better way to do this
       if (layout) {
-        html = await this.view.renderRaw(
-          `<x-layouts.${layout.name}>\n${html}\n</x-layouts.${layout.name}>`
-        )
+        html = await this.view.renderRaw(`<x-${layout.name}>\n${html}\n</x-${layout.name}>`)
       }
 
       return html

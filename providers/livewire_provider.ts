@@ -41,7 +41,7 @@ declare module '@adonisjs/core/http' {
 }
 
 const packageJson = {
-  version: '0.1.0',
+  version: '0.1.1',
 }
 
 import { dirname } from 'node:path'
@@ -52,6 +52,7 @@ import { SupportJsEvaluation } from '../src/features/support_js_valuation/suppor
 import { SupportRedirects } from '../src/features/support_redirects/support_redirects.js'
 import { SupportScriptsAndAssets } from '../src/features/support_scripts_and_assets/support_scripts_and_assets.js'
 import { SupportAutoInjectedAssets } from '../src/features/support_auto_injected_assets/support_auto_injected_assets.js'
+import { Config, defaultConfig } from '../src/define_config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -72,7 +73,8 @@ export default class LivewireProvider {
     const Livewire = (await import('../src/livewire.js')).default
     const LivewireTag = (await import('../src/livewire_tag.js')).default
 
-    const livewire = new Livewire(app)
+    const config = this.app.config.get<Config>('livewire', defaultConfig)
+    const livewire = new Livewire(app, config)
 
     this.app.container.singleton('livewire', () => {
       return livewire
@@ -185,7 +187,7 @@ export default class LivewireProvider {
       response.type('text/css')
       response.header('Cache-Control', 'public, max-age=31536000')
 
-      let progressBarColor = '#2299dd'
+      let progressBarColor = config.navigate.progressBarColor
 
       return `
       [wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {
@@ -238,7 +240,7 @@ export default class LivewireProvider {
         }
 
         return await view.renderRaw(
-          `@livewire('${component}', ${JSON.stringify(parameters)}, { layout: { name: 'main' } })`
+          `@livewire('${component}', ${JSON.stringify(parameters)}, { layout: { name: '${config.layout}' } })`
         )
       })
     }
