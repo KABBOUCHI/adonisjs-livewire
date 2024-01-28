@@ -1,44 +1,56 @@
-import { ApplicationContract } from '@ioc:Adonis/Core/Application'
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { ApplicationService } from '@adonisjs/core/types'
+import ComponentHook from '../../ComponentHook.js'
+import { Response } from '@adonisjs/core/http'
+import { SupportScriptsAndAssets } from '../SupportScriptsAndAssets/SupportScriptsAndAssets.js'
 
-import ComponentHook, { IComponentHook } from "../../ComponentHook";
-import { SupportScriptsAndAssets } from '../SupportScriptsAndAssets/SupportScriptsAndAssets';
+export class SupportAutoInjectedAssets extends ComponentHook {
+    static async provide(app: ApplicationService) {
 
-export class SupportAutoInjectedAssets extends ComponentHook implements IComponentHook {
+        //@ts-ignore
+        Response.getter('content', function () {
 
-    public static async provide(app: ApplicationContract) {
-        const Server = app.container.resolveBinding('Adonis/Core/Server');
-
-        Server.hooks.after(async (ctx: HttpContextContract) => {
+            //@ts-ignore
+            let self = this
+            let reqId = self.ctx.request.id()
             let assetsHead = ''
             let assetsBody = ''
 
-            let assets = Object.values(SupportScriptsAndAssets.renderedAssets);
+            let assets = Object.values(SupportScriptsAndAssets.renderedAssets.get(reqId) || {})
 
             if (assets.length > 0) {
                 for (let asset of assets) {
-                    assetsHead += asset + '\n';
+                    assetsHead += asset + '\n'
                 }
             }
 
-            if (!assetsHead && !assetsBody) return;
-
-            let html: string = ctx.response.lazyBody[0] || '';
-
-            if (typeof html === 'string' && html.includes('</html>')) {
-                ctx.response.lazyBody[0] = SupportAutoInjectedAssets.injectAssets(html, assetsHead, assetsBody);
+            if (!assetsHead && !assetsBody) {
+                return self.lazyBody.content
             }
+
+            let html: string = self.lazyBody.content?.[0] || ''
+            if (typeof html === 'string' && html.includes('</html>')) {
+                self.lazyBody.content[0] = SupportAutoInjectedAssets.injectAssets(
+                    html,
+                    assetsHead,
+                    assetsBody
+                )
+
+                SupportScriptsAndAssets.renderedAssets.delete(reqId)
+            }
+
+            return self.lazyBody.content
         })
+
     }
     async dehydrate() { }
 
     static injectAssets(html: string, assetsHead: string, assetsBody: string) {
-        let head = html.split('</head>');
-        let body = head[1].split('</body>');
+        let head = html.split('</head>')
+        let body = head[1].split('</body>')
 
-        head[1] = assetsHead + body[0];
-        body[0] = assetsBody;
+        head[1] = assetsHead + body[0]
+        body[0] = assetsBody
 
-        return head.join('</head>') + body.join('</body>');
+        return head.join('</head>') + body.join('</body>')
     }
 }

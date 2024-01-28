@@ -1,105 +1,93 @@
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { TypedSchema, ParsedTypedSchema, CustomMessages } from '@ioc:Adonis/Core/Validator';
-import { store } from './store';
-
+import type { HttpContext } from '@adonisjs/core/http'
+import { store } from './store.js'
 export class BaseComponent {
-    protected __ctx: HttpContextContract | null = null;
-    protected __id;
-    protected __name;
-    protected __view_path;
+  protected __ctx: HttpContext | null = null
 
-    get ctx() {
-        if (!this.__ctx) throw new Error("Cannot access http context. Please enable ASL.");
+  // @ts-ignore
+  protected __id: string
+  // @ts-ignore
+  protected __name: string
+  // @ts-ignore
+  protected __view_path: string
 
-        return this.__ctx;
-    }
 
-    public setId(id: string) {
-        this.__id = id;
-    }
+  declare bindings: any
 
-    public getId() {
-        return this.__id;
-    }
+  get ctx() {
+    if (!this.__ctx) throw new Error('Cannot access http context. Please enable ASL.')
 
-    public setName(name: string) {
-        this.__name = name;
-    }
+    return this.__ctx
+  }
 
-    public setViewPath(view: string) {
-        this.__view_path = view;
-    }
+  setId(id: string) {
+    this.__id = id
+  }
 
-    public getName() {
-        return this.__name;
-    }
+  getId() {
+    return this.__id
+  }
 
-    public async render(): Promise<string> {
-        return this.view.render(this.__view_path);
-    }
+  setName(name: string) {
+    this.__name = name
+  }
 
-    get view() {
-        return new Proxy(this.ctx.view, {
-            get: (target, prop) => {
-                if (prop === 'render') {
-                    return async (templatePath: string, state?: any) => {
-                        const rendered = await target.render(`livewire/${templatePath}`, {
-                            ...this,
-                            ... await this.data(),
-                            ...state || {},
-                        });
+  setViewPath(view: string) {
+    this.__view_path = view
+  }
 
-                        return rendered;
-                    }
-                }
+  getName() {
+    return this.__name
+  }
 
-                if (prop === 'renderRaw') {
-                    return async (contents: string, state?: any) => {
-                        const rendered = await target.renderRaw(contents, {
-                            ...this,
-                            ... await this.data(),
-                            ...state || {},
-                        });
+  async render(): Promise<string> {
+    return this.view.render(this.__view_path)
+  }
 
-                        return rendered;
-                    }
-                }
+  get view() {
+    return new Proxy(this.ctx.view, {
+      get: (target, prop) => {
+        if (prop === 'render') {
+          return async (templatePath: string, state?: any) => {
+            const rendered = await target.render(`livewire/${templatePath}`, {
+              ...this,
+              ...(await this.data()),
+              ...(state || {}),
+            })
 
-                return target[prop];
-            }
-        })
-    }
+            return rendered
+          }
+        }
 
-    public async data(): Promise<any> {
-        return {};
-    }
+        if (prop === 'renderRaw') {
+          return async (contents: string, state?: any) => {
+            const rendered = await target.renderRaw(contents, {
+              ...this,
+              ...(await this.data()),
+              ...(state || {}),
+            })
 
-    protected schema(): ParsedTypedSchema<TypedSchema> {
-        throw new Error("Schema not implemented");
-    }
+            return rendered
+          }
+        }
 
-    protected messages(): CustomMessages {
-        return {}
-    }
+        return target[prop]
+      },
+    }) as any
+  }
 
-    protected async validate(bail: boolean = true) {
-        await this.ctx.request.validate({
-            schema: this.schema(),
-            data: this,
-            messages: this.messages(),
-            bail,
-        })
-    }
+  async data(): Promise<any> {
+    return {}
+  }
 
-    skipRender(html?: string) {
-        store(this).set('skipRender', html ?? true);
-    }
+  skipRender(html?: string) {
+    store(this).set('skipRender', html ?? true)
+  }
 
-    skipMount() {
-        store(this).set('skipMount', true);
-    }
+  skipMount() {
+    store(this).set('skipMount', true)
+  }
 
-    skipHydrate() {
-        store(this).set('skipHydrate', true);
-    }
+  skipHydrate() {
+    store(this).set('skipHydrate', true)
+  }
 }

@@ -1,9 +1,9 @@
-import { Component } from "../../Component";
+import { Component } from '../../Component.js'
 
-export abstract class Decorator {   
-    protected component: Component;
+export abstract class Decorator {
+  declare component: Component
 
-    __boot(component: Component) {
-        this.component = component;
-    }
+  __boot(component: Component) {
+    this.component = component
+  }
 }

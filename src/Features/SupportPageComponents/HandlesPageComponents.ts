@@ -1,5 +1,3 @@
-import { BaseComponent } from "../../BaseComponent";
+import { BaseComponent } from '../../BaseComponent.js'
 
-export class HandlesPageComponents extends BaseComponent {
-
-}
+export class HandlesPageComponents extends BaseComponent {}

@@ -1,15 +1,16 @@
-import { store } from "../../store";
-import { Decorator } from "../SupportDecorators/Decorator";
+import { store } from '../../store.js'
+import { Decorator } from '../SupportDecorators/Decorator.js'
 
 export default class Layout extends Decorator {
-    constructor(public path: string, public section: string) {
-        super();
-    }
+  constructor(
+    public name: string,
+  ) {
+    super()
+  }
 
-    boot() {
-        store(this.component).push('layout', {
-            path: this.path,
-            section: this.section,
-        });
-    }
+  boot() {
+    store(this.component).push('layout', {
+      name: this.name,
+    })
+  }
 }

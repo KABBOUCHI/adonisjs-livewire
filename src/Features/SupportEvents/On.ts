@@ -1,15 +1,18 @@
-import { store } from "../../store";
-import { Decorator } from "../SupportDecorators/Decorator";
+import { store } from '../../store.js'
+import { Decorator } from '../SupportDecorators/Decorator.js'
 
 export default class On extends Decorator {
-    constructor(public name: string, public event: string) {
-        super();
-    }
+  constructor(
+    public name: string,
+    public event: string
+  ) {
+    super()
+  }
 
-    boot() {
-        store(this.component).push('listeners', {
-            name: this.name,
-            event: this.event,
-        });
-    }
+  boot() {
+    store(this.component).push('listeners', {
+      name: this.name,
+      event: this.event,
+    })
+  }
 }

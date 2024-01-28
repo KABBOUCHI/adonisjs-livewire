@@ -1,10 +1,10 @@
-import { BaseComponent } from "../../BaseComponent";
-import { store } from "../../store";
+import { BaseComponent } from '../../BaseComponent.js'
+import { store } from '../../store.js'
 
 export class HandlesRedirects extends BaseComponent {
-  public redirect(url: string, navigate: boolean = false) {
-    store(this).push('redirect', url);
+  redirect(url: string, navigate: boolean = false) {
+    store(this).push('redirect', url)
 
-    if (navigate) store(this).push('redirectUsingNavigate', true);
+    if (navigate) store(this).push('redirectUsingNavigate', true)
   }
 }

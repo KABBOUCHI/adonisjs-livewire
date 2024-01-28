@@ -1,0 +1,6 @@
+{{{
+  exports({ to: app.viewsPath('livewire/' + filename + '.edge') })
+}}}
+<div>
+   
+</div>

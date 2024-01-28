@@ -1,23 +1,34 @@
-import { Mixin } from 'ts-mixer';
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { HandlesEvents } from './Features/SupportEvents/HandlesEvents';
-import { HandlesDecorators } from './Features/SupportDecorators/HandlesDecorators';
-import { HandlesRedirects } from './Features/SupportRedirects/HandlesRedirects';
-import { HandlesPageComponents } from './Features/SupportPageComponents/HandlesPageComponents';
-import { HandlesJsEvaluation } from './Features/SupportJsEvaluation/HandlesJsEvaluation';
+import { Mixin } from 'ts-mixer'
+import type { HttpContext } from '@adonisjs/core/http'
+import { HandlesEvents } from './Features/SupportEvents/HandlesEvents.js'
+import { HandlesDecorators } from './Features/SupportDecorators/HandlesDecorators.js'
+import { HandlesRedirects } from './Features/SupportRedirects/HandlesRedirects.js'
+import { HandlesPageComponents } from './Features/SupportPageComponents/HandlesPageComponents.js'
+import { HandlesJsEvaluation } from './Features/SupportJsEvaluation/HandlesJsEvaluation.js'
+import { BaseComponent } from './BaseComponent.js'
 
 interface ComponentOptions {
-    ctx: HttpContextContract | null;
-    id: string;
-    name: string;
+  ctx: HttpContext | null
+  id: string
+  name: string
 }
 
-export class Component extends Mixin( HandlesEvents, HandlesRedirects, HandlesDecorators, HandlesPageComponents, HandlesJsEvaluation) {
-    constructor({ ctx, id, name }: ComponentOptions) {
-        super();
+export class Component extends Mixin(
+  BaseComponent,
+  HandlesEvents,
+  HandlesRedirects,
+  HandlesDecorators,
+  HandlesPageComponents,
+  HandlesJsEvaluation
+) {
+  constructor({ ctx, id, name }: ComponentOptions) {
+    super()
 
-        this.__ctx = ctx;
-        this.__id = id;
-        this.__name = name;
-    }
+    // @ts-ignore
+    this.__ctx = ctx
+    // @ts-ignore
+    this.__id = id
+    // @ts-ignore
+    this.__name = name
+  }
 }

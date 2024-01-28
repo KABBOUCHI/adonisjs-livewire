@@ -1,16 +1,16 @@
-import { BaseComponent } from "../../BaseComponent";
-import { store } from "../../store";
+import { BaseComponent } from '../../BaseComponent.js'
+import { store } from '../../store.js'
 
 export class HandlesEvents extends BaseComponent {
-    public getListeners(): { [key: string]: string } {
-        return {};
-    }
+  getListeners(): { [key: string]: string } {
+    return {}
+  }
 
-    public dispatch(name: string, params: any, to?: string) {
-        store(this).push('dispatched', {
-            name,
-            params,
-            to,
-        })
-    }
+  dispatch(name: string, params: any, to?: string) {
+    store(this).push('dispatched', {
+      name,
+      params,
+      to,
+    })
+  }
 }

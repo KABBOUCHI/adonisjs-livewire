@@ -1,8 +1,8 @@
-import { BaseComponent } from "../../BaseComponent";
-import { store } from "../../store";
+import { BaseComponent } from '../../BaseComponent.js'
+import { store } from '../../store.js'
 
 export class HandlesJsEvaluation extends BaseComponent {
-    protected js(expression: string) {
-        store(this).push('js', expression);
-    }
+  protected js(expression: string) {
+    store(this).push('js', expression)
+  }
 }

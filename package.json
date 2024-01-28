@@ -1,84 +1,84 @@
 {
   "name": "adonisjs-livewire",
-  "version": "0.0.42",
   "description": "A front-end framework for AdonisJS",
-  "homepage": "https://github.com/KABBOUCHI/adonisjs-livewire",
-  "license": "MIT",
-  "keywords": [
-    "adonisjs",
-    "livewire",
-    "components"
-  ],
-  "author": "Georges KABBOUCHI <georges.kabbouchi@gmail.com>",
-  "typings": "./build/adonis-typings/index.d.ts",
-  "main": "build/providers/index.js",
+  "version": "0.1.0",
+  "main": "build/providers/livewire_provider.js",
+  "type": "module",
   "files": [
     "build",
     "LICENSE.md",
     "README.md",
     "package.json"
   ],
+  "exports": {
+    ".": "./build/index.js",
+    "./services/main": "./build/services/main.js",
+    "./livewire_provider": "./build/providers/livewire_provider.js",
+    "./commands": "./build/commands/main.js"
+  },
   "scripts": {
-    "mrm": "mrm --preset=@adonisjs/mrm-preset",
-    "test": "node -r @adonisjs/require-ts/build/register bin/test.ts",
-    "clean": "del-cli build",
-    "compile": "npm run clean && tsc",
-    "build": "npm run compile && npm run copyfiles",
-    "copyfiles": "copyfiles assets/**/* build && copyfiles \"templates/**/*.txt\" build",
-    "prepublishOnly": "npm run build"
+    "test": "node --import=./tsnode.esm.js --enable-source-maps bin/test.ts",
+    "build": "npm run clean && npm run build-only && npm run copyfiles",
+    "copyfiles": "copyfiles assets/**/* build && copyfiles \"stubs/**/*.stub\" build",
+    "build-only": "tsc && npm run index:commands",
+    "clean": "rimraf build",
+    "prepublishOnly": "npm run build",
+    "index:commands": "adonis-kit index build/commands",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "devDependencies": {
-    "@adonisjs/core": "^5.1.0",
-    "@adonisjs/mrm-preset": "^5.0.3",
-    "@adonisjs/require-ts": "^2.0.13",
-    "@adonisjs/session": "^6.0.0",
-    "@adonisjs/view": "^6.0.0",
+    "@adonisjs/http-server": "^7.0.2",
+    "@adonisjs/core": "^6.2.2",
+    "@adonisjs/eslint-config": "^1.2.1",
+    "@adonisjs/prettier-config": "^1.2.1",
+    "@adonisjs/tsconfig": "^1.2.1",
     "@japa/assert": "^1.4.1",
     "@japa/run-failed-tests": "^1.0.7",
     "@japa/runner": "^2.0.9",
     "@japa/spec-reporter": "^1.1.12",
-    "reflect-metadata": "^0.2.1",
+    "@swc/core": "^1.3.106",
     "@types/crypto-js": "^4.2.1",
     "@types/node": "^20.10.6",
     "copyfiles": "^2.4.1",
     "del-cli": "^5.1.0",
-    "mrm": "^4.1.22",
-    "typescript": "^5.3.3",
-    "watch": "^1.0.2"
-  },
-  "peerDependencies": {
-    "@adonisjs/core": "^5.1.0",
-    "@adonisjs/session": "^6.0.0",
-    "@adonisjs/view": "^6.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@adonisjs/session": {
-      "optional": true
-    }
-  },
-  "mrmConfig": {
-    "core": false,
-    "license": "MIT",
-    "services": [],
-    "minNodeVersion": "16.13.1",
-    "probotApps": []
-  },
-  "adonisjs": {
-    "types": "adonisjs-livewire",
-    "commands": [
-      "adonisjs-livewire/build/commands"
-    ],
-    "providers": [
-      "adonisjs-livewire"
-    ],
-    "templates": {
-      "basePath": "./build/templates"
-    }
+    "edge.js": "^6.0.1",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "reflect-metadata": "^0.2.1",
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "@poppinss/inspect": "^1.0.1",
     "crypto-js": "^4.2.0",
     "edge-parser": "^8.2.2",
     "ts-mixer": "^6.0.3"
-  }
+  },
+  "peerDependencies": {
+    "@adonisjs/http-server": "^7.0.2",
+    "@adonisjs/shield": "^8.1.0",
+    "@adonisjs/core": "^6.2.2",
+    "@adonisjs/session": "^7.1.1",
+    "edge.js": "^6.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@adonisjs/session": {
+      "optional": true
+    }
+  },
+  "author": "Georges KABBOUCHI <georges.kabbouchi@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/KABBOUCHI/adonisjs-livewire",
+  "keywords": [
+    "adonisjs",
+    "livewire",
+    "components"
+  ],
+  "typings": "./build/adonis-typings/index.d.ts",
+  "eslintConfig": {
+    "extends": "@adonisjs/eslint-config/package"
+  },
+  "prettier": "@adonisjs/prettier-config"
 }

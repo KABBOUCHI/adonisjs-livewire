@@ -26,7 +26,7 @@ Enable ALS in `config/app.ts` https://docs.adonisjs.com/guides/async-local-stora
 // config/app.ts
 export const http: ServerConfig = {
   useAsyncLocalStorage: true,
-};
+}
 ```
 
 now you can use `this.ctx` in your Livewire components.
@@ -65,6 +65,7 @@ Create layout file
 
 ```sh
 node ace livewire:layout
+node ace livewire:layout <name>
 ```
 
 Add routes
@@ -72,44 +73,45 @@ Add routes
 ```ts
 // start/routes.ts
 
-Route.livewire("/", "Counter"); // App/Livewire/Counter.ts
-Route.livewire("/", "counter", { initialCounter: 10 });
-Route.livewire("/search-users", "search-users"); // App/Livewire/SearchUsers.ts
-Route.livewire("/search-users"); // App/Livewire/SearchUsers.ts
-Route.livewire("/search-users", "search-users.index"); // App/Livewire/SearchUsers/Index.ts
+Route.livewire('/', 'Counter') // App/Livewire/Counter.ts
+Route.livewire('/', 'counter', { initialCounter: 10 })
+Route.livewire('/search-users', 'search-users') // App/Livewire/SearchUsers.ts
+Route.livewire('/search-users') // App/Livewire/SearchUsers.ts
+Route.livewire('/search-users', 'search-users.index') // App/Livewire/SearchUsers/Index.ts
 ```
-
 
 ## Registering Custom Components
 
 You may manually register components using the Livewire::component method. This can be useful if you want to provide Livewire components from a composer package. Typically this should be done in the ready method of a service provider.
 
 ```ts
-import type { ApplicationContract } from '@ioc:Adonis/Core/Application'
+import type { ApplicationService } from '@adonisjs/core/types'
 import { Component } from 'adonisjs-livewire'
 
 export default class AppProvider {
-  constructor(protected app: ApplicationContract) {
-  }
+  constructor(protected app: ApplicationService) {}
 
   public async ready() {
-    const { Livewire } = await import('@ioc:Adonis/Addons/Livewire')
+    const Livewire = await this.app.container.make('livewire')
 
-    Livewire.component('custom-component', class extends Component {
-      public title = ''
+    Livewire.component(
+      'custom-component',
+      class extends Component {
+        public title = ''
 
-      public mount({ title }) {
-        this.title = title
+        public mount({ title }) {
+          this.title = title
+        }
+
+        async render() {
+          return '<div>{{ title  }}</div>'
+        }
       }
-
-      async render() {
-        return "<div>{{ title  }}</div>"
-      }
-    })
+    )
   }
 }
-
 ```
+
 Now, applications with your package installed can consume your component in their views like so:
 
 ```blade

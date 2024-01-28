@@ -1,16 +1,11 @@
 {
-  "extends": "./node_modules/@adonisjs/mrm-preset/_tsconfig",
+  "extends": "@adonisjs/tsconfig/tsconfig.package.json",
   "compilerOptions": {
-    "skipLibCheck": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "rootDir": "./",
+    "outDir": "./build",
     "resolveJsonModule": true,
-    "types": [
-      "@types/node",
-      "@adonisjs/core",
-      "@adonisjs/session",
-      "@adonisjs/view",
-      "reflect-metadata"
-    ]
+    "noImplicitAny": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true
   }
 }

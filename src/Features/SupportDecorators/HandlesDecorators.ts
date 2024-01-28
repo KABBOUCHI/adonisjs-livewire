@@ -1,16 +1,16 @@
-import { Decorator } from './Decorator';
-import { BaseComponent } from "../../BaseComponent";
+import { Decorator } from './Decorator.js'
+import { BaseComponent } from '../../BaseComponent.js'
 
-export class HandlesDecorators extends BaseComponent{
-  public __decorators: Decorator[]
+export class HandlesDecorators extends BaseComponent {
+  declare __decorators: Decorator[]
 
-  public getDecorators() {
-    return this.__decorators ?? [];
+  getDecorators() {
+    return this.__decorators ?? []
   }
 
-  public addDecorator(decorator: Decorator) {
-    if (!this.__decorators) this.__decorators = [];
+  addDecorator(decorator: Decorator) {
+    if (!this.__decorators) this.__decorators = []
 
-    this.__decorators.push(decorator);
+    this.__decorators.push(decorator)
   }
 }

@@ -1,8 +1,7 @@
-
-import { Decorator } from "../SupportDecorators/Decorator";
+import { Decorator } from '../SupportDecorators/Decorator.js'
 
 export default class Lazy extends Decorator {
-    constructor(public isolate: boolean = true) {
-        super();
-    }
+  constructor(public isolate: boolean = true) {
+    super()
+  }
 }

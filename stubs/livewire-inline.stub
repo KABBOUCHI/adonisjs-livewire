@@ -1,0 +1,10 @@
+{{{
+  exports({ to: app.makePath('app/livewire/' + filename + '.ts') })
+}}}
+import { Component } from 'adonisjs-livewire'
+
+export default class {{ className }} extends Component {
+  async render() {
+    return '<div></div>'
+  }
+}

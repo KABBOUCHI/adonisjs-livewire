@@ -1,15 +1,18 @@
+{{{
+  exports({ to: app.viewsPath('components/layouts/main.edge') })
+}}}
 <!DOCTYPE html>
-<html lang="{{ lang ?? 'en' }}">
+<html lang="\{\{ lang ?? 'en' \}\}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title ?? 'Page Title' }}</title>
-    
+    <title>\{\{ title ?? 'Page Title' \}\}</title>
+
     @livewireStyles
   </head>
   <body>
     <main>
-      @!section('body')
+      \{\{\{  await $slots.main()  \}\}\}
     </main>
 
     @livewireScripts
