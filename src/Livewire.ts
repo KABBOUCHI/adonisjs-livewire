@@ -428,8 +428,6 @@ export default class Livewire {
       })
     }
 
-    let data = (await component.data()) || {}
-
     // let ctx = HttpContext.get()
 
     // if (ctx) {
@@ -439,14 +437,12 @@ export default class Livewire {
     //   await ctx.session.initiate(false)
     // }
 
-    component.data = async () => data
-
     let finish = (await this.trigger('render', component, this.view, [])) as any
     let content = (await component.render()) || defaultValue || '<div></div>'
 
     let html = await this.view.renderRaw(content, {
       ...component,
-      ...data,
+      ...component.extractPublicMethods(),
     })
 
     html = this.insertAttributesIntoHtmlRoot(html, {

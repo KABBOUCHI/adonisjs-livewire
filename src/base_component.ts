@@ -47,9 +47,9 @@ export class BaseComponent {
       get: (target, prop) => {
         if (prop === 'render') {
           return async (templatePath: string, state?: any) => {
-            const rendered = await target.render(`livewire/${templatePath}`, {
+            const rendered = await target.render(`${templatePath}`, {
               ...this,
-              ...(await this.data()),
+              ...this.extractPublicMethods(),
               ...(state || {}),
             })
 
@@ -61,7 +61,7 @@ export class BaseComponent {
           return async (contents: string, state?: any) => {
             const rendered = await target.renderRaw(contents, {
               ...this,
-              ...(await this.data()),
+              ...this.extractPublicMethods(),
               ...(state || {}),
             })
 
@@ -74,8 +74,22 @@ export class BaseComponent {
     }) as any
   }
 
-  async data(): Promise<any> {
-    return {}
+  extractPublicMethods() {
+    let methods = this.getPublicMethods()
+
+    return methods.reduce((obj: any, method) => {
+      // @ts-ignore
+      obj[method] = this[method].bind(this)
+      return obj
+    }, {} as any)
+  }
+
+  getPublicMethods() {
+    const proto = Object.getPrototypeOf(this)
+
+    return Object.getOwnPropertyNames(proto).filter(
+      (prop) => typeof proto[prop] === 'function' && prop !== 'constructor' && prop !== 'render'
+    )
   }
 
   skipRender(html?: string) {
