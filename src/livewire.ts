@@ -225,7 +225,8 @@ export default class Livewire {
       .split('.')
       .map((s) => string.dashCase(s))
       .join('/')
-    component.setViewPath(viewPath)
+
+    component.setViewPath(`livewire/${viewPath}`)
 
     return component
   }
@@ -439,11 +440,7 @@ export default class Livewire {
 
     let finish = (await this.trigger('render', component, this.view, [])) as any
     let content = (await component.render()) || defaultValue || '<div></div>'
-
-    let html = await this.view.renderRaw(content, {
-      ...component,
-      ...component.extractPublicMethods(),
-    })
+    let html = await component.view.renderRaw(content)
 
     html = this.insertAttributesIntoHtmlRoot(html, {
       'wire:id': component.getId(),

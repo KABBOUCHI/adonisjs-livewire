@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { store } from './store.js'
+import edge, { Template } from 'edge.js'
 export class BaseComponent {
   protected __ctx: HttpContext | null = null
 
@@ -43,53 +44,58 @@ export class BaseComponent {
   }
 
   get view() {
-    return new Proxy(this.ctx.view, {
-      get: (target, prop) => {
-        if (prop === 'render') {
-          return async (templatePath: string, state?: any) => {
-            const rendered = await target.render(`${templatePath}`, {
-              ...this,
-              ...this.extractPublicMethods(),
-              ...(state || {}),
-            })
+    return {
+      render: (templatePath: string, state: Record<string, any> = {}): Promise<string> => {
+        let compiledTemplate = edge.asyncCompiler.compile(templatePath)
+        let templ = new Template(edge.asyncCompiler, edge.globals, {}, edge.processor)
 
-            return rendered
-          }
-        }
+        const instance = new Proxy(this, {
+          get(target, prop, receiver) {
+            if (prop in target) {
+              return Reflect.get(target, prop, receiver)
+            }
 
-        if (prop === 'renderRaw') {
-          return async (contents: string, state?: any) => {
-            const rendered = await target.renderRaw(contents, {
-              ...this,
-              ...this.extractPublicMethods(),
-              ...(state || {}),
-            })
+            if (prop in state) {
+              return Reflect.get(state, prop, receiver)
+            }
 
-            return rendered
-          }
-        }
+            return Reflect.get(edge.globals, prop, receiver)
+          },
+        })
 
-        return target[prop]
+        return compiledTemplate(templ, instance, {}).then((output: any) =>
+          edge.processor.executeOutput({
+            output,
+            template: templ,
+            state: instance,
+          })
+        )
       },
-    }) as any
-  }
+      renderRaw: (template: string, state: Record<string, any> = {}): Promise<string> => {
+        let compiledTemplate = edge.asyncCompiler.compileRaw(template)
+        let templ = new Template(edge.asyncCompiler, edge.globals, {}, edge.processor)
+        const instance = new Proxy(this, {
+          get(target, prop, receiver) {
+            if (prop in target) {
+              return Reflect.get(target, prop, receiver)
+            }
 
-  extractPublicMethods() {
-    let methods = this.getPublicMethods()
+            if (prop in state) {
+              return Reflect.get(state, prop, receiver)
+            }
 
-    return methods.reduce((obj: any, method) => {
-      // @ts-ignore
-      obj[method] = this[method].bind(this)
-      return obj
-    }, {} as any)
-  }
-
-  getPublicMethods() {
-    const proto = Object.getPrototypeOf(this)
-
-    return Object.getOwnPropertyNames(proto).filter(
-      (prop) => typeof proto[prop] === 'function' && prop !== 'constructor' && prop !== 'render'
-    )
+            return Reflect.get(edge.globals, prop, receiver)
+          },
+        })
+        return compiledTemplate(templ, instance, {}).then((output: any) =>
+          edge.processor.executeOutput({
+            output,
+            template: templ,
+            state: instance,
+          })
+        )
+      },
+    }
   }
 
   skipRender(html?: string) {
