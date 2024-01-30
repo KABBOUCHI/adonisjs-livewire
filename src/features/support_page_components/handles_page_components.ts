@@ -1,3 +1,4 @@
 import { BaseComponent } from '../../base_component.js'
 
-export class HandlesPageComponents extends BaseComponent {}
+export interface HandlesPageComponents extends BaseComponent {}
+export class HandlesPageComponents {}

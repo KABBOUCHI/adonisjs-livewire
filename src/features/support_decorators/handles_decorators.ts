@@ -1,7 +1,8 @@
 import { Decorator } from './decorator.js'
 import { BaseComponent } from '../../base_component.js'
 
-export class HandlesDecorators extends BaseComponent {
+export interface HandlesDecorators extends BaseComponent {}
+export class HandlesDecorators {
   declare __decorators: Decorator[]
 
   getDecorators() {

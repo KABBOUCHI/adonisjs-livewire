@@ -123,3 +123,59 @@ Now, applications with your package installed can consume your component in thei
 
 <livewire:custom-component title="My Component" />
 ```
+
+## Creating mixins
+
+```ts
+// app/livewire_mixins/my_mixin.ts
+import { Component } from 'adonisjs-livewire'
+export MyMixin extends Component {}
+export class MyMixin {
+  public foo = 'bar'
+
+  public baz() {
+    return 'baz'
+  }
+}
+
+// or (not recommended)
+
+export class MyMixin extends Component {
+  public foo = 'bar'
+
+  public baz() {
+    return 'baz'
+  }
+}
+
+```
+
+```ts
+// app/Livewire/Counter.ts
+import { Component, Mixin } from 'adonisjs-livewire'
+import MyMixin from '#app/livewire_mixins/my_mixin'
+
+export default class Counter extends Mixin(Component, MyMixin) {
+  public count = 0
+
+  public increment() {
+    this.count++
+  }
+
+  public decrement() {
+    this.count--
+  }
+
+  public render() {
+    return `
+      <div>
+        <button wire:click="increment">+</button>
+        <h1>{{ count }}</h1>
+        <button wire:click="decrement">-</button>
+        <h2>{{ foo }}</h2>
+        <h3>{{ baz() }}</h3>
+      </div>
+    `
+  }
+}
+```

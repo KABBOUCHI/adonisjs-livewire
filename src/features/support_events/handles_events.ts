@@ -1,7 +1,8 @@
 import { BaseComponent } from '../../base_component.js'
 import { store } from '../../store.js'
 
-export class HandlesEvents extends BaseComponent {
+export interface HandlesEvents extends BaseComponent {}
+export class HandlesEvents {
   getListeners(): { [key: string]: string } {
     return {}
   }
