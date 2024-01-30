@@ -287,13 +287,13 @@ export default class Livewire {
         let method = call['method']
         let params = call['params']
 
-        let methods = getPublicMethods(component)
-        methods = methods.filter((m) => m !== 'render')
-        methods.push('__dispatch')
-        methods.push('__lazyLoad')
-        if (methods.includes(method) === false) {
-          throw new Error(`Method \`${method}\` does not exist on component ${component.getName()}`)
-        }
+        // let methods = getPublicMethods(component)
+        // methods = methods.filter((m) => m !== 'render')
+        // methods.push('__dispatch')
+        // methods.push('__lazyLoad')
+        // if (methods.includes(method) === false) {
+        //   throw new Error(`Method \`${method}\` does not exist on component ${component.getName()}`)
+        // }
 
         if (method === '__dispatch') {
           const features = getLivewireContext()!.features
@@ -518,9 +518,9 @@ function htmlspecialchars(text: string): string {
   return text.replace(/[&<>"']/g, (m) => map[m])
 }
 
-function getPublicMethods(obj: any) {
-  const proto = Object.getPrototypeOf(obj)
-  return Object.getOwnPropertyNames(proto).filter(
-    (prop) => typeof proto[prop] === 'function' && prop !== 'constructor'
-  )
-}
+// function getPublicMethods(obj: any) {
+//   const proto = Object.getPrototypeOf(obj)
+//   return Object.getOwnPropertyNames(proto).filter(
+//     (prop) => typeof proto[prop] === 'function' && prop !== 'constructor'
+//   )
+// }
