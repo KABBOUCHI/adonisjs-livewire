@@ -387,29 +387,45 @@ export default class Livewire {
     })
 
     for (const key in updates) {
-      if (!(key in component)) return
+      let segments = key.split('.')
+      let property = segments[0]
+      if (!(property in component)) return
 
       const child = updates[key]
 
       await this.trigger('update', component, key, key, child)
 
       if (typeof component['updating'] === 'function') {
-        await component['updating'](key, child)
+        await component['updating'](property, child)
       }
 
-      let updatingPropMethod = `updating${string.titleCase(key)}`
+      let updatingPropMethod = `updating${string.titleCase(property)}`
 
       if (typeof component[updatingPropMethod] === 'function') {
         await component[updatingPropMethod](child)
       }
 
-      component[key] = child
+      if (segments.length > 1) {
+        let current = component[property]
 
-      if (typeof component['updated'] === 'function') {
-        await component['updated'](key, child)
+        for (let i = 1; i < segments.length; i++) {
+          let segment = segments[i]
+
+          if (i === segments.length - 1) {
+            current[segment] = child
+          } else {
+            current = current[segment]
+          }
+        }
+      } else {
+        component[property] = child
       }
 
-      let updatedPropMethod = `updated${string.titleCase(key)}`
+      if (typeof component['updated'] === 'function') {
+        await component['updated'](property, child)
+      }
+
+      let updatedPropMethod = `updated${string.titleCase(property)}`
 
       if (typeof component[updatedPropMethod] === 'function') {
         await component[updatedPropMethod](child)

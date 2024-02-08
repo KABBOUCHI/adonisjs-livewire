@@ -8,6 +8,9 @@ dependencies:
   '@adonisjs/session':
     specifier: ^7.1.1
     version: 7.1.1(@adonisjs/core@6.2.2)(edge.js@6.0.1)
+  '@adonisjs/shield':
+    specifier: ^8.1.0
+    version: 8.1.1(@adonisjs/core@6.2.2)(@adonisjs/session@7.1.1)(edge.js@6.0.1)
   crypto-js:
     specifier: ^4.2.0
     version: 4.2.0
@@ -352,6 +355,31 @@ packages:
       '@adonisjs/core': 6.2.2(edge.js@6.0.1)
       '@poppinss/utils': 6.7.1
       edge.js: 6.0.1
+    dev: false
+
+  /@adonisjs/shield@8.1.1(@adonisjs/core@6.2.2)(@adonisjs/session@7.1.1)(edge.js@6.0.1):
+    resolution: {integrity: sha512-b/rIypxfG8HKPRvWYJo7qhvAlvYCFXn7/A7eb/QI/PQV4fMmW4iF9tAykxl5peu4WJCHCwXwR3Y6/j0VerQcmQ==}
+    engines: {node: '>=18.16.0'}
+    peerDependencies:
+      '@adonisjs/core': ^6.2.0
+      '@adonisjs/i18n': ^2.0.0
+      '@adonisjs/session': ^7.0.0
+      '@japa/api-client': ^2.0.2
+      edge.js: ^6.0.1
+    peerDependenciesMeta:
+      '@adonisjs/i18n':
+        optional: true
+      '@japa/api-client':
+        optional: true
+      edge.js:
+        optional: true
+    dependencies:
+      '@adonisjs/core': 6.2.2(edge.js@6.0.1)
+      '@adonisjs/session': 7.1.1(@adonisjs/core@6.2.2)(edge.js@6.0.1)
+      '@poppinss/utils': 6.7.1
+      csrf: 3.1.0
+      edge.js: 6.0.1
+      helmet-csp: 3.4.0
     dev: false
 
   /@adonisjs/tsconfig@1.2.1:
@@ -1591,6 +1619,15 @@ packages:
     resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
     dev: false
 
+  /csrf@3.1.0:
+    resolution: {integrity: sha512-uTqEnCvWRk042asU6JtapDTcJeeailFy4ydOQS28bj1hcLnYRiqi8SsD2jS412AY1I/4qdOwWZun774iqywf9w==}
+    engines: {node: '>= 0.8'}
+    dependencies:
+      rndm: 1.2.0
+      tsscmp: 1.0.6
+      uid-safe: 2.1.5
+    dev: false
+
   /dag-map@1.0.2:
     resolution: {integrity: sha512-+LSAiGFwQ9dRnRdOeaj7g47ZFJcOUPukAP8J3A3fuZ1g9Y44BG+P1sgApjLXTQPOzC4+7S9Wr8kXsfpINM4jpw==}
     dev: true
@@ -2299,6 +2336,11 @@ packages:
   /he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
+
+  /helmet-csp@3.4.0:
+    resolution: {integrity: sha512-a+YgzWw6dajqhQfb6ktxil0FsQuWTKzrLSUfy55dxS8fuvl1jidTIMPZ2udN15mjjcpBPgTHNHGF5tyWKYyR8w==}
+    engines: {node: '>=10.0.0'}
+    dev: false
 
   /hosted-git-info@2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}
@@ -3362,6 +3404,10 @@ packages:
       glob: 7.2.3
     dev: true
 
+  /rndm@1.2.0:
+    resolution: {integrity: sha512-fJhQQI5tLrQvYIYFpOnFinzv9dwmR7hRnUz1XqP3OJ1jIweTNOd6aTO4jwQSgcBSFUB+/KHJxuGneime+FdzOw==}
+    dev: false
+
   /run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
     dependencies:
@@ -3788,6 +3834,11 @@ packages:
   /tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
     dev: true
+
+  /tsscmp@1.0.6:
+    resolution: {integrity: sha512-LxhtAkPDTkVCMQjt2h6eBVY28KCjikZqZfMcC15YBeNjkgUpdCfBu5HoiOTDu86v6smE8yOjyEktJ8hlbANHQA==}
+    engines: {node: '>=0.6.x'}
+    dev: false
 
   /type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}

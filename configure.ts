@@ -23,4 +23,11 @@ export async function configure(command: ConfigureCommand) {
     rcFile.addProvider('adonisjs-livewire/livewire_provider')
     rcFile.addCommand('adonisjs-livewire/commands')
   })
+
+  await codemods.installPackages([
+    {
+      name: 'edge.js',
+      isDevDependency: false,
+    },
+  ])
 }
