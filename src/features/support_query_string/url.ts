@@ -2,7 +2,10 @@ import ComponentContext from '../../component_context.js'
 import { Decorator } from '../support_decorators/decorator.js'
 
 export default class Url extends Decorator {
-  constructor(public name: string) {
+  constructor(
+    public name: string,
+    public as: string | null = null
+  ) {
     super()
   }
 
@@ -15,7 +18,7 @@ export default class Url extends Decorator {
     if (!context.mounting) return
 
     let queryString = {
-      as: null,
+      as: this.as || null,
       use: 'replace',
       alwaysShow: false,
       except: null,

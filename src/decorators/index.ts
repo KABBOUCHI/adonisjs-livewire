@@ -50,9 +50,9 @@ export function locked() {
   }
 }
 
-export function url() {
+export function url(as: string | null = null) {
   return function (target: Component, propertyKey: string) {
-    target.addDecorator(new Url(propertyKey))
+    target.addDecorator(new Url(propertyKey, as))
   }
 }
 
