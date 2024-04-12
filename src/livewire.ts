@@ -205,10 +205,10 @@ export default class Livewire {
         .map((s) => string.snakeCase(s))
         .join('/')
 
-      LivewireComponent = await import(resolve(process.cwd(), `/app/livewire/${path}.js`))
+      LivewireComponent = await import(resolve(process.cwd(), `./app/livewire/${path}.js`))
         .then((module) => module.default)
         .catch(async () => {
-          return await import(resolve(process.cwd(), `/app/livewire/${path}/index.js`)).then(
+          return await import(resolve(process.cwd(), `./app/livewire/${path}/index.js`)).then(
             (module) => module.default
           )
         })
