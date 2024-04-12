@@ -10,7 +10,7 @@ import Computed from './features/support_computed/computed.js'
 import { SupportLazyLoading } from './features/support_lazy_loading/support_lazy_loading.js'
 import { Secret } from '@adonisjs/core/helpers'
 import type { Config } from './define_config.js'
-import { resolve } from 'node:path'
+import { resolve, normalize } from 'node:path'
 
 export default class Livewire {
   app: ApplicationService
@@ -205,12 +205,14 @@ export default class Livewire {
         .map((s) => string.snakeCase(s))
         .join('/')
 
-      LivewireComponent = await import(resolve(process.cwd(), `./app/livewire/${path}.js`))
+      LivewireComponent = await import(
+        normalize(resolve(process.cwd(), `./app/livewire/${path}.js`))
+      )
         .then((module) => module.default)
         .catch(async () => {
-          return await import(resolve(process.cwd(), `./app/livewire/${path}/index.js`)).then(
-            (module) => module.default
-          )
+          return await import(
+            normalize(resolve(process.cwd(), `./app/livewire/${path}/index.js`))
+          ).then((module) => module.default)
         })
     }
 
