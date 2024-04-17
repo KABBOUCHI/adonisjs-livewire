@@ -14,9 +14,9 @@ export function title(value: string) {
   }
 }
 
-export function layout(name: string = 'main') {
+export function layout(name: string = 'main', props: Record<string, any> = {}) {
   return function (constructor: typeof Component) {
-    constructor.prototype.addDecorator(new Layout(name))
+    constructor.prototype.addDecorator(new Layout(name, props))
   }
 }
 

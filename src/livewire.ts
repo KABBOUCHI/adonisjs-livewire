@@ -170,8 +170,12 @@ export default class Livewire {
 
       // TODO: find a better way to do this
       if (layout) {
-        let layoutName = layout.name.replaceAll('/', '.')
-        html = await this.view.renderRaw(`<x-${layoutName}>\n${html}\n</x-${layoutName}>`)
+        let layoutName = layout.name.replaceAll('.', '/')
+        let layoutProps = layout.props
+        html = await this.view.renderRaw(`@component(layoutName, layoutProps)\n${html}\n@end`, {
+          layoutProps,
+          layoutName,
+        })
       }
 
       return html
