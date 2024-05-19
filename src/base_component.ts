@@ -47,6 +47,12 @@ export class BaseComponent {
     return {
       render: (templatePath: string, state: Record<string, any> = {}): Promise<string> => {
         let compiledTemplate = edge.asyncCompiler.compile(templatePath)
+        let extracted = {
+          locals: {},
+        }
+        this.ctx.view.renderRawSync(`@eval(extracted.locals = state)`, {
+          extracted,
+        })
         let templ = new Template(edge.asyncCompiler, edge.globals, {}, edge.processor)
 
         const instance = new Proxy(this, {
@@ -57,6 +63,10 @@ export class BaseComponent {
 
             if (prop in state) {
               return Reflect.get(state, prop, receiver)
+            }
+
+            if (prop in extracted.locals) {
+              return Reflect.get(extracted.locals, prop, receiver)
             }
 
             return Reflect.get(edge.globals, prop, receiver)
@@ -73,6 +83,12 @@ export class BaseComponent {
       },
       renderRaw: (template: string, state: Record<string, any> = {}): Promise<string> => {
         let compiledTemplate = edge.asyncCompiler.compileRaw(template)
+        let extracted = {
+          locals: {},
+        }
+        this.ctx.view.renderRawSync(`@eval(extracted.locals = state)`, {
+          extracted,
+        })
         let templ = new Template(edge.asyncCompiler, edge.globals, {}, edge.processor)
         const instance = new Proxy(this, {
           get(target, prop, receiver) {
@@ -82,6 +98,10 @@ export class BaseComponent {
 
             if (prop in state) {
               return Reflect.get(state, prop, receiver)
+            }
+
+            if (prop in extracted.locals) {
+              return Reflect.get(extracted.locals, prop, receiver)
             }
 
             return Reflect.get(edge.globals, prop, receiver)

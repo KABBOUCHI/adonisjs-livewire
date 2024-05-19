@@ -316,9 +316,9 @@ export default class Livewire {
         }
       } catch (error) {
         console.error(error)
-        if (error.name === 'ValidationException' && error.flashToSession) {
+        if (error.code === 'E_VALIDATION_ERROR') {
           //@ts-ignore
-          // HttpContext.get()?.session?.flash('errors', error.messages)
+          HttpContext.get()?.session?.flashValidationErrors(error)
         } else {
           throw error
         }
@@ -449,14 +449,22 @@ export default class Livewire {
       })
     }
 
-    // let ctx = HttpContext.get()
+    let ctx = HttpContext.get()
 
-    // if (ctx) {
-    //   await ctx.session.commit()
-    //   ctx.session.initiated = false
-    //   ctx.session.responseFlashMessages.clear()
-    //   await ctx.session.initiate(false)
-    // }
+    if (ctx && ctx.session) {
+      await ctx.session.commit()
+
+      if (ctx.session.has(ctx.session.flashKey)) {
+        ctx.session.flashMessages.update(ctx.session.pull(ctx.session.flashKey, null))
+      }
+
+      this.view.share({
+        flashMessages: ctx.session.flashMessages,
+        old: function (key: string, defaultVal?: any) {
+          return ctx?.session.flashMessages.get(key, defaultVal)
+        },
+      })
+    }
 
     let finish = (await this.trigger('render', component, this.view, [])) as any
     let content = (await component.render()) || defaultValue || '<div></div>'
@@ -476,11 +484,10 @@ export default class Livewire {
 
     html = await this.view.renderRaw(html)
 
-    // if (ctx) {
-    //   ctx.session.responseFlashMessages.clear()
-    //   ctx.session.flashMessages.clear()
-    //   ctx.session.clear()
-    // }
+    if (ctx && ctx.session) {
+      ctx.session.responseFlashMessages.clear()
+      ctx.session.flashMessages.clear()
+    }
 
     return html
   }
