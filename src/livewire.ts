@@ -450,18 +450,19 @@ export default class Livewire {
     }
 
     let ctx = HttpContext.get()
+    let session: any = ctx?.['session']
 
-    if (ctx && ctx.session) {
-      await ctx.session.commit()
+    if (session) {
+      await session.commit()
 
-      if (ctx.session.has(ctx.session.flashKey)) {
-        ctx.session.flashMessages.update(ctx.session.pull(ctx.session.flashKey, null))
+      if (session.has(session.flashKey)) {
+        session.flashMessages.update(session.pull(session.flashKey, null))
       }
 
       this.view.share({
-        flashMessages: ctx.session.flashMessages,
+        flashMessages: session.flashMessages,
         old: function (key: string, defaultVal?: any) {
-          return ctx?.session.flashMessages.get(key, defaultVal)
+          return session.flashMessages.get(key, defaultVal)
         },
       })
     }
@@ -484,9 +485,9 @@ export default class Livewire {
 
     html = await this.view.renderRaw(html)
 
-    if (ctx && ctx.session) {
-      ctx.session.responseFlashMessages.clear()
-      ctx.session.flashMessages.clear()
+    if (session) {
+      session.responseFlashMessages.clear()
+      session.flashMessages.clear()
     }
 
     return html
