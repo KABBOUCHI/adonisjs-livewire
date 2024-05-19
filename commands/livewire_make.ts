@@ -27,22 +27,34 @@ export default class MakeLivewire extends BaseCommand {
   private async generateInline() {
     const codemods = await this.createCodemods()
 
+    let name = this.name.replaceAll('.', '/')
+    let parts = name.split('/')
+    let last = parts.pop()!
+    let filename = [...parts, stringHelpers.snakeCase(last)].join('/')
+
     codemods.makeUsingStub(stubsRoot, 'livewire-inline.stub', {
-      className: stringHelpers.pascalCase(this.name),
-      filename: stringHelpers.snakeCase(this.name),
+      className: stringHelpers.pascalCase(last),
+      filename,
     })
   }
 
   private async generate() {
     const codemods = await this.createCodemods()
 
+    let name = this.name.replaceAll('.', '/')
+    let parts = name.split('/')
+    let last = parts.pop()!
+    let filename = [...parts, stringHelpers.snakeCase(last)].join('/')
+
     codemods.makeUsingStub(stubsRoot, 'livewire-component.stub', {
-      filename: stringHelpers.snakeCase(this.name),
-      className: stringHelpers.pascalCase(this.name),
+      className: stringHelpers.pascalCase(last),
+      filename,
     })
 
+    let dashedFilename = [...parts, stringHelpers.dashCase(last)].join('/')
+
     codemods.makeUsingStub(stubsRoot, 'livewire-template.stub', {
-      filename: stringHelpers.dashCase(this.name),
+      filename: dashedFilename,
     })
   }
 }

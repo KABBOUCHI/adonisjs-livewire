@@ -1,15 +1,10 @@
 {
   "name": "adonisjs-livewire",
   "description": "A front-end framework for AdonisJS",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "main": "build/providers/livewire_provider.js",
   "type": "module",
-  "files": [
-    "build",
-    "LICENSE.md",
-    "README.md",
-    "package.json"
-  ],
+  "files": ["build", "LICENSE.md", "README.md", "package.json"],
   "exports": {
     ".": "./build/index.js",
     "./services/main": "./build/services/main.js",
@@ -65,11 +60,7 @@
   "author": "Georges KABBOUCHI <georges.kabbouchi@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/KABBOUCHI/adonisjs-livewire",
-  "keywords": [
-    "adonisjs",
-    "livewire",
-    "components"
-  ],
+  "keywords": ["adonisjs", "livewire", "components"],
   "eslintConfig": {
     "extends": "@adonisjs/eslint-config/package"
   },

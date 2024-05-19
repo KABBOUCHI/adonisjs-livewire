@@ -1,5 +1,5 @@
 {{{
-  exports({ to: app.viewsPath('components/layouts/main.edge') })
+  exports({ to: app.viewsPath('components/layouts/' + filename + '.edge') })
 }}}
 <!DOCTYPE html>
 <html lang="\{\{ lang ?? 'en' \}\}">

@@ -1,6 +1,7 @@
-import { BaseCommand, flags } from '@adonisjs/core/ace'
+import { BaseCommand, args } from '@adonisjs/core/ace'
 import { CommandOptions } from '@adonisjs/core/types/ace'
 import { stubsRoot } from '../index.js'
+import stringHelpers from '@adonisjs/core/helpers/string'
 
 export default class LivewireLayout extends BaseCommand {
   static commandName = 'livewire:layout'
@@ -12,12 +13,19 @@ export default class LivewireLayout extends BaseCommand {
     staysAlive: false,
   }
 
-  @flags.string({ description: 'Name of layout', default: 'main' })
-  declare name
+  @args.string({ description: 'Name of layout', default: 'main' })
+  declare name: string
 
   async run() {
     const codemods = await this.createCodemods()
 
-    codemods.makeUsingStub(stubsRoot, 'layout.stub', {})
+    let name = this.name.replaceAll('.', '/')
+    let parts = name.split('/')
+    let last = parts.pop()!
+    let filename = [...parts, stringHelpers.dashCase(last)].join('/')
+
+    codemods.makeUsingStub(stubsRoot, 'layout.stub', {
+      filename,
+    })
   }
 }
