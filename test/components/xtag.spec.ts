@@ -27,56 +27,56 @@ test.group('x-tag', () => {
 
   test('opening and closing tag', async ({ assert }) => {
     let input = '<x-component></x-component>'
-    let expected = `@component('component', {})  @end`
+    let expected = `@component('component', {})\n\n@end`
 
     assert.equal(compile(input), expected)
   })
 
   test('opening and closing tag with props', async ({ assert }) => {
     let input = "<x-component foo='bar'></x-component>"
-    let expected = `@component('component', {"foo":"bar"})  @end`
+    let expected = `@component('component', {"foo":"bar"})\n\n@end`
 
     assert.equal(compile(input), expected)
   })
 
   test('opening and closing tag with bound props', async ({ assert }) => {
     let input = "<x-component :foo='bar'></x-component>"
-    let expected = `@component('component', {"foo":bar})  @end`
+    let expected = `@component('component', {"foo":bar})\n\n@end`
 
     assert.equal(compile(input), expected)
   })
 
   test('opening and closing tag with content', async ({ assert }) => {
     let input = '<x-component>foo</x-component>'
-    let expected = `@component('component', {}) foo @end`
+    let expected = `@component('component', {})\nfoo\n@end`
 
     assert.equal(compile(input), expected)
   })
 
   test('opening and closing tag with props and content', async ({ assert }) => {
     let input = "<x-component foo='bar'>foo</x-component>"
-    let expected = `@component('component', {"foo":"bar"}) foo @end`
+    let expected = `@component('component', {"foo":"bar"})\nfoo\n@end`
 
     assert.equal(compile(input), expected)
   })
 
   test('opening and closing tag with bound props and content', async ({ assert }) => {
     let input = "<x-component :foo='bar'>foo</x-component>"
-    let expected = `@component('component', {"foo":bar}) foo @end`
+    let expected = `@component('component', {"foo":bar})\nfoo\n@end`
 
     assert.equal(compile(input), expected)
   })
 
   test('nested #1', async ({ assert }) => {
     let input = '<x-foo><x-bar /></x-foo>'
-    let expected = `@component('foo', {}) @!component('bar', {}) @end`
+    let expected = `@component('foo', {})\n@!component('bar', {})\n@end`
 
     assert.equal(compile(input), expected)
   })
 
   test('nested #2', async ({ assert }) => {
     let input = "<x-foo><x-bar bar1='bar2'></x-bar></x-foo>"
-    let expected = `@component('foo', {}) @component('bar', {"bar1":"bar2"})  @end @end`
+    let expected = `@component('foo', {})\n@component('bar', {"bar1":"bar2"})\n\n@end\n@end`
 
     assert.equal(compile(input), expected)
   })
@@ -89,13 +89,20 @@ test.group('x-tag', () => {
         </x-baz>
     </x-bar>
 </x-foo>`
-    let expected = `@component('foo', {}) 
-    @component('bar', {}) 
-        @component('baz', {}) 
-            @!component('qux', {"a":"b"})
-         @end
-     @end
- @end`
+    let expected =
+      "@component('foo', {})\n" +
+      '\n' +
+      "    @component('bar', {})\n" +
+      '\n' +
+      "        @component('baz', {})\n" +
+      '\n' +
+      `            @!component('qux', {"a":"b"})\n` +
+      '        \n' +
+      '@end\n' +
+      '    \n' +
+      '@end\n' +
+      '\n' +
+      '@end'
 
     assert.equal(compile(input), expected)
   })
@@ -109,7 +116,7 @@ test.group('x-tag', () => {
 
   test('opening and closing with flag', async ({ assert }) => {
     let input = "<x-component a='b' lazy></x-component>"
-    let expected = `@component('component', {"a":"b","lazy":true})  @end`
+    let expected = `@component('component', {"a":"b","lazy":true})\n\n@end`
 
     assert.equal(compile(input), expected)
   })

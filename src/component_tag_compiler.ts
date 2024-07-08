@@ -19,12 +19,12 @@ export class ComponentTagCompiler {
       if (props) {
         let regex = /(:)?([a-zA-Z0-9\-:.]+)\s*=\s*['"]([^'"]*)['"]/g
 
-        let matches = props.match(regex)
+        let subMatches = props.match(regex) || []
         let propsRemainder = props
         if (matches) {
-          for (const match of matches) {
+          for (const subMatch of subMatches) {
             let [m, prefix, key, value] =
-              match.match(/(:)?([a-zA-Z0-9\-:.]+)\s*=\s*['"]([^'"]*)['"]/) || []
+              subMatch.match(/(:)?([a-zA-Z0-9\-:.]+)\s*=\s*['"]([^'"]*)['"]/) || []
             if (prefix === ':') {
               attributes[key] = `_____${value}_____`
             } else {
@@ -79,12 +79,12 @@ export class ComponentTagCompiler {
       if (props) {
         let regex = /(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/g
 
-        let matches = props.match(regex)
+        let subMatches = props.match(regex) || []
         let propsRemainder = props
         if (matches) {
-          for (const match of matches) {
+          for (const subMatch of subMatches) {
             let [m, prefix, key, value] =
-              match.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || []
+              subMatch.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || []
             if (prefix === ':') {
               attributes[key] = `_____${value}_____`
             } else {
@@ -119,7 +119,7 @@ export class ComponentTagCompiler {
         }
       }
 
-      raw = raw.replace(match, `@component('${componentPath}', ${attrs}) ${content} @end`)
+      raw = raw.replace(match, `@component('${componentPath}', ${attrs})\n${content}\n@end`)
     }
 
     if (raw.match(OPENING_REGEX)) {
