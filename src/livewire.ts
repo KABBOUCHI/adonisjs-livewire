@@ -86,6 +86,12 @@ export default class Livewire {
         component.addDecorator(new Layout(options.layout.name))
       }
 
+      const ctx = HttpContext.get()
+
+      if (ctx) {
+        context.addMemo('path', ctx.request.url())
+      }
+
       await this.trigger('mount', component, params, options.key)
 
       const s = store(component)
@@ -185,6 +191,23 @@ export default class Livewire {
   async fromSnapshot(snapshot: any) {
     this.checksum.verify(snapshot)
 
+    const router = await this.app.container.make('router')
+    const path = snapshot['memo']['path']
+    const route = router.find(path)
+    const ctx = HttpContext.get()
+
+    if (route && ctx) {
+      await route.middleware.runner().run((handler, next) => {
+        return typeof handler !== 'function' && !!handler.name
+          ? handler.handle(ctx.containerResolver, ctx, next)
+          : next()
+      })
+
+      if (ctx.response.getStatus() >= 300) {
+        throw new Error('Redirect')
+      }
+    }
+
     let data = snapshot['data']
     let name = snapshot['memo']['name']
     let id = snapshot['memo']['id']
@@ -262,6 +285,12 @@ export default class Livewire {
     return await livewireContext.run({ dataStore, context, features }, async () => {
       let data = snapshot['data']
       let memo = snapshot['memo']
+      let path = snapshot['memo']['path'] ?? ''
+
+      const ctx = HttpContext.get()
+      if (ctx) {
+        context.addMemo('path', path)
+      }
 
       await this.trigger('hydrate', component, memo, context)
 
