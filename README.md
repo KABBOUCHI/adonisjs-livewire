@@ -182,7 +182,7 @@ export default class Counter extends Mixin(Component, MyMixin) {
 
 ## Helpers
 
-# Edge tag compiler (Experimental)
+### Edge tag compiler (Experimental)
 
 ```edge
 <x-button class="bg-red" a="b" :foo="bar"> Hello </x-button>
@@ -191,12 +191,12 @@ export default class Counter extends Mixin(Component, MyMixin) {
 will be compiled to
 
 ```edge
-@component('button', { class: 'bg-red', a: 'b', foo: bar })
+@component('button or components/button or components/button/index', { class: 'bg-red', a: 'b', foo: bar })
   Hello
 @end
 ```
 
-# dd (Dump and Die)
+### dd (Dump and Die)
 
 Global helper to dump and die anywhere in your code.
 
