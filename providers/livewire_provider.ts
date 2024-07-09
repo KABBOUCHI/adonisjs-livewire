@@ -1,6 +1,6 @@
 import type { ApplicationService } from '@adonisjs/core/types'
 import fs from 'node:fs'
-import { HttpContext, Route } from '@adonisjs/core/http'
+import { HttpContext, Route, errors } from '@adonisjs/core/http'
 import { ComponentTagCompiler } from '../src/component_tag_compiler.js'
 import { SupportLazyLoading } from '../src/features/support_lazy_loading/support_lazy_loading.js'
 import { Constructor } from '@adonisjs/http-server/types'
@@ -15,6 +15,7 @@ import { SupportScriptsAndAssets } from '../src/features/support_scripts_and_ass
 import { SupportAutoInjectedAssets } from '../src/features/support_auto_injected_assets/support_auto_injected_assets.js'
 import { Config, defaultConfig } from '../src/define_config.js'
 import type Livewire from '../src/livewire.js'
+import inspect from '@poppinss/inspect'
 
 const currentDirname = dirname(fileURLToPath(import.meta.url))
 
@@ -41,6 +42,16 @@ declare module '@adonisjs/core/types' {
     livewire: Livewire
   }
 }
+
+function dd(...args: any[]) {
+  throw errors.E_HTTP_REQUEST_ABORTED.invoke(args.map(inspect.string.html).join('\n'), 500)
+}
+
+declare global {
+  function dd(...args: any[]): void
+}
+
+globalThis.dd = dd
 
 export default class LivewireProvider {
   constructor(protected app: ApplicationService) {}
