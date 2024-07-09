@@ -1,5 +1,5 @@
 import { ApplicationService } from '@adonisjs/core/types'
-import { HttpContext } from '@adonisjs/core/http'
+import { HttpContext, errors } from '@adonisjs/core/http'
 import string from '@adonisjs/core/helpers/string'
 import { Component } from './component.js'
 import ComponentContext from './component_context.js'
@@ -204,7 +204,7 @@ export default class Livewire {
       })
 
       if (ctx.response.getStatus() >= 300) {
-        throw new Error('Redirect')
+        throw errors.E_HTTP_REQUEST_ABORTED.invoke(ctx.response.getBody(), ctx.response.getStatus())
       }
     }
 
