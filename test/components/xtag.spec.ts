@@ -134,4 +134,18 @@ test.group('x-tag', () => {
 
     assert.equal(compile(input), expected)
   })
+
+  test('curly braces in props - self closed', async ({ assert }) => {
+    let input = "<x-component foo='{{ bar }}' />"
+    let expected = `@!component('component', {"foo": bar })`
+
+    assert.equal(compile(input), expected)
+  })
+
+  test('curly braces in props', async ({ assert }) => {
+    let input = "<x-component foo='{{ bar }}'></x-component>"
+    let expected = `@component('component', {"foo": bar })\n\n@end`
+
+    assert.equal(compile(input), expected)
+  })
 })
