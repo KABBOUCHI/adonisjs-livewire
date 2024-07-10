@@ -185,7 +185,9 @@ export default class Counter extends Mixin(Component, MyMixin) {
 ### Edge tag compiler (Experimental)
 
 ```edge
-<x-button class="bg-red" a="b" :foo="bar"> Hello </x-button>
+<x-button class="bg-red" a="b" :foo="bar" baz="{{ 1 + 2 }}">
+  Hello
+</x-button>
 ```
 
 will be compiled to
