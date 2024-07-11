@@ -148,4 +148,33 @@ test.group('x-tag', () => {
 
     assert.equal(compile(input), expected)
   })
+
+  test('slot', async ({ assert }) => {
+    let input = "<x-slot name='header'></x-slot>"
+    let expected = `@slot("header")\n\n@endslot`
+
+    assert.equal(compile(input), expected)
+  })
+
+  test('slot - dyamic prop', async ({ assert }) => {
+    let input = "<x-slot name='{{ foo }}'></x-slot>"
+    let expected = `@slot( foo )\n\n@endslot`
+
+    assert.equal(compile(input), expected)
+
+    let input2 = "<x-slot :name='bar'></x-slot>"
+    let expected2 = `@slot(bar)\n\n@endslot`
+
+    assert.equal(compile(input2), expected2)
+
+    let input3 = "<x-slot :name='bar' props='{ a, b, c }'></x-slot>"
+    let expected3 = `@slot(bar, { a, b, c })\n\n@endslot`
+
+    assert.equal(compile(input3), expected3)
+
+    let input4 = "<x-slot :name='bar' props='myProps'></x-slot>"
+    let expected4 = `@slot(bar, myProps)\n\n@endslot`
+
+    assert.equal(compile(input4), expected4)
+  })
 })

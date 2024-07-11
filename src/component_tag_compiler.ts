@@ -131,17 +131,23 @@ export class ComponentTagCompiler {
 
       let componentPath = component.replace(/\./g, '/')
 
-      if (app) {
-        if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
-          componentPath = `components/${componentPath}`
-
+      if (componentPath === 'slot' && attributes.name) {
+        let name = JSON.stringify(attributes.name).replace(/"_____([^"]*)_____"/g, '$1')
+        let maybeProps = attributes.props ? `, ${attributes.props}` : ``
+        raw = raw.replace(match, `@slot(${name}${maybeProps})\n${content}\n@endslot`)
+      } else {
+        if (app) {
           if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
-            componentPath = componentPath + '/index'
+            componentPath = `components/${componentPath}`
+
+            if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
+              componentPath = componentPath + '/index'
+            }
           }
         }
-      }
 
-      raw = raw.replace(match, `@component('${componentPath}', ${attrs})\n${content}\n@end`)
+        raw = raw.replace(match, `@component('${componentPath}', ${attrs})\n${content}\n@end`)
+      }
     }
 
     if (raw.match(OPENING_REGEX)) {
