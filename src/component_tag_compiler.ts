@@ -28,18 +28,7 @@ export class ComponentTagCompiler {
             if (prefix === ':') {
               attributes[key] = `_____${value}_____`
             } else {
-              let curlyMatch = value.match(/(\\)?{{(.*?)}}/)
-
-              if (curlyMatch) {
-                let [, escape, cValue] = curlyMatch
-                if (escape) {
-                  attributes[key] = `{{${cValue}}}`
-                } else {
-                  attributes[key] = `_____${cValue}_____`
-                }
-              } else {
-                attributes[key] = value
-              }
+              attributes[key] = value
             }
 
             if (m) {
@@ -99,18 +88,7 @@ export class ComponentTagCompiler {
             if (prefix === ':') {
               attributes[key] = `_____${value}_____`
             } else {
-              let curlyMatch = value.match(/(\\)?{{(.*?)}}/)
-
-              if (curlyMatch) {
-                let [, escape, cValue] = curlyMatch
-                if (escape) {
-                  attributes[key] = `{{${cValue}}}`
-                } else {
-                  attributes[key] = `_____${cValue}_____`
-                }
-              } else {
-                attributes[key] = value
-              }
+              attributes[key] = value
             }
 
             if (m) {
@@ -133,6 +111,15 @@ export class ComponentTagCompiler {
 
       if (componentPath === 'slot' && attributes.name) {
         let name = JSON.stringify(attributes.name).replace(/"_____([^"]*)_____"/g, '$1')
+        let curlyMatch = name.match(/(\\)?{{(.*?)}}/)
+        if (curlyMatch) {
+          let [, escape, cValue] = curlyMatch
+          if (escape) {
+            name = `{{${cValue}}}`
+          } else {
+            name = cValue
+          }
+        }
         let maybeProps = attributes.props ? `, ${attributes.props}` : ``
         raw = raw.replace(match, `@slot(${name}${maybeProps})\n${content}\n@endslot`)
       } else {
