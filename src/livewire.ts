@@ -471,11 +471,7 @@ export default class Livewire {
     skipRenderHtml = Array.isArray(skipRenderHtml) ? skipRenderHtml[0] : skipRenderHtml
 
     if (skipRenderHtml) {
-      skipRenderHtml = skipRenderHtml ?? defaultValue ?? '<div></div>'
-
-      if (skipRenderHtml === true) {
-        return
-      }
+      skipRenderHtml = skipRenderHtml || defaultValue || '<div></div>'
 
       return this.insertAttributesIntoHtmlRoot(skipRenderHtml, {
         'wire:id': component.getId(),
