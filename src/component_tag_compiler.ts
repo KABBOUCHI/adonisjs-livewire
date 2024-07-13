@@ -31,12 +31,7 @@ export class ComponentTagCompiler {
               let curlyMatch = value.match(/(\\)?{{(.*?)}}/)
 
               if (curlyMatch) {
-                let [, escape, cValue] = curlyMatch
-                if (escape) {
-                  attributes[key] = `{{${cValue}}}`
-                } else {
-                  attributes[key] = `_____${cValue}_____`
-                }
+                attributes[key] = `_____\`${value.replace(/\{\{\s*(\w+)\s*\}\}/g, '${$1}')}\`_____`
               } else {
                 attributes[key] = value
               }
@@ -102,12 +97,7 @@ export class ComponentTagCompiler {
               let curlyMatch = value.match(/(\\)?{{(.*?)}}/)
 
               if (curlyMatch) {
-                let [, escape, cValue] = curlyMatch
-                if (escape) {
-                  attributes[key] = `{{${cValue}}}`
-                } else {
-                  attributes[key] = `_____${cValue}_____`
-                }
+                attributes[key] = `_____\`${value.replace(/\{\{\s*(\w+)\s*\}\}/g, '${$1}')}\`_____`
               } else {
                 attributes[key] = value
               }
