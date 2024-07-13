@@ -132,7 +132,7 @@ export default class Livewire {
 
       ;(await this.trigger('render', component, this.view, [])) as any
 
-      let html = await this.render(component, '<div></div>')
+      let html = (await this.render(component, '<div></div>')) || '<div></div>'
 
       await this.trigger('dehydrate', component, context)
 
@@ -471,7 +471,11 @@ export default class Livewire {
     skipRenderHtml = Array.isArray(skipRenderHtml) ? skipRenderHtml[0] : skipRenderHtml
 
     if (skipRenderHtml) {
-      skipRenderHtml = skipRenderHtml || defaultValue || '<div></div>'
+      skipRenderHtml = skipRenderHtml ?? defaultValue ?? '<div></div>'
+
+      if (skipRenderHtml === true) {
+        return
+      }
 
       return this.insertAttributesIntoHtmlRoot(skipRenderHtml, {
         'wire:id': component.getId(),
