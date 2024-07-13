@@ -193,7 +193,7 @@ export default class Counter extends Mixin(Component, MyMixin) {
 will be compiled to
 
 ```edge
-@component('button or components/button or components/button/index', { class: 'bg-red', a: 'b', foo: bar })
+@component('button or components/button or components/button/index', { class: 'bg-red', a: 'b', foo: bar, baz: `${1 + 2}` })
   Hello
 @end
 ```
