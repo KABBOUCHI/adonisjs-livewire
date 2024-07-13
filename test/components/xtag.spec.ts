@@ -137,19 +137,19 @@ test.group('x-tag', () => {
 
   test('curly braces in props - self closed', async ({ assert }) => {
     let input = "<x-component foo='{{ bar }}' />"
-    let expected = `@!component('component', {"foo":\`\${bar}\`})`
+    let expected = `@!component('component', {"foo":\`\${bar }\`})`
 
     assert.equal(compile(input), expected)
   })
 
   test('curly braces in props', async ({ assert }) => {
     let input = "<x-component foo='{{ bar }}'></x-component>"
-    let expected = `@component('component', {"foo":\`\${bar}\`})\n\n@end`
+    let expected = `@component('component', {"foo":\`\${bar }\`})\n\n@end`
 
     assert.equal(compile(input), expected)
 
     let input2 = "<x-component foo='abc {{ bar }}'></x-component>"
-    let expected2 = `@component('component', {"foo":\`abc \${bar}\`})\n\n@end`
+    let expected2 = `@component('component', {"foo":\`abc \${bar }\`})\n\n@end`
 
     assert.equal(compile(input2), expected2)
   })
@@ -163,7 +163,7 @@ test.group('x-tag', () => {
 
   test('slot - dyamic prop', async ({ assert }) => {
     let input = "<x-slot name='{{ foo }}'></x-slot>"
-    let expected = `@slot(\`\${foo}\`)\n\n@endslot`
+    let expected = `@slot(\`\${foo }\`)\n\n@endslot`
 
     assert.equal(compile(input), expected)
 
