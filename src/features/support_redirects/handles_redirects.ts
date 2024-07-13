@@ -7,5 +7,8 @@ export class HandlesRedirects {
     store(this).push('redirect', url)
 
     if (navigate) store(this).push('redirectUsingNavigate', true)
+
+    // config.render_on_redirect
+    // this.skipRender()
   }
 }
