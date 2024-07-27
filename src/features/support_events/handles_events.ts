@@ -7,11 +7,12 @@ export class HandlesEvents {
     return {}
   }
 
-  dispatch(name: string, params: any, to?: string) {
+  dispatch(name: string, params: any, to?: string, self?: boolean) {
     store(this).push('dispatched', {
       name,
       params,
       to,
+      self,
     })
   }
 }
