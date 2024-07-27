@@ -129,7 +129,7 @@ Now, applications with your package installed can consume your component in thei
 ```ts
 // app/livewire_mixins/my_mixin.ts
 import { Component } from 'adonisjs-livewire'
-export MyMixin extends Component {}
+export interface MyMixin extends Component {}
 export class MyMixin {
   public foo = 'bar'
 
@@ -147,7 +147,6 @@ export class MyMixin extends Component {
     return 'baz'
   }
 }
-
 ```
 
 ```ts
