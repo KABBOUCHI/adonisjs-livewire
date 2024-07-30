@@ -154,6 +154,18 @@ test.group('x-tag', () => {
     assert.equal(compile(input2), expected2)
   })
 
+  test('curly braces in props #2', async ({ assert }) => {
+    let input = `<x-button wire:click="clickMe('{{ abc }}')"></x-button>`
+    let expected = `@component('button', {"wire:click":\`clickMe(\'\${abc }\')\`})\n\n@end`
+
+    assert.equal(compile(input), expected)
+
+    let input2 = `<x-button wire:click="clickMe('{{ abc }}')" />`
+    let expected2 = `@!component('button', {"wire:click":\`clickMe(\'\${abc }\')\`})`
+
+    assert.equal(compile(input2), expected2)
+  })
+
   test('slot', async ({ assert }) => {
     let input = "<x-slot name='header'></x-slot>"
     let expected = `@slot("header")\n\n@endslot`

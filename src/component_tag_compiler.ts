@@ -17,14 +17,15 @@ export class ComponentTagCompiler {
       let [_, component, props] = match.match(/<x-([a-zA-Z0-9\.\-]+)([^>]*)\/>/) || []
       let attributes: any = {}
       if (props) {
-        let regex = /(:)?([a-zA-Z0-9\-:.]+)\s*=\s*['"]([^'"]*)['"]/g
+        let regex = /(:)?([a-zA-Z0-9\-:.]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g
 
         let subMatches = props.match(regex) || []
         let propsRemainder = props
         if (matches) {
           for (const subMatch of subMatches) {
-            let [m, prefix, key, value] =
-              subMatch.match(/(:)?([a-zA-Z0-9\-:.]+)\s*=\s*['"]([^'"]*)['"]/) || []
+            let [m, prefix, key, value, value2] =
+              subMatch.match(/(:)?([a-zA-Z0-9\-:.]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/) || []
+            value = value || value2
             if (prefix === ':') {
               attributes[key] = `_____${value}_____`
             } else {
@@ -84,14 +85,15 @@ export class ComponentTagCompiler {
 
       let attributes: any = {}
       if (props) {
-        let regex = /(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/g
+        let regex = /(:)?([a-zA-Z0-9\-:.]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g
 
         let subMatches = props.match(regex) || []
         let propsRemainder = props
         if (matches) {
           for (const subMatch of subMatches) {
-            let [m, prefix, key, value] =
-              subMatch.match(/(:)?([a-zA-Z0-9\-:]+)\s*=\s*['"]([^'"]*)['"]/) || []
+            let [m, prefix, key, value, value2] =
+              subMatch.match(/(:)?([a-zA-Z0-9\-:.]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/) || []
+            value = value || value2
             if (prefix === ':') {
               attributes[key] = `_____${value}_____`
             } else {
