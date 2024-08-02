@@ -3,4 +3,10 @@
 }}}
 import { Component } from 'adonisjs-livewire'
 
-export default class {{ className }} extends Component {}
+export default class {{ className }} extends Component {
+   async render() {
+        return this.view.render('livewire/{{ dashedFilename }}', {
+            message: 'Hello World'
+        })
+    }
+}

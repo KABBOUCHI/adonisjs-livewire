@@ -45,13 +45,13 @@ export default class MakeLivewire extends BaseCommand {
     let parts = name.split('/')
     let last = parts.pop()!
     let filename = [...parts, stringHelpers.snakeCase(last)].join('/')
+    let dashedFilename = [...parts, stringHelpers.dashCase(last)].join('/')
 
     codemods.makeUsingStub(stubsRoot, 'livewire-component.stub', {
       className: stringHelpers.pascalCase(last),
       filename,
+      dashedFilename,
     })
-
-    let dashedFilename = [...parts, stringHelpers.dashCase(last)].join('/')
 
     codemods.makeUsingStub(stubsRoot, 'livewire-template.stub', {
       filename: dashedFilename,
