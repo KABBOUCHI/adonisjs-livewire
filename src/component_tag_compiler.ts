@@ -1,5 +1,6 @@
 import type { ApplicationService } from '@adonisjs/core/types'
-import { existsSync } from 'node:fs'
+import edge from 'edge.js'
+// import { existsSync } from 'node:fs'
 
 const SELF_CLOSING_REGEX = /<x-([a-zA-Z0-9\.\-]+)([^>]*)\/>/g
 const OPENING_REGEX = /<x-([a-zA-Z0-9\.\-]+)([^>]*)>([\s\S]*?(?:(?!<\/x-\1>).)*?)<\/x-\1>/g
@@ -58,13 +59,28 @@ export class ComponentTagCompiler {
       let componentPath = component.replace(/\./g, '/')
 
       if (app) {
-        if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
-          componentPath = `components/${componentPath}`
+        const components =
+          edge.loader
+            .listComponents()
+            .find((l) => l.diskName === 'default')
+            ?.components.map((c) => c.componentName) || []
 
-          if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
-            componentPath = componentPath + '/index'
-          }
+        if (components.includes(componentPath)) {
+        } else if (components.includes(`components/${componentPath}`)) {
+          componentPath = `components/${componentPath}`
+        } else if (components.includes(`${componentPath}/index`)) {
+          componentPath = `${componentPath}/index`
+        } else if (components.includes(`components/${componentPath}/index`)) {
+          componentPath = `components/${componentPath}/index`
         }
+
+        // if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
+        //   componentPath = `components/${componentPath}`
+
+        //   if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
+        //     componentPath = componentPath + '/index'
+        //   }
+        // }
       }
       raw = raw.replace(match, `@!component('${componentPath}', ${attrs})`)
     }
@@ -131,13 +147,27 @@ export class ComponentTagCompiler {
         raw = raw.replace(match, `@slot(${name}${maybeProps})\n${content}\n@endslot`)
       } else {
         if (app) {
-          if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
-            componentPath = `components/${componentPath}`
+          const components =
+            edge.loader
+              .listComponents()
+              .find((l) => l.diskName === 'default')
+              ?.components.map((c) => c.componentName) || []
 
-            if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
-              componentPath = componentPath + '/index'
-            }
+          if (components.includes(componentPath)) {
+          } else if (components.includes(`components/${componentPath}`)) {
+            componentPath = `components/${componentPath}`
+          } else if (components.includes(`${componentPath}/index`)) {
+            componentPath = `${componentPath}/index`
+          } else if (components.includes(`components/${componentPath}/index`)) {
+            componentPath = `components/${componentPath}/index`
           }
+          // if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
+          //   componentPath = `components/${componentPath}`
+
+          //   if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
+          //     componentPath = componentPath + '/index'
+          //   }
+          // }
         }
 
         raw = raw.replace(match, `@component('${componentPath}', ${attrs})\n${content}\n@end`)

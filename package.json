@@ -1,7 +1,7 @@
 {
   "name": "adonisjs-livewire",
   "description": "A front-end framework for AdonisJS",
-  "version": "0.2.13",
+  "version": "0.3.0",
   "main": "build/providers/livewire_provider.js",
   "type": "module",
   "files": [
@@ -14,6 +14,7 @@
     ".": "./build/index.js",
     "./services/main": "./build/services/main.js",
     "./livewire_provider": "./build/providers/livewire_provider.js",
+    "./edge_provider": "./build/providers/edge_provider.js",
     "./commands": "./build/commands/main.js"
   },
   "scripts": {
@@ -52,6 +53,7 @@
   },
   "dependencies": {
     "@poppinss/inspect": "^1.0.1",
+    "@poppinss/utils": "^6.7.3",
     "crypto-js": "^4.2.0",
     "edge-parser": "^8.2.2",
     "ts-mixer": "^6.0.3"

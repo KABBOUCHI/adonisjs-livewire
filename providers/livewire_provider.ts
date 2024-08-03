@@ -1,7 +1,6 @@
 import type { ApplicationService } from '@adonisjs/core/types'
 import fs from 'node:fs'
 import { HttpContext, Route, errors } from '@adonisjs/core/http'
-import { ComponentTagCompiler } from '../src/component_tag_compiler.js'
 import { SupportLazyLoading } from '../src/features/support_lazy_loading/support_lazy_loading.js'
 import { Constructor } from '@adonisjs/http-server/types'
 import edge, { type Edge } from 'edge.js'
@@ -261,10 +260,6 @@ export default class LivewireProvider {
       }
 
       return result
-    })
-
-    edge.processor.process('raw', (value) => {
-      return ComponentTagCompiler.compile(value.raw, this.app)
     })
   }
 

@@ -73,11 +73,11 @@ Add routes
 ```ts
 // start/routes.ts
 
-Route.livewire('/', 'Counter') // App/Livewire/Counter.ts
+Route.livewire('/', 'counter') // app/livewire/counter.ts
 Route.livewire('/', 'counter', { initialCounter: 10 })
-Route.livewire('/search-users', 'search-users') // App/Livewire/SearchUsers.ts
-Route.livewire('/search-users') // App/Livewire/SearchUsers.ts
-Route.livewire('/search-users', 'search-users.index') // App/Livewire/SearchUsers/Index.ts
+Route.livewire('/search-users', 'search-users') // app/livewire/search-users.ts
+Route.livewire('/search-users') // app/livewire/search-users.ts
+Route.livewire('/search-users', 'search-users.index') // app/livewire/search-users/index.ts
 ```
 
 ## Registering Custom Components
@@ -150,7 +150,7 @@ export class MyMixin extends Component {
 ```
 
 ```ts
-// app/Livewire/Counter.ts
+// app/livewire/counter.ts
 import { Component, Mixin } from 'adonisjs-livewire'
 import MyMixin from '#app/livewire_mixins/my_mixin'
 
@@ -195,6 +195,36 @@ will be compiled to
 @component('button or components/button or components/button/index', { class: 'bg-red', a: 'b', foo: bar, baz: `${1 + 2}` })
   Hello
 @end
+```
+
+### Edge component class
+
+```ts
+// app/compoments/button.ts
+import { EdgeComponent } from 'adonisjs-livewire'
+
+export default class Button extends EdgeComponent {
+  type = 'button'
+  text = ''
+
+  constructor({ type, text }) {
+    this.type = type || this.type
+    this.text = text || this.text
+  }
+
+  isLoading() {
+    return true // some logic
+  }
+
+  public render() {
+    // or return this.view.render("components/button")
+    return `
+      <button type="{{ type }}" {{ isLoading() ? 'data-loading': '' }} {{ $props.only(['class']).toAttrs() }}>
+        {{{ text || await $slots.main() }}}
+      </button>
+    `
+  }
+}
 ```
 
 ### dd (Dump and Die)

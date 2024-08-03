@@ -21,6 +21,7 @@ export async function configure(command: ConfigureCommand) {
   await codemods.makeUsingStub(stubsRoot, 'config/livewire.stub', {})
   await codemods.updateRcFile((rcFile: any) => {
     rcFile.addProvider('adonisjs-livewire/livewire_provider')
+    rcFile.addProvider('adonisjs-livewire/edge_provider')
     rcFile.addCommand('adonisjs-livewire/commands')
   })
 
