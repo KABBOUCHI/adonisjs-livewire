@@ -67,18 +67,32 @@ export default class EdgeProvider {
 
       // @ts-ignore
       const component = new componentClass($props.all())
-
       const renderer = edge.createRenderer()
 
-      const props = Object.getOwnPropertyNames(Object.getPrototypeOf(component))
-      const data: Record<string, any> = {}
+      component.$props = $props
+      component.$slots = $slots
+      component.$caller = $caller
+
+      const prototype = Object.getPrototypeOf(component)
+      const props = Object.getOwnPropertyNames(prototype)
+      let data: Record<string, any> = {}
 
       for (const prop of props) {
         if (['constructor', 'render'].includes(prop)) {
           continue
         }
 
-        data[prop] = component[prop]
+        const descriptor = Object.getOwnPropertyDescriptor(prototype, prop)
+
+        if (descriptor && (descriptor.get || descriptor.set)) {
+          data = Object.assign(data, {
+            get [prop]() {
+              return component[prop]
+            },
+          })
+        } else {
+          data[prop] = component[prop]
+        }
       }
 
       for (const key of Object.keys(component)) {
