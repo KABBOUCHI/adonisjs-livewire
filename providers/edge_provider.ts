@@ -73,26 +73,33 @@ export default class EdgeProvider {
       component.$slots = $slots
       component.$caller = $caller
 
-      const prototype = Object.getPrototypeOf(component)
-      const props = Object.getOwnPropertyNames(prototype)
       let data: Record<string, any> = {}
+      let prototype = Object.getPrototypeOf(component)
 
-      for (const prop of props) {
-        if (['constructor', 'render'].includes(prop)) {
-          continue
+      while (prototype && prototype !== Object.prototype) {
+        const props = Object.getOwnPropertyNames(prototype)
+
+        for (const prop of props) {
+          if (['constructor', 'render'].includes(prop)) {
+            continue
+          }
+
+          const descriptor = Object.getOwnPropertyDescriptor(prototype, prop)
+
+          if (descriptor && (descriptor.get || descriptor.set)) {
+            data = Object.assign(data, {
+              get [prop]() {
+                return component[prop]
+              },
+            })
+          } else if (typeof component[prop] === 'function') {
+            data[prop] = component[prop].bind(component)
+          } else {
+            data[prop] = component[prop]
+          }
         }
 
-        const descriptor = Object.getOwnPropertyDescriptor(prototype, prop)
-
-        if (descriptor && (descriptor.get || descriptor.set)) {
-          data = Object.assign(data, {
-            get [prop]() {
-              return component[prop]
-            },
-          })
-        } else {
-          data[prop] = component[prop]
-        }
+        prototype = Object.getPrototypeOf(prototype)
       }
 
       for (const key of Object.keys(component)) {
