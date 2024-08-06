@@ -58,15 +58,16 @@ export default class EdgeProvider {
       edgeComponents[componentName] = componentClass
     }
 
-    async function renderEdgeComponent(name: string, { $props, $slots, $caller }: any) {
-      if (!(name in edgeComponents)) {
+    async function renderEdgeComponent(
+      name: string | EdgeComponent,
+      { $props, $slots, $caller }: any = {}
+    ) {
+      if (typeof name === 'string' && !(name in edgeComponents)) {
         return `Component ${name} not found`
       }
 
-      const componentClass = edgeComponents[name]
-
       // @ts-ignore
-      const component = new componentClass($props.all())
+      const component = typeof name === 'string' ? new edgeComponents[name]($props.all()) : name
       const renderer = edge.createRenderer()
 
       component.$props = $props
@@ -106,7 +107,7 @@ export default class EdgeProvider {
         data[key] = component[key]
       }
 
-      for (const key of Object.keys($props)) {
+      for (const key of Object.keys($props || {})) {
         data[key] = $props[key]
       }
 
@@ -122,6 +123,9 @@ export default class EdgeProvider {
     }
 
     edge.global('renderEdgeComponent', renderEdgeComponent)
+
+    //@ts-ignore
+    this.app.container.bindValue('renderEdgeComponent', renderEdgeComponent)
 
     for (const key of Object.keys(edgeComponents)) {
       edge.registerTemplate(key, {

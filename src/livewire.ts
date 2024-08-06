@@ -10,6 +10,7 @@ import Computed from './features/support_computed/computed.js'
 import { SupportLazyLoading } from './features/support_lazy_loading/support_lazy_loading.js'
 import { Secret } from '@adonisjs/core/helpers'
 import type { Config } from './define_config.js'
+import { EventBus } from './event_bus.js'
 
 export default class Livewire {
   app: ApplicationService
@@ -42,6 +43,10 @@ export default class Livewire {
 
   async trigger(event: string, component: Component, ...params: any[]) {
     const { context, features } = getLivewireContext()!
+    const eventBus = await this.app.container.make(EventBus)
+
+    // TODO: migrate everything to event bus
+    await eventBus.trigger(event, component, ...params)
 
     const callbacks = await Promise.all(
       features.map(async (feature) => {

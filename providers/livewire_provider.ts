@@ -15,6 +15,7 @@ import { SupportAutoInjectedAssets } from '../src/features/support_auto_injected
 import { Config, defaultConfig } from '../src/define_config.js'
 import type Livewire from '../src/livewire.js'
 import inspect from '@poppinss/inspect'
+import { EventBus } from '../src/event_bus.js'
 
 const currentDirname = dirname(fileURLToPath(import.meta.url))
 
@@ -62,6 +63,8 @@ export default class LivewireProvider {
 
     const app = await this.app.container.make('app')
     const router = await this.app.container.make('router')
+
+    this.app.container.singleton(EventBus, () => new EventBus())
 
     app.config.set('app.http.generateRequestId', true)
     app.config.set('app.http.useAsyncLocalStorage', true)
