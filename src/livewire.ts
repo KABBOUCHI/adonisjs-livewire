@@ -238,10 +238,14 @@ export default class Livewire {
 
       LivewireComponent = await import(this.app.makeURL(`./app/livewire/${path}.js`).href)
         .then((module) => module.default)
-        .catch(async () => {
-          return await import(this.app.makeURL(`./app/livewire/${path}/index.js`).href).then(
-            (module) => module.default
-          )
+        .catch(async (err) => {
+          if (err.message.includes('Cannot find module')) {
+            return await import(this.app.makeURL(`./app/livewire/${path}/index.js`).href).then(
+              (module) => module.default
+            )
+          }
+
+          throw err
         })
     }
 
