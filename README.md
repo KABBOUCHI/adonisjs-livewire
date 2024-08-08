@@ -201,9 +201,9 @@ will be compiled to
 
 ```ts
 // app/compoments/button.ts
-import { EdgeComponent } from 'adonisjs-livewire'
+import { ViewComponent } from 'adonisjs-livewire'
 
-export default class Button extends EdgeComponent {
+export default class Button extends ViewComponent {
   type = 'button'
   text = ''
 
