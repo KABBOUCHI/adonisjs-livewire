@@ -5,20 +5,20 @@ import type { ApplicationService } from '@adonisjs/core/types'
 import { basename, extname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import edge from 'edge.js'
-import { EdgeComponent } from '../index.js'
+import { ViewComponent } from '../index.js'
 import { ComponentTagCompiler } from '../src/component_tag_compiler.js'
 
 const JS_MODULES = ['.js', '.cjs', '.mjs']
 
-export default class EdgeProvider {
+export default class ViewProvider {
   constructor(protected app: ApplicationService) {}
 
   /**
    * The container bindings have booted
    */
   async boot() {
-    const edgeComponents: Record<string, typeof EdgeComponent> = {}
-    const edgeComponentFiles = await fsReadAll(this.app.relativePath('app/components'), {
+    const viewComponents: Record<string, typeof ViewComponent> = {}
+    const viewComponentFiles = await fsReadAll(this.app.relativePath('app/components'), {
       pathType: 'url',
       ignoreMissingRoot: true,
       filter: (filePath: string) => {
@@ -40,7 +40,7 @@ export default class EdgeProvider {
       },
     })
 
-    for (let file of edgeComponentFiles) {
+    for (let file of viewComponentFiles) {
       if (file.endsWith('.ts')) {
         file = file.replace(/\.ts$/, '.js')
       }
@@ -52,22 +52,22 @@ export default class EdgeProvider {
       const componentClass = (await importDefault(
         () => import(file),
         relativeFileName
-      )) as typeof EdgeComponent
+      )) as typeof ViewComponent
       const componentName = relativeFileName.replace(/\.js$/, '')
 
-      edgeComponents[componentName] = componentClass
+      viewComponents[componentName] = componentClass
     }
 
-    async function renderEdgeComponent(
-      name: string | EdgeComponent,
+    async function renderViewComponent(
+      name: string | ViewComponent,
       { $props, $slots, $caller }: any = {}
     ) {
-      if (typeof name === 'string' && !(name in edgeComponents)) {
+      if (typeof name === 'string' && !(name in viewComponents)) {
         return `Component ${name} not found`
       }
 
       // @ts-ignore
-      const component = typeof name === 'string' ? new edgeComponents[name]($props.all()) : name
+      const component = typeof name === 'string' ? new viewComponents[name]($props.all()) : name
       const renderer = edge.createRenderer()
 
       component.$props = $props
@@ -122,14 +122,14 @@ export default class EdgeProvider {
       return await renderer.renderRaw(await component.render())
     }
 
-    edge.global('renderEdgeComponent', renderEdgeComponent)
+    edge.global('renderViewComponent', renderViewComponent)
 
     //@ts-ignore
-    this.app.container.bindValue('renderEdgeComponent', renderEdgeComponent)
+    this.app.container.bindValue('renderViewComponent', renderViewComponent)
 
-    for (const key of Object.keys(edgeComponents)) {
+    for (const key of Object.keys(viewComponents)) {
       edge.registerTemplate(key, {
-        template: `{{{ await renderEdgeComponent("${key}", { $props, $slots, $caller }) }}}`,
+        template: `{{{ await renderViewComponent("${key}", { $props, $slots, $caller }) }}}`,
       })
     }
 

@@ -12,7 +12,7 @@ interface ComponentProps {
   toAttrs(): string
 }
 
-export abstract class EdgeComponent {
+export abstract class ViewComponent {
   declare view: Edge
   declare $props: ComponentProps
   declare $slots: { [key: string]: any }
