@@ -169,7 +169,8 @@ export default class Livewire {
 
       ;(await this.trigger('render', component, component.view, [])) as any
 
-      let html = (await this.render(component, '<div></div>')) || '<div></div>'
+      let content = (await this.render(component, '<div></div>')) || '<div></div>'
+      let html = await component.view.renderRaw(content)
 
       await this.trigger('dehydrate', component, context)
 
@@ -362,6 +363,7 @@ export default class Livewire {
       Livewire.setOrUpdateComponentView(component)
 
       let html = await this.render(component)
+      html = await component.view.renderRaw(html || '')
 
       if (html) {
         context.addEffect('html', html)
