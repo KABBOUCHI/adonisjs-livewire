@@ -307,8 +307,17 @@ export default class Livewire {
 
   static setOrUpdateComponentView(component: Component) {
     const renderer = edge.createRenderer()
+    const ctx = HttpContext.get()
+
+    //TODO: try to get locals from ctx.view.#locals
     renderer.share({
-      request: HttpContext.get()?.request,
+      request: ctx?.request,
+      //@ts-ignore
+      auth: ctx?.auth,
+      //@ts-ignore
+      cspNonce: ctx?.cspNonce,
+      //@ts-ignore
+      i18n: ctx?.i18n,
     })
     renderer.share(Livewire.generateComponentData(component))
 
