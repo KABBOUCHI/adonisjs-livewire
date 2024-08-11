@@ -11,6 +11,7 @@ import { SupportLazyLoading } from './features/support_lazy_loading/support_lazy
 import { Secret } from '@adonisjs/core/helpers'
 import type { Config } from './define_config.js'
 import { EventBus } from './event_bus.js'
+import edge from 'edge.js'
 
 export default class Livewire {
   app: ApplicationService
@@ -29,16 +30,6 @@ export default class Livewire {
 
   static componentHook(feature: any) {
     this.FEATURES.push(feature)
-  }
-
-  get view() {
-    let ctx = HttpContext.get()
-
-    if (!ctx) {
-      throw new Error('No HttpContext found')
-    }
-
-    return ctx.view as any
   }
 
   async trigger(event: string, component: Component, ...params: any[]) {
@@ -72,8 +63,46 @@ export default class Livewire {
     return callbacks
   }
 
+  static generateComponentData(component: Component) {
+    let data: Record<string, any> = {}
+    let prototype = Object.getPrototypeOf(component)
+
+    while (prototype && prototype !== Object.prototype) {
+      const props = Object.getOwnPropertyNames(prototype)
+
+      for (const prop of props) {
+        if (['constructor', 'render'].includes(prop)) {
+          continue
+        }
+
+        const descriptor = Object.getOwnPropertyDescriptor(prototype, prop)
+
+        if (descriptor && (descriptor.get || descriptor.set)) {
+          data = Object.assign(data, {
+            get [prop]() {
+              return component[prop]
+            },
+          })
+        } else if (typeof component[prop] === 'function') {
+          data[prop] = component[prop].bind(component)
+        } else {
+          data[prop] = component[prop]
+        }
+      }
+
+      prototype = Object.getPrototypeOf(prototype)
+    }
+
+    for (const key of Object.keys(component)) {
+      data[key] = component[key]
+    }
+
+    return data
+  }
+
   async mount(name: string, params: object = {}, options: { layout?: any; key?: string } = {}) {
     let component = await this.new(name)
+
     let context = new ComponentContext(component, true)
     let dataStore = new DataStore(string.generateRandom(32))
     let features = Livewire.FEATURES.map((Feature) => {
@@ -98,6 +127,9 @@ export default class Livewire {
       }
 
       await this.trigger('mount', component, params, options.key)
+
+      // pickup newely added props, like ts declared props
+      Livewire.setOrUpdateComponentView(component)
 
       const s = store(component)
 
@@ -135,7 +167,7 @@ export default class Livewire {
         await component.mount(...resolvedParams)
       }
 
-      ;(await this.trigger('render', component, this.view, [])) as any
+      ;(await this.trigger('render', component, component.view, [])) as any
 
       let html = (await this.render(component, '<div></div>')) || '<div></div>'
 
@@ -183,10 +215,13 @@ export default class Livewire {
       if (layout) {
         let layoutName = layout.name.replaceAll('.', '/')
         let layoutProps = layout.props
-        html = await this.view.renderRaw(`@component(layoutName, layoutProps)\n${html}\n@end`, {
-          layoutProps,
-          layoutName,
-        })
+        html = await component.view.renderRaw(
+          `@component(layoutName, layoutProps)\n${html}\n@end`,
+          {
+            layoutProps,
+            layoutName,
+          }
+        )
       }
 
       return html
@@ -264,7 +299,19 @@ export default class Livewire {
 
     component.setViewPath(`livewire/${viewPath}`)
 
+    Livewire.setOrUpdateComponentView(component)
+
     return component
+  }
+
+  static setOrUpdateComponentView(component: Component) {
+    const renderer = edge.createRenderer()
+    renderer.share({
+      request: HttpContext.get()?.request,
+    })
+    renderer.share(Livewire.generateComponentData(component))
+
+    component.view = renderer
   }
 
   protected async hydrateProperties(
@@ -273,6 +320,10 @@ export default class Livewire {
     _context: ComponentContext
   ) {
     Object.keys(data).forEach((key) => {
+      if (['view'].includes(key)) {
+        return
+      }
+
       const child = data[key]
 
       if (typeof component[key] !== 'function') {
@@ -306,6 +357,9 @@ export default class Livewire {
       await this.updateProperties(component, updates, data, context)
 
       await this.callMethods(component, calls, context)
+
+      // handle declare properties, they should be set after mount
+      Livewire.setOrUpdateComponentView(component)
 
       let html = await this.render(component)
 
@@ -422,6 +476,7 @@ export default class Livewire {
     Object.keys(data).forEach((key) => {
       if (computedDecorators.some((d) => d.name === key)) return
       if (!(key in component)) return
+      if (['view'].includes(key)) return
 
       const child = data[key]
 
@@ -429,6 +484,8 @@ export default class Livewire {
     })
 
     for (const key in updates) {
+      if (['view'].includes(key)) continue
+
       let segments = key.split('.')
       let property = segments[0]
       if (!(property in component)) return
@@ -501,7 +558,7 @@ export default class Livewire {
         session.flashMessages.update(session.pull(session.flashKey, null))
       }
 
-      this.view.share({
+      component.view.share({
         flashMessages: session.flashMessages,
         old: function (key: string, defaultVal?: any) {
           return session.flashMessages.get(key, defaultVal)
@@ -509,9 +566,8 @@ export default class Livewire {
       })
     }
 
-    let finish = (await this.trigger('render', component, this.view, [])) as any
-    let content = (await component.render()) || defaultValue || '<div></div>'
-    let html = await component.view.renderRaw(content)
+    let finish = (await this.trigger('render', component, component.view, [])) as any
+    let html = (await component.render()) || defaultValue || '<div></div>'
 
     html = this.insertAttributesIntoHtmlRoot(html, {
       'wire:id': component.getId(),
@@ -524,8 +580,6 @@ export default class Livewire {
         })
       }
     }
-
-    html = await this.view.renderRaw(html)
 
     if (session) {
       session.responseFlashMessages.clear()

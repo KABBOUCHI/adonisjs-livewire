@@ -15,6 +15,8 @@ export default class Computed extends Decorator {
 
     let value = await this.component[this.method]()
 
-    this.component[this.name] = value
+    this.component.view.share({
+      [this.name]: value,
+    })
   }
 }
