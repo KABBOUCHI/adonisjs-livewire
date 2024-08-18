@@ -71,7 +71,29 @@ export default class Livewire {
       const props = Object.getOwnPropertyNames(prototype)
 
       for (const prop of props) {
-        if (['constructor', 'render'].includes(prop)) {
+        if (prop.startsWith('__')) {
+          continue
+        }
+        if (
+          [
+            'constructor',
+            'render',
+            'ctx',
+            'view',
+            'setId',
+            'setName',
+            'addDecorator',
+            'redirect',
+            'setViewPath',
+            'dispatch',
+            'getListeners',
+            'skipRender',
+            'skipMount',
+            'skipHydrate',
+            'js',
+            'getDecorators',
+          ].includes(prop)
+        ) {
           continue
         }
 
@@ -94,6 +116,14 @@ export default class Livewire {
     }
 
     for (const key of Object.keys(component)) {
+      if (key.startsWith('__')) {
+        continue
+      }
+
+      // if ([].includes(key)) {
+      //   continue
+      // }
+
       data[key] = component[key]
     }
 
@@ -305,20 +335,29 @@ export default class Livewire {
     return component
   }
 
-  static setOrUpdateComponentView(component: Component) {
-    const renderer = edge.createRenderer()
+  // TODO: https://github.com/edge-js/edge/pull/156
+  static extractRequestViewLocals() {
     const ctx = HttpContext.get()
 
-    //TODO: try to get locals from ctx.view.#locals
-    renderer.share({
-      request: ctx?.request,
-      //@ts-ignore
-      auth: ctx?.auth,
-      //@ts-ignore
-      cspNonce: ctx?.cspNonce,
-      //@ts-ignore
-      i18n: ctx?.i18n,
+    if (!ctx || !ctx.view) {
+      return {}
+    }
+
+    let extracted = {
+      locals: {},
+    }
+
+    ctx.view.renderRawSync(`@eval(extracted.locals = state)`, {
+      extracted,
     })
+
+    return extracted.locals
+  }
+
+  static setOrUpdateComponentView(component: Component) {
+    const renderer = edge.createRenderer()
+
+    renderer.share(Livewire.extractRequestViewLocals())
     renderer.share(Livewire.generateComponentData(component))
 
     component.__view = renderer
