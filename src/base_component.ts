@@ -14,12 +14,38 @@ export class BaseComponent {
 
   declare bindings: any
 
-  declare view: ReturnType<Edge['createRenderer']>
+  declare __view: ReturnType<Edge['createRenderer']>
+  declare __view_data: Record<string, any>
 
   get ctx() {
     if (!this.__ctx) throw new Error('Cannot access http context. Please enable ASL.')
 
     return this.__ctx
+  }
+
+  get view() {
+    return {
+      share: (data: Record<string, any>) => {
+        return this.__view.share(data)
+      },
+
+      render: async (templatePath: string, state?: Record<string, any>) => {
+        this.__view_data = Object.assign({}, this.__view_data || {}, state || {})
+        return await this.__view.render(templatePath, state)
+      },
+      renderSync: (templatePath: string, state?: Record<string, any>) => {
+        this.__view_data = Object.assign({}, this.__view_data || {}, state || {})
+        return this.__view.renderSync(templatePath, state)
+      },
+      renderRaw: async (contents: string, state?: Record<string, any>, templatePath?: string) => {
+        this.__view_data = Object.assign({}, this.__view_data || {}, state || {})
+        return await this.__view.renderRaw(contents, state, templatePath)
+      },
+      renderRawSync: (contents: string, state?: Record<string, any>, templatePath?: string) => {
+        this.__view_data = Object.assign({}, this.__view_data || {}, state || {})
+        return this.__view.renderRawSync(contents, state, templatePath)
+      },
+    } as any
   }
 
   setId(id: string) {

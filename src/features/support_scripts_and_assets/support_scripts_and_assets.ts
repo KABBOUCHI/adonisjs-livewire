@@ -54,7 +54,11 @@ export class SupportScriptsAndAssets extends ComponentHook {
 
         const s = store(context.component)
 
-        s.push('scripts', await context.component.view.renderRaw(output), key)
+        s.push(
+          'scripts',
+          await context.component.view.renderRaw(output, context.component.__view_data || {}),
+          key
+        )
       },
     })
 
@@ -62,24 +66,34 @@ export class SupportScriptsAndAssets extends ComponentHook {
       tagName: 'assets',
       block: true,
       seekable: false,
-      compile(parser, _buffer, token) {
+      async compile(_parser, _buffer, token) {
         let output = ''
 
         let key = string.generateRandom(32)
 
-        const buff: any = {
-          outputRaw: (str: string) => {
-            output += str
-          },
+        for (let child of token.children) {
+          if (child.type === 'raw') {
+            output += child.value
+          } else if (child.type === 'newline') {
+            output += '\n'
+          } else if (child.type === 'mustache') {
+            output += `{{ ${child.properties.jsArg} }}`
+          } else if (child.type === 's__mustache') {
+            output += `{{{ ${child.properties.jsArg} }}}`
+          } else {
+            console.log(child.type, child)
+          }
         }
-
-        token.children.forEach((child) => parser.processToken(child, buff))
 
         const { context } = getLivewireContext()!
 
         const s = store(context.component)
 
-        s.push('assets', output, key)
+        s.push(
+          'assets',
+          await context.component.view.renderRaw(output, context.component.__view_data || {}),
+          key
+        )
       },
     })
   }

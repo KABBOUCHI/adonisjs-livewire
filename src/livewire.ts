@@ -321,7 +321,7 @@ export default class Livewire {
     })
     renderer.share(Livewire.generateComponentData(component))
 
-    component.view = renderer
+    component.__view = renderer
   }
 
   protected async hydrateProperties(
