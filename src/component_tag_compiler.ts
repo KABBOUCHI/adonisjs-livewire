@@ -2,8 +2,8 @@ import type { ApplicationService } from '@adonisjs/core/types'
 import edge from 'edge.js'
 // import { existsSync } from 'node:fs'
 
-const SELF_CLOSING_REGEX = /<x-([a-zA-Z0-9\.\-]+)([^>]*)\/>/g
-const OPENING_REGEX = /<x-([a-zA-Z0-9\.\-]+)([^>]*)>([\s\S]*?(?:(?!<\/x-\1>).)*?)<\/x-\1>/g
+const SELF_CLOSING_REGEX = /<x-([a-zA-Z0-9\.\-\:]+)([^>]*)\/>/g
+const OPENING_REGEX = /<x-([a-zA-Z0-9\.\-\:]+)([^>]*)>([\s\S]*?(?:(?!<\/x-\1>).)*?)<\/x-\1>/g
 
 export class ComponentTagCompiler {
   static compileSelfClosingTags(input: string, app?: ApplicationService): string {
@@ -15,7 +15,8 @@ export class ComponentTagCompiler {
     }
 
     for (const match of matches) {
-      let [_, component, props] = match.match(/<x-([a-zA-Z0-9\.\-]+)([^>]*)\/>/) || []
+      let [_, diskName, component, props] =
+        match.match(/<x-(?:(\w+)::)?([a-zA-Z0-9\.\-]+)([^>]*)\/>/) || []
       let attributes: any = {}
       if (props) {
         let regex = /(:)?([a-zA-Z0-9\-:.]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g
@@ -58,19 +59,19 @@ export class ComponentTagCompiler {
 
       let componentPath = component.replace(/\./g, '/')
 
+      const prefix = diskName ? `${diskName}::` : ''
       if (app) {
         const components =
           edge.loader
             .listComponents()
-            .find((l) => l.diskName === 'default')
+            .find((l) => l.diskName === (diskName ?? 'default'))
             ?.components.map((c) => c.componentName) || []
-
-        if (components.includes(componentPath)) {
-        } else if (components.includes(`components/${componentPath}`)) {
+        if (components.includes(prefix + componentPath)) {
+        } else if (components.includes(prefix + `components/${componentPath}`)) {
           componentPath = `components/${componentPath}`
-        } else if (components.includes(`${componentPath}/index`)) {
+        } else if (components.includes(prefix + `${componentPath}/index`)) {
           componentPath = `${componentPath}/index`
-        } else if (components.includes(`components/${componentPath}/index`)) {
+        } else if (components.includes(prefix + `components/${componentPath}/index`)) {
           componentPath = `components/${componentPath}/index`
         }
 
@@ -82,7 +83,8 @@ export class ComponentTagCompiler {
         //   }
         // }
       }
-      raw = raw.replace(match, `@!component('${componentPath}', ${attrs})`)
+
+      raw = raw.replace(match, `@!component('${prefix}${componentPath}', ${attrs})`)
     }
     return raw
   }
@@ -96,8 +98,10 @@ export class ComponentTagCompiler {
       return raw
     }
     for (const match of matches) {
-      let [_, component, props, content] =
-        match.match(/<x-([a-zA-Z0-9\.\-]+)([^>]*)>([\s\S]*?(?:(?!<\/x-\1>).)*?)<\/x-\1>/) || []
+      let [_, diskName, component, props, content] =
+        match.match(
+          /<x-(?:(\w+)::)?([a-zA-Z0-9\.\-]+)([^>]*)>([\s\S]*?(?:(?!<\/x-\1>).)*?)<\/x-\1(::)?\2>/
+        ) || []
 
       let attributes: any = {}
       if (props) {
@@ -146,19 +150,19 @@ export class ComponentTagCompiler {
         let maybeProps = attributes.props ? `, ${attributes.props}` : ``
         raw = raw.replace(match, `@slot(${name}${maybeProps})\n${content}\n@endslot`)
       } else {
+        const prefix = diskName ? `${diskName}::` : ''
         if (app) {
           const components =
             edge.loader
               .listComponents()
-              .find((l) => l.diskName === 'default')
+              .find((l) => l.diskName === (diskName ?? 'default'))
               ?.components.map((c) => c.componentName) || []
-
-          if (components.includes(componentPath)) {
-          } else if (components.includes(`components/${componentPath}`)) {
+          if (components.includes(prefix + componentPath)) {
+          } else if (components.includes(prefix + `components/${componentPath}`)) {
             componentPath = `components/${componentPath}`
-          } else if (components.includes(`${componentPath}/index`)) {
+          } else if (components.includes(prefix + `${componentPath}/index`)) {
             componentPath = `${componentPath}/index`
-          } else if (components.includes(`components/${componentPath}/index`)) {
+          } else if (components.includes(prefix + `components/${componentPath}/index`)) {
             componentPath = `components/${componentPath}/index`
           }
           // if (!existsSync(app.viewsPath(componentPath + '.edge'))) {
@@ -170,7 +174,10 @@ export class ComponentTagCompiler {
           // }
         }
 
-        raw = raw.replace(match, `@component('${componentPath}', ${attrs})\n${content}\n@end`)
+        raw = raw.replace(
+          match,
+          `@component('${prefix}${componentPath}', ${attrs})\n${content}\n@end`
+        )
       }
     }
 

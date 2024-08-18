@@ -194,4 +194,16 @@ test.group('x-tag', () => {
 
     assert.equal(compile(input4), expected4)
   })
+
+  test('disks - self closed', async ({ assert }) => {
+    let input = '<x-diskName::button />'
+    let expected = `@!component('diskName::button', {})`
+    assert.equal(compile(input), expected)
+  })
+
+  test('disks', async ({ assert }) => {
+    let input = '<x-diskName::button> Test </x-diskName::button>'
+    let expected = `@component('diskName::button', {})\n Test \n@end`
+    assert.equal(compile(input), expected)
+  })
 })
