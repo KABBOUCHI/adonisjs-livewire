@@ -16,6 +16,7 @@ import { Config, defaultConfig } from '../src/define_config.js'
 import type Livewire from '../src/livewire.js'
 import inspect from '@poppinss/inspect'
 import { EventBus } from '../src/event_bus.js'
+import { ModelSynth } from '../src/synthesizers/model.js'
 
 const currentDirname = dirname(fileURLToPath(import.meta.url))
 
@@ -288,5 +289,7 @@ export default class LivewireProvider {
         await feature['provide'](this.app)
       }
     }
+
+    Livewire.registerPropertySynthesizer([ModelSynth])
   }
 }

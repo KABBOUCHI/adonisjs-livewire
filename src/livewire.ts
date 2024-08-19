@@ -12,6 +12,9 @@ import { Secret } from '@adonisjs/core/helpers'
 import type { Config } from './define_config.js'
 import { EventBus } from './event_bus.js'
 import edge from 'edge.js'
+import { Synth } from '../index.js'
+
+const isSyntheticTuple = (data) => Array.isArray(data) && data.length === 2 && !!data[1]['s']
 
 export default class Livewire {
   app: ApplicationService
@@ -19,6 +22,7 @@ export default class Livewire {
   components = new Map<string, typeof Component>()
   checksum: Checksum
   static FEATURES: any[] = []
+  static PROPERTY_SYNTHESIZERS: Array<typeof Synth> = []
 
   constructor(app: ApplicationService, config: Config) {
     this.app = app
@@ -30,6 +34,14 @@ export default class Livewire {
 
   static componentHook(feature: any) {
     this.FEATURES.push(feature)
+  }
+
+  static registerPropertySynthesizer(synth: typeof Synth | (typeof Synth)[]) {
+    if (Array.isArray(synth)) {
+      synth.forEach((s) => this.PROPERTY_SYNTHESIZERS.push(s))
+    } else {
+      this.PROPERTY_SYNTHESIZERS.push(synth)
+    }
   }
 
   async trigger(event: string, component: Component, ...params: any[]) {
@@ -158,9 +170,6 @@ export default class Livewire {
 
       await this.trigger('mount', component, params, options.key)
 
-      // pickup newely added props, like ts declared props
-      Livewire.setOrUpdateComponentView(component)
-
       const s = store(component)
 
       let skipMount = s.get('skipMount') ?? false
@@ -197,6 +206,8 @@ export default class Livewire {
         await component.mount(...resolvedParams)
       }
 
+      // pickup newely added props, like ts declared props
+      Livewire.setOrUpdateComponentView(component)
       ;(await this.trigger('render', component, component.view, [])) as any
 
       let content = (await this.render(component, '<div></div>')) || '<div></div>'
@@ -363,22 +374,35 @@ export default class Livewire {
     component.__view = renderer
   }
 
+  protected async hydrate(data: any, context: ComponentContext, path: string) {
+    if (!isSyntheticTuple(data)) {
+      return data
+    }
+
+    const [value, meta] = data
+
+    const synth = this.propertySynth(meta['s'], context, path)
+
+    return await synth.hydrate(value, meta, async (name: string, child: any) => {
+      return await this.hydrate(child, context, `${path}.${name}`)
+    })
+  }
+
   protected async hydrateProperties(
     component: Component,
     data: { [key: string]: any },
-    _context: ComponentContext
+    context: ComponentContext
   ) {
-    Object.keys(data).forEach((key) => {
+    for (let key in data) {
       if (['view'].includes(key)) {
-        return
+        continue
       }
 
-      const child = data[key]
-
+      const child = await this.hydrate(data[key], context, key)
       if (typeof component[key] !== 'function') {
         component[key] = child
       }
-    })
+    }
   }
 
   async update(snapshot: any, updates: any, calls: any) {
@@ -470,16 +494,90 @@ export default class Livewire {
     context.addEffect('returns', returns)
   }
 
+  getSynthesizerByKey(key: string, context: ComponentContext, path: string): Synth {
+    for (let synth of Livewire.PROPERTY_SYNTHESIZERS) {
+      if (synth.getKey() === key) {
+        // @ts-ignore
+        return new synth(context, path, this.app)
+      }
+    }
+
+    throw new Error('No synthesizer found for key: "' + key + '"')
+  }
+
+  getSynthesizerByTarget(target: any, context: ComponentContext, path: string): Synth {
+    for (let synth of Livewire.PROPERTY_SYNTHESIZERS) {
+      if (synth.match(target)) {
+        // @ts-ignore
+        return new synth(context, path, this.app)
+      }
+    }
+
+    throw new Error(
+      'Property type not supported in Livewire for property: [' + JSON.stringify(target) + ']'
+    )
+  }
+
+  propertySynth(keyOrTarget: any, context: ComponentContext, path: string): Synth {
+    return typeof keyOrTarget === 'string'
+      ? this.getSynthesizerByKey(keyOrTarget, context, path)
+      : this.getSynthesizerByTarget(keyOrTarget, context, path)
+  }
+
+  dehydrate(target: any, context: ComponentContext, path: string) {
+    if (target === null || ['string', 'number', 'boolean', 'undefined'].includes(typeof target)) {
+      return target
+    }
+
+    if (typeof target === 'object' && typeof target.constructor?.name !== 'string') {
+      return target
+    }
+
+    const synth = this.propertySynth(target, context, path)
+
+    const [data, meta] = synth.dehydrate(target, (name: string, child: any) => {
+      return this.dehydrate(child, context, `${path}.${name}`)
+    })
+
+    //@ts-ignore
+    meta['s'] = synth.getKey()
+
+    return [data, meta]
+  }
+
+  dehydrateProperties(component: any, context: ComponentContext) {
+    const data = {}
+    for (let key in component) {
+      if (key.startsWith('__')) {
+        continue
+      }
+
+      if (typeof component[key] === 'function') {
+        continue
+      }
+
+      data[key] = component[key]
+    }
+
+    for (let key in data) {
+      data[key] = this.dehydrate(data[key], context, key)
+    }
+
+    return data
+
+    // return JSON.parse(
+    //   JSON.stringify(component, (key, value) => {
+    //     if (key.startsWith('__')) return undefined
+
+    //     return value
+    //   })
+    // )
+  }
+
   snapshot(component: any, context: any = null): any {
     context = context ?? new ComponentContext(component)
 
-    let data = JSON.parse(
-      JSON.stringify(component, (key, value) => {
-        if (key.startsWith('__')) return undefined
-
-        return value
-      })
-    )
+    let data = this.dehydrateProperties(component, context)
 
     const s = store(component)
 
@@ -518,20 +616,25 @@ export default class Livewire {
     component: Component,
     updates: any,
     data: any,
-    _context: ComponentContext
+    context: ComponentContext
   ) {
     const computedDecorators: Computed[] = component
       .getDecorators()
       .filter((d) => d instanceof Computed) as any
-    Object.keys(data).forEach((key) => {
+
+    for (const key in data) {
       if (computedDecorators.some((d) => d.name === key)) return
       if (!(key in component)) return
       if (['view'].includes(key)) return
 
       const child = data[key]
 
-      component[key] = child
-    })
+      if (isSyntheticTuple(child)) {
+        component[key] = await this.hydrate(child, context, key)
+      } else {
+        component[key] = child
+      }
+    }
 
     for (const key in updates) {
       if (['view'].includes(key)) continue

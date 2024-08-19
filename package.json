@@ -1,7 +1,7 @@
 {
   "name": "adonisjs-livewire",
   "description": "A front-end framework for AdonisJS",
-  "version": "0.4.0",
+  "version": "0.5.0-beta.1",
   "main": "build/providers/livewire_provider.js",
   "type": "module",
   "files": [
@@ -32,6 +32,7 @@
     "@adonisjs/core": "^6.2.2",
     "@adonisjs/eslint-config": "^1.2.1",
     "@adonisjs/http-server": "^7.0.2",
+    "@adonisjs/lucid": "^21.2.0",
     "@adonisjs/prettier-config": "^1.2.1",
     "@adonisjs/tsconfig": "^1.2.1",
     "@japa/assert": "^1.4.1",
@@ -61,6 +62,7 @@
   "peerDependencies": {
     "@adonisjs/core": "^6.2.2",
     "@adonisjs/http-server": "^7.0.2",
+    "@adonisjs/lucid": "^21.2.0",
     "@adonisjs/session": "^7.1.1",
     "@adonisjs/shield": "^8.1.0",
     "edge.js": "^6.0.1"
