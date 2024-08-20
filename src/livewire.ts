@@ -485,6 +485,16 @@ export default class Livewire {
         if (error.code === 'E_VALIDATION_ERROR') {
           //@ts-ignore
           HttpContext.get()?.session?.flashValidationErrors(error)
+        } else if (error.code === 'E_INVALID_CREDENTIALS') {
+          //@ts-ignore
+          const session = HttpContext.get()?.session
+
+          if (session) {
+            session.flashExcept(['_csrf', '_method', 'password', 'password_confirmation'])
+            session.flashErrors({ [error.code!]: error.message })
+          } else {
+            throw error
+          }
         } else {
           throw error
         }
