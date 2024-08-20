@@ -525,24 +525,36 @@ export default class Livewire {
   }
 
   dehydrate(target: any, context: ComponentContext, path: string) {
-    if (target === null || ['string', 'number', 'boolean', 'undefined'].includes(typeof target)) {
+    const isPrimitive = (v: any) =>
+      v === null || ['string', 'number', 'boolean', 'undefined'].includes(typeof v)
+
+    if (isPrimitive(target)) {
       return target
     }
 
-    if (typeof target === 'object' && typeof target.constructor?.name !== 'string') {
+    // if (typeof target === 'object' && typeof target.constructor?.name !== 'string') {
+    //   return target
+    // }
+
+    if (Array.isArray(target) && target.every(isPrimitive)) {
       return target
     }
 
-    const synth = this.propertySynth(target, context, path)
+    try {
+      const synth = this.propertySynth(target, context, path)
 
-    const [data, meta] = synth.dehydrate(target, (name: string, child: any) => {
-      return this.dehydrate(child, context, `${path}.${name}`)
-    })
+      const [data, meta] = synth.dehydrate(target, (name: string, child: any) => {
+        return this.dehydrate(child, context, `${path}.${name}`)
+      })
 
-    //@ts-ignore
-    meta['s'] = synth.getKey()
+      //@ts-ignore
+      meta['s'] = synth.getKey()
 
-    return [data, meta]
+      return [data, meta]
+    } catch (error) {
+      console.error(error)
+      return target
+    }
   }
 
   dehydrateProperties(component: any, context: ComponentContext) {
