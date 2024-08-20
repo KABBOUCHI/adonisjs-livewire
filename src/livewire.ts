@@ -526,15 +526,13 @@ export default class Livewire {
 
   dehydrate(target: any, context: ComponentContext, path: string) {
     const isPrimitive = (v: any) =>
-      v === null || ['string', 'number', 'boolean', 'undefined'].includes(typeof v)
+      v === null ||
+      ['string', 'number', 'boolean', 'undefined'].includes(typeof v) ||
+      (typeof target === 'object' && target.constructor.name === 'Object')
 
     if (isPrimitive(target)) {
       return target
     }
-
-    // if (typeof target === 'object' && typeof target.constructor?.name !== 'string') {
-    //   return target
-    // }
 
     if (Array.isArray(target) && target.every(isPrimitive)) {
       return target

@@ -1,7 +1,7 @@
 {
   "name": "adonisjs-livewire",
   "description": "A front-end framework for AdonisJS",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "main": "build/providers/livewire_provider.js",
   "type": "module",
   "files": [
