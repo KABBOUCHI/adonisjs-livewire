@@ -23,6 +23,9 @@ dependencies:
   edge-parser:
     specifier: ^8.2.2
     version: 8.2.2
+  luxon:
+    specifier: ^3.5.0
+    version: 3.5.0
   ts-mixer:
     specifier: ^6.0.3
     version: 6.0.3
@@ -39,7 +42,7 @@ devDependencies:
     version: 7.0.2(@adonisjs/application@8.0.3)(@adonisjs/encryption@6.0.1)(@adonisjs/events@9.0.1)(@adonisjs/fold@10.0.1)(@adonisjs/logger@6.0.1)
   '@adonisjs/lucid':
     specifier: ^21.2.0
-    version: 21.2.0(@adonisjs/core@6.2.2)
+    version: 21.2.0(@adonisjs/core@6.2.2)(luxon@3.5.0)
   '@adonisjs/prettier-config':
     specifier: ^1.2.1
     version: 1.2.1
@@ -64,6 +67,9 @@ devDependencies:
   '@types/crypto-js':
     specifier: ^4.2.1
     version: 4.2.2
+  '@types/luxon':
+    specifier: ^3.4.2
+    version: 3.4.2
   '@types/node':
     specifier: ^20.10.6
     version: 20.11.8
@@ -331,7 +337,7 @@ packages:
       abstract-logging: 2.0.1
       pino: 8.17.2
 
-  /@adonisjs/lucid@21.2.0(@adonisjs/core@6.2.2):
+  /@adonisjs/lucid@21.2.0(@adonisjs/core@6.2.2)(luxon@3.5.0):
     resolution: {integrity: sha512-QWsRq/2uU3ZSJhAo418yTSIvgapuXC+D7ZhOvJ3Q/nav1BFUaGP8gzq68gUsBVGEk7cAiHqmBPgwR6b367TKHg==}
     engines: {node: '>=18.16.0'}
     peerDependencies:
@@ -355,6 +361,7 @@ packages:
       kleur: 4.1.5
       knex: 3.1.0
       knex-dynamic-connection: 3.2.0
+      luxon: 3.5.0
       pretty-hrtime: 1.0.3
       qs: 6.13.0
       slash: 5.1.0
@@ -1045,6 +1052,10 @@ packages:
 
   /@types/json-schema@7.0.15:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+    dev: true
+
+  /@types/luxon@3.4.2:
+    resolution: {integrity: sha512-TifLZlFudklWlMBfhubvgqTXRzLDI5pCbGa4P8a3wPyUQSW+1xQ5eDsreP9DWHX3tjq1ke96uYG/nwundroWcA==}
     dev: true
 
   /@types/minimist@1.2.5:
@@ -3017,6 +3028,10 @@ packages:
     dependencies:
       yallist: 4.0.0
     dev: true
+
+  /luxon@3.5.0:
+    resolution: {integrity: sha512-rh+Zjr6DNfUYR3bPwJEnuwDdqMbxZW7LOQfUN4B54+Cl+0o5zaU9RJ6bcidfDtC1cWCZXQ+nvX8bf6bAji37QQ==}
+    engines: {node: '>=12'}
 
   /macroable@7.0.2:
     resolution: {integrity: sha512-QS9p+Q20YBxpE0dJBnF6CPURP7p1GUsxnhTxTWH5nG3A1F5w8Rg3T4Xyh5UlrFSbHp88oOciVP/0agsNLhkHdQ==}
