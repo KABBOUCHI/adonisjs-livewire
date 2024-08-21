@@ -706,6 +706,7 @@ export default class Livewire {
   }
 
   async render(component: Component, defaultValue?: string) {
+    // let isRedirect = (store(component).get('redirect') ?? []).length > 0
     let skipRenderHtml = store(component).get('skipRender') ?? false
     skipRenderHtml = Array.isArray(skipRenderHtml) ? skipRenderHtml[0] : skipRenderHtml
 
@@ -725,16 +726,13 @@ export default class Livewire {
     let session: any = ctx?.['session']
 
     if (session) {
-      await session.commit()
-
-      if (session.has(session.flashKey)) {
-        session.flashMessages.update(session.pull(session.flashKey, null))
-      }
+      //@ts-ignore
+      const isLivewireRequest = typeof ctx.request.request.headers['x-livewire'] !== 'undefined'
 
       component.view.share({
-        flashMessages: session.flashMessages,
+        flashMessages: isLivewireRequest ? session.responseFlashMessages : session.flashMessages,
         old: function (key: string, defaultVal?: any) {
-          return session.flashMessages.get(key, defaultVal)
+          return (isLivewireRequest ? session.responseFlashMessages : session.flashMessages).get(key, defaultVal)
         },
       })
     }
@@ -752,11 +750,6 @@ export default class Livewire {
           html = newHtml
         })
       }
-    }
-
-    if (session) {
-      session.responseFlashMessages.clear()
-      session.flashMessages.clear()
     }
 
     return html

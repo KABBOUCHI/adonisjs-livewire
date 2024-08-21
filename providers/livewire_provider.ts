@@ -252,6 +252,7 @@ export default class LivewireProvider {
         components: [],
         assets: [],
       }
+      let isRedirect = false
       for (const component of components) {
         let snapshot = JSON.parse(component.snapshot)
         let [newSnapshot, effects] = await livewire.update(
@@ -259,10 +260,23 @@ export default class LivewireProvider {
           component.updates,
           component.calls
         )
+
+        if(effects && effects.redirect){
+          isRedirect = true
+        }
         result.components.push({
           snapshot: JSON.stringify(newSnapshot),
           effects,
         })
+      }
+
+
+      // @ts-ignore
+      if(ctx.session && !isRedirect) {
+        // @ts-ignore
+        ctx.session.responseFlashMessages.clear()
+        // @ts-ignore
+        ctx.session.flashMessages.clear()
       }
 
       return result
