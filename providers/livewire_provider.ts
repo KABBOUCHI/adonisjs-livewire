@@ -240,9 +240,7 @@ export default class LivewireProvider {
           ...params,
         }
 
-        return await view.renderRaw(
-          `@livewire('${component}', ${JSON.stringify(parameters)}, { layout: { name: '${config.layout}' } })`
-        )
+        return await livewire.mount(component, parameters, { layout: { name: config.layout } })
       })
     }
 
@@ -261,7 +259,7 @@ export default class LivewireProvider {
           component.calls
         )
 
-        if(effects && effects.redirect){
+        if (effects && effects.redirect) {
           isRedirect = true
         }
         result.components.push({
@@ -270,9 +268,8 @@ export default class LivewireProvider {
         })
       }
 
-
       // @ts-ignore
-      if(ctx.session && !isRedirect) {
+      if (ctx.session && !isRedirect) {
         // @ts-ignore
         ctx.session.responseFlashMessages.clear()
         // @ts-ignore
