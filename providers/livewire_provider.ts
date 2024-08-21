@@ -1,6 +1,6 @@
 import type { ApplicationService } from '@adonisjs/core/types'
 import fs from 'node:fs'
-import { HttpContext, Route, errors } from '@adonisjs/core/http'
+import { Route, errors } from '@adonisjs/core/http'
 import { SupportLazyLoading } from '../src/features/support_lazy_loading/support_lazy_loading.js'
 import { Constructor } from '@adonisjs/http-server/types'
 import edge, { type Edge } from 'edge.js'
@@ -96,12 +96,14 @@ export default class LivewireProvider {
       tagName: 'livewireScripts',
       block: false,
       seekable: false,
-      compile(_parser, buffer, _token) {
-        //@ts-ignore
-        let csrfToken = HttpContext.get()?.request.csrfToken
-
-        buffer.outputRaw(
-          `<script src="/livewire.js?v=${packageJson.version}" data-csrf="${csrfToken}" data-update-uri="/livewire/update" data-navigate-once="true"></script>`
+      compile(_parser, buffer, token) {
+        buffer.outputExpression(
+          '`<script src="/livewire.js?v=' +
+            packageJson.version +
+            '" data-csrf="${state.request.csrfToken}" data-update-uri="/livewire/update" data-navigate-once="true"></script>`',
+          token.filename,
+          token.loc.start.line,
+          false
         )
       },
     })
