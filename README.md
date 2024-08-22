@@ -77,11 +77,11 @@ Add routes
 ```ts
 // start/routes.ts
 
-Route.livewire('/', 'counter') // app/livewire/counter.ts
-Route.livewire('/', 'counter', { initialCounter: 10 })
-Route.livewire('/search-users', 'search-users') // app/livewire/search-users.ts
-Route.livewire('/search-users') // app/livewire/search-users.ts
-Route.livewire('/search-users', 'search-users.index') // app/livewire/search-users/index.ts
+router.livewire('/', 'counter') // app/livewire/counter.ts
+router.livewire('/', 'counter', { initialCounter: 10 })
+router.livewire('/search-users', 'search-users') // app/livewire/search-users.ts
+router.livewire('/search-users') // app/livewire/search-users.ts
+router.livewire('/search-users', 'search-users.index') // app/livewire/search-users/index.ts
 ```
 
 ## Registering Custom Components
