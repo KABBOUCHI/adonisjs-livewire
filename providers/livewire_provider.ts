@@ -14,7 +14,7 @@ import { SupportScriptsAndAssets } from '../src/features/support_scripts_and_ass
 import { SupportAutoInjectedAssets } from '../src/features/support_auto_injected_assets/support_auto_injected_assets.js'
 import { Config, defaultConfig } from '../src/define_config.js'
 import type Livewire from '../src/livewire.js'
-import inspect from '@poppinss/inspect'
+import { dump, createScript, createStyleSheet } from '@poppinss/dumper/html'
 import { EventBus } from '../src/event_bus.js'
 import { ModelSynth } from '../src/synthesizers/model.js'
 
@@ -45,7 +45,19 @@ declare module '@adonisjs/core/types' {
 }
 
 function dd(...args: any[]) {
-  throw errors.E_HTTP_REQUEST_ABORTED.invoke(args.map(inspect.string.html).join('\n'), 500)
+  throw errors.E_HTTP_REQUEST_ABORTED.invoke(
+    `<style>
+    ${createStyleSheet()}
+    </style>
+
+    <script>
+    ${createScript()}
+    </script>
+
+    ${args.map((arg) => dump(arg)).join('\n')}
+   `,
+    500
+  )
 }
 
 declare global {

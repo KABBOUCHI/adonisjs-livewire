@@ -11,9 +11,9 @@ dependencies:
   '@adonisjs/shield':
     specifier: ^8.1.0
     version: 8.1.1(@adonisjs/core@6.2.2)(@adonisjs/session@7.1.1)(edge.js@6.0.1)
-  '@poppinss/inspect':
-    specifier: ^1.0.1
-    version: 1.0.1
+  '@poppinss/dumper':
+    specifier: 0.1.0-beta.4
+    version: 0.1.0-beta.4
   '@poppinss/utils':
     specifier: ^6.7.3
     version: 6.7.3
@@ -780,6 +780,12 @@ packages:
     dependencies:
       kleur: 4.1.5
 
+  /@poppinss/dumper@0.1.0-beta.4:
+    resolution: {integrity: sha512-tFGFC9mBBSZAhT1K3vq9AC9PI2woZ2XvoJNaSPNQoSUEWMui89dzI+C3PfTT3nIZUmgsQezh6DPRCs5Pb+7npA==}
+    dependencies:
+      '@sindresorhus/is': 7.0.0
+    dev: false
+
   /@poppinss/hooks@6.0.2-0:
     resolution: {integrity: sha512-mG0hnQlxgflvxyM6t/XO8z/FwotsYRXPhtLZ3cz3iyk4t8xaNtOihSANBcvqdkxZCtGBvotNIf/GnES9hvlfSQ==}
     dev: true
@@ -876,6 +882,11 @@ packages:
   /@sindresorhus/is@6.1.0:
     resolution: {integrity: sha512-BuvU07zq3tQ/2SIgBsEuxKYDyDjC0n7Zir52bpHy2xnBbW81+po43aLFPLbeV3HRAheFbGud1qgcqSYfhtHMAg==}
     engines: {node: '>=16'}
+
+  /@sindresorhus/is@7.0.0:
+    resolution: {integrity: sha512-WDTlVTyvFivSOuyvMeedzg2hdoBLZ3f1uNVuEida2Rl9BrfjrIRjWA/VZIrMRLvSwJYCAlCRA3usDt1THytxWQ==}
+    engines: {node: '>=18'}
+    dev: false
 
   /@swc/core-darwin-arm64@1.3.106:
     resolution: {integrity: sha512-XYcbViNyHnnm7RWOAO1YipMmthM7m2aXF32b0y+JMLYFBEyFpjVX9btLkzeL7wRx/5B3I35yJNhE+xyx0Q1Gkw==}
