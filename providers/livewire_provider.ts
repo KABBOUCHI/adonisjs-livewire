@@ -89,6 +89,7 @@ function dd(...args: any[]) {
             bigInt: 'color: rgb(18, 153, 218); font-weight: bold;',
             unknownLabel: 'color: rgb(255, 132, 0);',
             undefined: 'color: rgb(255, 132, 0);',
+            functionLabel: 'color: rgb(18, 153, 218);',
           },
         })
       )
