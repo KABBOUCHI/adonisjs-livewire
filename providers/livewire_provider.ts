@@ -14,7 +14,7 @@ import { SupportScriptsAndAssets } from '../src/features/support_scripts_and_ass
 import { SupportAutoInjectedAssets } from '../src/features/support_auto_injected_assets/support_auto_injected_assets.js'
 import { Config, defaultConfig } from '../src/define_config.js'
 import type Livewire from '../src/livewire.js'
-import { dump, createScript, createStyleSheet } from '@poppinss/dumper/html'
+import { dump, createScript, createStyleSheet, themes } from '@poppinss/dumper/html'
 import { EventBus } from '../src/event_bus.js'
 import { ModelSynth } from '../src/synthesizers/model.js'
 
@@ -48,13 +48,52 @@ function dd(...args: any[]) {
   throw errors.E_HTTP_REQUEST_ABORTED.invoke(
     `<style>
     ${createStyleSheet()}
+
+    .dumper-dump {
+      font-size: 12px;
+      padding: 0;
+      margin: 12px 0;
+      border-radius: 2px;
+    }
+
+    .dumper-dump pre {
+      padding: 5px;
+      font: 12px Menlo, Monaco, Consolas, monospace;
+      line-height: 24px;
+    }
     </style>
 
     <script>
     ${createScript()}
     </script>
 
-    ${args.map((arg) => dump(arg)).join('<br>')}
+    ${args
+      .map((arg) =>
+        dump(arg, {
+          styles: {
+            ...themes.nightOwl,
+            shell: 'background-color: rgb(23, 22, 26); color: rgb(255, 132, 0);',
+            pre: '',
+            classLabel: 'color: rgb(18, 153, 218);',
+            arrayLabel: 'color: rgb(18, 153, 218);',
+            objectLabel: 'color: rgb(18, 153, 218);',
+            mapLabel: 'color: rgb(18, 153, 218);',
+            setLabel: 'color: rgb(18, 153, 218);',
+            symbol: 'color: rgb(18, 153, 218);',
+            braces: 'color: rgb(255, 132, 0);',
+            brackets: 'color: rgb(255, 132, 0);',
+            toggle: 'color: rgb(160, 160, 160); background: none; border: none; padding: 0',
+            boolean: 'color: rgb(255, 132, 0); font-style: mono;',
+            objectKey: 'color: rgb(255, 255, 255);',
+            string: 'color: rgb(86, 219, 58);',
+            number: 'color: rgb(18, 153, 218);',
+            bigInt: 'color: rgb(18, 153, 218); font-weight: bold;',
+            unknownLabel: 'color: rgb(255, 132, 0);',
+            undefined: 'color: rgb(255, 132, 0);',
+          },
+        })
+      )
+      .join('\n')}
    `,
     500
   )
