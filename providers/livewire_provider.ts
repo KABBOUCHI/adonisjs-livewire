@@ -54,7 +54,7 @@ function dd(...args: any[]) {
     ${createScript()}
     </script>
 
-    ${args.map((arg) => dump(arg)).join('\n')}
+    ${args.map((arg) => dump(arg)).join('<br>')}
    `,
     500
   )
