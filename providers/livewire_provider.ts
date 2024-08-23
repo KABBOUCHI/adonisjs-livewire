@@ -53,7 +53,6 @@ function dd(...args: any[]) {
       font-size: 12px;
       padding: 0;
       margin: 12px 0;
-      border-radius: 2px;
     }
 
     .dumper-dump pre {
