@@ -60,6 +60,10 @@ function dd(...args: any[]) {
       font: 12px Menlo, Monaco, Consolas, monospace;
       line-height: 24px;
     }
+
+    .dumper-dump .dumper-toggle span {
+        font-size: 12px;
+    }
     </style>
 
     <script>
@@ -71,8 +75,7 @@ function dd(...args: any[]) {
         dump(arg, {
           styles: {
             ...themes.nightOwl,
-            shell: 'background-color: rgb(23, 22, 26); color: rgb(255, 132, 0);',
-            pre: '',
+            pre: 'background-color: rgb(23, 22, 26); color: rgb(255, 132, 0);',
             classLabel: 'color: rgb(18, 153, 218);',
             arrayLabel: 'color: rgb(18, 153, 218);',
             objectLabel: 'color: rgb(18, 153, 218);',

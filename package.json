@@ -1,7 +1,7 @@
 {
   "name": "adonisjs-livewire",
   "description": "A front-end framework for AdonisJS",
-  "version": "0.5.12",
+  "version": "0.5.13",
   "main": "build/providers/livewire_provider.js",
   "type": "module",
   "files": [
@@ -54,7 +54,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@poppinss/dumper": "0.1.0-beta.4",
+    "@poppinss/dumper": "0.1.0-beta.5",
     "@poppinss/utils": "^6.7.3",
     "crypto-js": "^4.2.0",
     "edge-parser": "^8.2.2",
