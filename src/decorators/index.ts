@@ -7,6 +7,7 @@ import Modelable from '../features/support_models/modelable.js'
 import Layout from '../features/support_page_components/layout.js'
 import Title from '../features/support_page_components/title.js'
 import Url from '../features/support_query_string/url.js'
+import Renderless from '../features/support_renderless/renderless.js'
 
 export function title(value: string) {
   return function (constructor: typeof Component) {
@@ -88,5 +89,11 @@ export function bind() {
         type: param,
       })
     })
+  }
+}
+
+export function renderless() {
+  return function (target: Component, propertyKey: string) {
+    target.addDecorator(new Renderless())
   }
 }

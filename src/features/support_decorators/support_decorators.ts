@@ -87,4 +87,12 @@ export class SupportDecorators extends ComponentHook {
       }
     }
   }
+
+  async call(method, params, returnEarly) {
+    for (const decorator of this.component.getDecorators()) {
+      if (typeof decorator['call'] !== 'function') continue
+
+      await decorator['call'](method, params, returnEarly)
+    }
+  }
 }

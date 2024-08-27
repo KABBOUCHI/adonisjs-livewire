@@ -1,4 +1,5 @@
 import { BaseComponent } from '../../base_component.js'
+import { Config } from '../../define_config.js'
 import { store } from '../../store.js'
 
 export interface HandlesRedirects extends BaseComponent {}
@@ -8,7 +9,8 @@ export class HandlesRedirects {
 
     if (navigate) store(this).push('redirectUsingNavigate', true)
 
-    // config.render_on_redirect
-    // this.skipRender()
+    const livewireConfig = this.app.config.get<Config>('livewire', {})
+
+    !livewireConfig.renderOnRedirect && this.skipRender()
   }
 }

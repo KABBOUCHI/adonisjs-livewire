@@ -68,6 +68,8 @@ export default class Livewire {
           return await feature.callRender(...params)
         } else if (event === 'update') {
           await feature.callUpdate(params[0], params[1], params[2])
+        } else if (event === 'call') {
+          await feature.callCall(params[1], params[2], params[3])
         }
       })
     )
@@ -104,6 +106,7 @@ export default class Livewire {
             'skipHydrate',
             'js',
             'getDecorators',
+            'app',
           ].includes(prop)
         ) {
           continue
@@ -129,6 +132,10 @@ export default class Livewire {
 
     for (const key of Object.keys(component)) {
       if (key.startsWith('__')) {
+        continue
+      }
+
+      if (['app', 'ctx'].includes(key)) {
         continue
       }
 
@@ -328,8 +335,15 @@ export default class Livewire {
 
     let componentId = id ?? string.generateRandom(20)
 
+    const ctx = HttpContext.get()
+
+    if (!ctx) {
+      throw new Error('Cannot access http context. Please enable ASL.')
+    }
+
     let component = new LivewireComponent({
-      ctx: HttpContext.get(),
+      ctx,
+      app: this.app,
       id: componentId,
       name,
     })
@@ -429,10 +443,10 @@ export default class Livewire {
 
       await this.updateProperties(component, updates, data, context)
 
-      await this.callMethods(component, calls, context)
-
       // handle declare properties, they should be set after mount
       Livewire.setOrUpdateComponentView(component)
+
+      await this.callMethods(component, calls, context)
 
       let html = await this.render(component)
       html = await component.view.renderRaw(html || '')
@@ -464,6 +478,22 @@ export default class Livewire {
         // if (methods.includes(method) === false) {
         //   throw new Error(`Method \`${method}\` does not exist on component ${component.getName()}`)
         // }
+
+        let earlyReturnCalled = false
+        let earlyReturn: any = null
+        const returnEarly = (returnVal: any = null) => {
+          earlyReturnCalled = true
+          earlyReturn = returnVal
+        }
+
+        const finish = await this.trigger('call', component, method, params, context, returnEarly)
+
+        if (earlyReturnCalled) {
+          //@ts-ignore
+          returns.push(await finish(earlyReturn))
+
+          continue
+        }
 
         if (method === '__dispatch') {
           const features = getLivewireContext()!.features
@@ -569,6 +599,10 @@ export default class Livewire {
     const data = {}
     for (let key in component) {
       if (key.startsWith('__')) {
+        continue
+      }
+
+      if (['ctx', 'app'].includes(key)) {
         continue
       }
 
@@ -732,7 +766,10 @@ export default class Livewire {
       component.view.share({
         flashMessages: isLivewireRequest ? session.responseFlashMessages : session.flashMessages,
         old: function (key: string, defaultVal?: any) {
-          return (isLivewireRequest ? session.responseFlashMessages : session.flashMessages).get(key, defaultVal)
+          return (isLivewireRequest ? session.responseFlashMessages : session.flashMessages).get(
+            key,
+            defaultVal
+          )
         },
       })
     }

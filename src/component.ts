@@ -6,9 +6,11 @@ import { HandlesPageComponents } from './features/support_page_components/handle
 import { HandlesDecorators } from './features/support_decorators/handles_decorators.js'
 import { HandlesRedirects } from './features/support_redirects/handles_redirects.js'
 import { HandlesEvents } from './features/support_events/handles_events.js'
+import type { ApplicationService } from '@adonisjs/core/types'
 
 interface ComponentOptions {
-  ctx: HttpContext | null
+  ctx: HttpContext
+  app: ApplicationService
   id: string
   name: string
 }
@@ -21,14 +23,15 @@ export class Component extends Mixin(
   HandlesPageComponents,
   HandlesJsEvaluation
 ) {
-  constructor({ ctx, id, name }: ComponentOptions) {
+  constructor({ ctx, app, id, name }: ComponentOptions) {
     super()
 
-    // @ts-ignore
-    this.__ctx = ctx
     // @ts-ignore
     this.__id = id
     // @ts-ignore
     this.__name = name
+
+    this.app = app
+    this.ctx = ctx
   }
 }

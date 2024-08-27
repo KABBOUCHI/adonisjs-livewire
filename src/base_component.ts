@@ -1,10 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { store } from './store.js'
 import { Edge } from 'edge.js'
+import { ApplicationService } from '@adonisjs/core/types'
 
 export class BaseComponent {
-  protected __ctx: HttpContext | null = null
-
   // @ts-ignore
   protected __id: string
   // @ts-ignore
@@ -14,14 +13,11 @@ export class BaseComponent {
 
   declare bindings: any
 
+  declare app: ApplicationService
+  declare ctx: HttpContext
+
   declare __view: ReturnType<Edge['createRenderer']>
   declare __view_data: Record<string, any>
-
-  get ctx() {
-    if (!this.__ctx) throw new Error('Cannot access http context. Please enable ASL.')
-
-    return this.__ctx
-  }
 
   get view() {
     return {
