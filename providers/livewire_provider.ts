@@ -15,8 +15,10 @@ import { SupportAutoInjectedAssets } from '../src/features/support_auto_injected
 import { Config, defaultConfig } from '../src/define_config.js'
 import type Livewire from '../src/livewire.js'
 import { dump, createScript, createStyleSheet, themes } from '@poppinss/dumper/html'
+import { dump as dumpConsole, themes as themesConsole } from '@poppinss/dumper/console'
 import { EventBus } from '../src/event_bus.js'
 import { ModelSynth } from '../src/synthesizers/model.js'
+import app from '@adonisjs/core/services/app'
 
 const currentDirname = dirname(fileURLToPath(import.meta.url))
 
@@ -45,6 +47,19 @@ declare module '@adonisjs/core/types' {
 }
 
 function dd(...args: any[]) {
+  if (app.getEnvironment() !== 'web') {
+    for (const arg of args) {
+      console.log(
+        dumpConsole(arg, {
+          styles: themesConsole.dark,
+        })
+      )
+      console.log()
+    }
+
+    process.exit(1)
+  }
+
   throw errors.E_HTTP_REQUEST_ABORTED.invoke(
     `<style>
     ${createStyleSheet()}

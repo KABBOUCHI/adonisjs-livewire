@@ -12,8 +12,8 @@ dependencies:
     specifier: ^8.1.0
     version: 8.1.1(@adonisjs/core@6.2.2)(@adonisjs/session@7.1.1)(edge.js@6.0.1)
   '@poppinss/dumper':
-    specifier: 0.1.0-beta.5
-    version: 0.1.0-beta.5
+    specifier: 0.1.0-beta.6
+    version: 0.1.0-beta.6
   '@poppinss/utils':
     specifier: ^6.7.3
     version: 6.7.3
@@ -780,8 +780,8 @@ packages:
     dependencies:
       kleur: 4.1.5
 
-  /@poppinss/dumper@0.1.0-beta.5:
-    resolution: {integrity: sha512-m4NWaKzcsct5SWp3GYbccgDXgWyB6eriC8slVhtm4aRgIiWGnYfJMRLzF5XmlJzorTJfH61qnGbDO09x1geGvg==}
+  /@poppinss/dumper@0.1.0-beta.6:
+    resolution: {integrity: sha512-fPrlUDk2xiduKKkfykwVuWi2kaM0dloAEb5J+prIJjjdw1QV3qzeat5dXmISEcwHiYD9wEVsMVMdAeNMoZ0AaQ==}
     dependencies:
       '@sindresorhus/is': 7.0.0
     dev: false
