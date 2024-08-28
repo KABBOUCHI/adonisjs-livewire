@@ -443,10 +443,10 @@ export default class Livewire {
 
       await this.updateProperties(component, updates, data, context)
 
+      await this.callMethods(component, calls, context)
+
       // handle declare properties, they should be set after mount
       Livewire.setOrUpdateComponentView(component)
-
-      await this.callMethods(component, calls, context)
 
       let html = await this.render(component)
       html = await component.view.renderRaw(html || '')
