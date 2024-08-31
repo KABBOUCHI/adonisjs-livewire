@@ -652,6 +652,7 @@ export default class Livewire {
         name: component.getName(),
         path: component.getName().toLowerCase(),
         method: 'GET',
+        // TODO: support nesting components
         children: [],
         scripts: [],
         assets: [],

@@ -198,7 +198,7 @@ export default class LivewireProvider {
         let attributes: any = {}
         let options: any = {}
         if (props) {
-          let regex = /(@|:|wire:)?([a-zA-Z0-9\-:.]+)\s*=\s*['"]([^'"]*)['"]/g
+          let regex = /(@|:|wire:)?([a-zA-Z0-9\-:.]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g
 
           let matches = props.match(regex)
           let propsRemainder = props
@@ -206,7 +206,7 @@ export default class LivewireProvider {
           if (matches) {
             for (const match of matches) {
               let [m, prefix, key, value] =
-                match.match(/(@|:|wire:)?([a-zA-Z0-9\-:.]+)\s*=\s*['"]([^'"]*)['"]/) || []
+                match.match(/(@|:|wire:)?([a-zA-Z0-9\-:.]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/) || []
               if (prefix === ':' && key !== 'is' && key !== 'component') {
                 attributes[key] = `_____${value}_____`
               } else if (prefix === 'wire:' && key === 'key') {
@@ -217,10 +217,14 @@ export default class LivewireProvider {
                 } else {
                   attributes[`wire:${key}`] = value
                 }
-              } else if (prefix === '@') {
-                attributes[`@${key}`] = value
               } else {
-                attributes[key] = value
+                let curlyMatch = value.match(/(\\)?{{(.*?)}}/)
+                if (curlyMatch) {
+                  attributes[`${prefix ?? ''}${key}`] =
+                    `_____\`${value.replace(/\{\{\s*([^}]+)\s*\}\}/g, '${$1}')}\`_____`
+                } else {
+                  attributes[`${prefix ?? ''}${key}`] = value
+                }
               }
 
               if (m) {
