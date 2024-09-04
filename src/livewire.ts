@@ -288,7 +288,7 @@ export default class Livewire {
     if (route && ctx) {
       await route.middleware.runner().run((handler, next) => {
         return typeof handler !== 'function' && !!handler.name
-          ? handler.handle(ctx.containerResolver, ctx, next)
+          ? handler.handle(ctx.containerResolver, ctx, next, handler.args)
           : next()
       })
 
