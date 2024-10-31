@@ -230,15 +230,3 @@ export default class Button extends ViewComponent {
   }
 }
 ```
-
-### dd (Dump and Die)
-
-Global helper to dump and die anywhere in your code.
-
-```ts
-dd('Hello')
-
-dd({ foo: 'bar' })
-
-dd([1, 2, 3])
-```

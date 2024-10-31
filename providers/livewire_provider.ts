@@ -1,6 +1,6 @@
 import type { ApplicationService } from '@adonisjs/core/types'
 import fs from 'node:fs'
-import { Route, errors } from '@adonisjs/core/http'
+import { Route } from '@adonisjs/core/http'
 import { SupportLazyLoading } from '../src/features/support_lazy_loading/support_lazy_loading.js'
 import { Constructor } from '@adonisjs/http-server/types'
 import edge, { type Edge } from 'edge.js'
@@ -14,11 +14,8 @@ import { SupportScriptsAndAssets } from '../src/features/support_scripts_and_ass
 import { SupportAutoInjectedAssets } from '../src/features/support_auto_injected_assets/support_auto_injected_assets.js'
 import { Config, defaultConfig } from '../src/define_config.js'
 import type Livewire from '../src/livewire.js'
-import { dump, createScript, createStyleSheet, themes } from '@poppinss/dumper/html'
-import { dump as dumpConsole, themes as themesConsole } from '@poppinss/dumper/console'
 import { EventBus } from '../src/event_bus.js'
 import { ModelSynth } from '../src/synthesizers/model.js'
-import app from '@adonisjs/core/services/app'
 
 const currentDirname = dirname(fileURLToPath(import.meta.url))
 
@@ -45,83 +42,6 @@ declare module '@adonisjs/core/types' {
     livewire: Livewire
   }
 }
-
-function dd(...args: any[]) {
-  if (app.getEnvironment() !== 'web') {
-    for (const arg of args) {
-      console.log(
-        dumpConsole(arg, {
-          styles: themesConsole.dark,
-        })
-      )
-      console.log()
-    }
-
-    process.exit(1)
-  }
-
-  throw errors.E_HTTP_REQUEST_ABORTED.invoke(
-    `<style>
-    ${createStyleSheet()}
-
-    .dumper-dump {
-      font-size: 12px;
-      padding: 0;
-      margin: 12px 0;
-    }
-
-    .dumper-dump pre {
-      padding: 5px;
-      font: 12px Menlo, Monaco, Consolas, monospace;
-      line-height: 24px;
-    }
-
-    .dumper-dump .dumper-toggle span {
-        font-size: 12px;
-    }
-    </style>
-
-    <script>
-    ${createScript()}
-    </script>
-
-    ${args
-      .map((arg) =>
-        dump(arg, {
-          styles: {
-            ...themes.nightOwl,
-            pre: 'background-color: rgb(23, 22, 26); color: rgb(255, 132, 0);',
-            classLabel: 'color: rgb(18, 153, 218);',
-            arrayLabel: 'color: rgb(18, 153, 218);',
-            objectLabel: 'color: rgb(18, 153, 218);',
-            mapLabel: 'color: rgb(18, 153, 218);',
-            setLabel: 'color: rgb(18, 153, 218);',
-            symbol: 'color: rgb(18, 153, 218);',
-            braces: 'color: rgb(255, 132, 0);',
-            brackets: 'color: rgb(255, 132, 0);',
-            toggle: 'color: rgb(160, 160, 160); background: none; border: none; padding: 0',
-            boolean: 'color: rgb(255, 132, 0); font-style: mono;',
-            objectKey: 'color: rgb(255, 255, 255);',
-            string: 'color: rgb(86, 219, 58);',
-            number: 'color: rgb(18, 153, 218);',
-            bigInt: 'color: rgb(18, 153, 218); font-weight: bold;',
-            unknownLabel: 'color: rgb(255, 132, 0);',
-            undefined: 'color: rgb(255, 132, 0);',
-            functionLabel: 'color: rgb(18, 153, 218);',
-          },
-        })
-      )
-      .join('\n')}
-   `,
-    500
-  )
-}
-
-declare global {
-  function dd(...args: any[]): void
-}
-
-globalThis.dd = dd
 
 export default class LivewireProvider {
   constructor(protected app: ApplicationService) {}

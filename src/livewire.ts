@@ -380,9 +380,15 @@ export default class Livewire {
   }
 
   static setOrUpdateComponentView(component: Component) {
-    const renderer = edge.createRenderer()
+    const ctx = HttpContext.get()!
+    const renderer = 'clone' in ctx.view ? ctx.view.clone() : edge.createRenderer()
 
-    renderer.share(Livewire.extractRequestViewLocals())
+    if (!('clone' in ctx.view)) {
+      console.warn(
+        `Livewire: The view renderer is not a clone. This may cause unexpected behavior, upgrade to Edge.js v6.2.0 or higher.`
+      )
+      renderer.share(Livewire.extractRequestViewLocals())
+    }
     renderer.share(Livewire.generateComponentData(component))
 
     component.__view = renderer
