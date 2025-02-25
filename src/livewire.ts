@@ -877,7 +877,7 @@ export default class Livewire {
     name: string,
     livewireViewPath: string
   ): Promise<typeof Component | undefined> {
-    const content = await readFile(livewireViewPath, 'utf-8')
+    const content = await readFile(fileURLToPath(livewireViewPath), 'utf-8')
 
     const { serverCode, template } = extractComponentParts(content)
 
