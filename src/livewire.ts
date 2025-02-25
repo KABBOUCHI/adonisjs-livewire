@@ -886,8 +886,8 @@ export default class Livewire {
     }
 
     const parts = name.split('.')
-    const path = this.app.tmpPath('/livewire/' + parts.slice(0, -1).join('/'))
-    const filePath = path + '/' + parts[parts.length - 1] + '.js'
+    const path = this.app.tmpPath('/livewire/', ...parts.slice(0, -1))
+    const filePath = path + parts[parts.length - 1] + '.js'
 
     await mkdir(path, {
       recursive: true,
@@ -895,7 +895,7 @@ export default class Livewire {
 
     await writeFile(filePath, serverCode)
 
-    const { default: component } = await import(path)
+    const { default: component } = await import(filePath)
     component.prototype.render = function () {
       return template
     }
