@@ -183,6 +183,36 @@ export default class Counter extends Mixin(Component, MyMixin) {
 }
 ```
 
+## SFC (Experimental)
+
+Define component logic using `<script server>` tag inside livewire edge component. e.g: `resources/views/livewire/counter.edge`
+
+```html
+<script server>
+  import { Component } from 'adonisjs-livewire'
+
+  export default class extends Component {
+    public count = 0
+
+    public increment() {
+      this.count++
+    }
+
+    public decrement() {
+      this.count--
+    }
+  }
+</script>
+
+<div>
+  <button wire:click="decrement">-</button>
+
+  <h1>{{ count }}</h1>
+
+  <button wire:click="increment">+</button>
+</div>
+```
+
 ## Helpers
 
 ### Edge tag compiler (Experimental)
