@@ -331,13 +331,10 @@ export default class Livewire {
       ]
 
       for (const livewirePath of livewirePaths) {
-        console.log(`Finding Livewire component at ${livewirePath.href}`)
         if (existsSync(fileURLToPath(livewirePath))) {
-          console.log(`Found Livewire component at ${livewirePath.href}`)
-          console.log(
-            `Importing Livewire component from ${livewirePath.href.replace(/\.ts$/, '.js')}`
+          LivewireComponent = await import(livewirePath.href.replace(/\.ts$/, '.js')).then(
+            (m) => m.default
           )
-          LivewireComponent = await import(livewirePath.href.replace(/\.ts$/, '.js'))
           if (this.app.inProduction) {
             this.components.set(name, LivewireComponent)
           }
@@ -358,10 +355,7 @@ export default class Livewire {
         ]
 
         for (const livewireViewPath of livewireViewPaths) {
-          console.log(`Finding Livewire SFC component at ${livewireViewPath.href}`)
-
           if (existsSync(fileURLToPath(livewireViewPath))) {
-            console.log(`Found Livewire SFC component at ${livewireViewPath.href}`)
             let component = await this.buildSingleFileComponent(name, livewireViewPath.href)
 
             if (component) {
