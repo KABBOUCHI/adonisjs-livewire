@@ -192,13 +192,13 @@ Define component logic using `<script server>` tag inside livewire edge componen
   import { Component } from 'adonisjs-livewire'
 
   export default class extends Component {
-    public count = 0
+    count = 0
 
-    public increment() {
+    increment() {
       this.count++
     }
 
-    public decrement() {
+    decrement() {
       this.count--
     }
   }
