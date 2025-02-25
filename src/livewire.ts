@@ -13,6 +13,9 @@ import type { Config } from './define_config.js'
 import { EventBus } from './event_bus.js'
 import edge from 'edge.js'
 import { Synth } from '../index.js'
+import { existsSync } from 'node:fs'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 
 const isSyntheticTuple = (data) => Array.isArray(data) && data.length === 2 && !!data[1]['s']
 
@@ -315,22 +318,67 @@ export default class Livewire {
     if (this.components.has(name)) {
       LivewireComponent = this.components.get(name)!
     } else {
-      let path = name
+      let jsPath = name
         .split('.')
         .map((s) => string.snakeCase(s))
         .join('/')
 
-      LivewireComponent = await import(this.app.makeURL(`./app/livewire/${path}.js`).href)
-        .then((module) => module.default)
-        .catch(async (err) => {
-          if (err.message.includes('Cannot find module')) {
-            return await import(this.app.makeURL(`./app/livewire/${path}/index.js`).href).then(
-              (module) => module.default
-            )
-          }
+      const livewirePaths = [
+        this.app.makeURL(`./app/livewire/${jsPath}.js`),
+        this.app.makeURL(`./app/livewire/${jsPath}/index.js`),
+        this.app.makeURL(`./app/livewire/${jsPath}.ts`),
+        this.app.makeURL(`./app/livewire/${jsPath}/index.ts`),
+      ]
 
-          throw err
-        })
+      for (const livewirePath of livewirePaths) {
+        console.log(`Finding Livewire component at ${livewirePath.href}`)
+        if (existsSync(fileURLToPath(livewirePath))) {
+          console.log(`Found Livewire component at ${livewirePath.href}`)
+          console.log(
+            `Importing Livewire component from ${livewirePath.href.replace(/\.ts$/, '.js')}`
+          )
+          LivewireComponent = await import(livewirePath.href.replace(/\.ts$/, '.js'))
+          if (this.app.inProduction) {
+            this.components.set(name, LivewireComponent)
+          }
+          break
+        }
+      }
+
+      //@ts-ignore
+      if (!LivewireComponent) {
+        let viewPath = name
+          .split('.')
+          .map((s) => string.snakeCase(s))
+          .join('/')
+
+        const livewireViewPaths = [
+          this.app.makeURL(`./resources/views/livewire/${viewPath}.edge`),
+          this.app.makeURL(`./resources/views/livewire/${viewPath}/index.edge`),
+        ]
+
+        for (const livewireViewPath of livewireViewPaths) {
+          console.log(`Finding Livewire SFC component at ${livewireViewPath.href}`)
+
+          if (existsSync(fileURLToPath(livewireViewPath))) {
+            console.log(`Found Livewire SFC component at ${livewireViewPath.href}`)
+            let component = await this.buildSingleFileComponent(name, livewireViewPath.href)
+
+            if (component) {
+              LivewireComponent = component
+              if (this.app.inProduction && LivewireComponent) {
+                this.components.set(name, LivewireComponent)
+              }
+              break
+            }
+          }
+        }
+      }
+
+      //@ts-ignore
+      if (!LivewireComponent) {
+        throw new Error(`Livewire component not found for ${name}`)
+      }
     }
 
     let componentId = id ?? string.generateRandom(20)
@@ -823,6 +871,52 @@ export default class Livewire {
       attributesFormattedForHtmlElement +
       html.substring(positionOfFirstCharacterInTagName + lengthOfTagName)
     )
+  }
+
+  async buildSingleFileComponent(
+    name: string,
+    livewireViewPath: string
+  ): Promise<typeof Component | undefined> {
+    const content = await readFile(livewireViewPath, 'utf-8')
+
+    const { serverCode, template } = extractComponentParts(content)
+
+    if (!serverCode) {
+      return
+    }
+
+    const parts = name.split('.')
+    const path = this.app.tmpPath('/livewire/' + parts.slice(0, -1).join('/'))
+    const filePath = path + '/' + parts[parts.length - 1] + '.js'
+
+    await mkdir(path, {
+      recursive: true,
+    })
+
+    await writeFile(filePath, serverCode)
+
+    const { default: component } = await import(path)
+    component.prototype.render = function () {
+      return template
+    }
+
+    return component as typeof Component
+  }
+}
+
+function extractComponentParts(content: string) {
+  const serverCodePattern = /<script server>([\s\S]*?)<\/script>/
+  const templatePattern = /<script server>[\s\S]*?<\/script>([\s\S]*)/
+
+  const serverCodeMatch = content.match(serverCodePattern)
+  const serverCode = serverCodeMatch ? serverCodeMatch[1].trim() : ''
+
+  const templateMatch = content.match(templatePattern)
+  const template = templateMatch ? templateMatch[1].trim() : ''
+
+  return {
+    serverCode,
+    template,
   }
 }
 
