@@ -39,11 +39,23 @@ export default class Livewire {
     this.FEATURES.push(feature)
   }
 
+  componentHook(feature: any) {
+    Livewire.FEATURES.push(feature)
+  }
+
   static registerPropertySynthesizer(synth: typeof Synth | (typeof Synth)[]) {
     if (Array.isArray(synth)) {
       synth.forEach((s) => this.PROPERTY_SYNTHESIZERS.push(s))
     } else {
       this.PROPERTY_SYNTHESIZERS.push(synth)
+    }
+  }
+
+  registerPropertySynthesizer(synth: typeof Synth | (typeof Synth)[]) {
+    if (Array.isArray(synth)) {
+      synth.forEach((s) => Livewire.PROPERTY_SYNTHESIZERS.push(s))
+    } else {
+      Livewire.PROPERTY_SYNTHESIZERS.push(synth)
     }
   }
 
