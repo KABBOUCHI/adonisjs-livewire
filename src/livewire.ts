@@ -760,7 +760,7 @@ export default class Livewire {
 
       const child = updates[key]
 
-      await this.trigger('update', component, key, key, child)
+      // await this.trigger('update', component, key, key, child)
 
       if (typeof component['updating'] === 'function') {
         await component['updating'](property, child)
@@ -787,6 +787,8 @@ export default class Livewire {
       } else {
         component[property] = child
       }
+
+      await this.trigger('update', component, key, key, child)
 
       if (typeof component['updated'] === 'function') {
         await component['updated'](property, child)
