@@ -231,7 +231,7 @@ will be compiled to
 @end
 ```
 
-### Edge component class
+### Edge component class (Experimental)
 
 ```ts
 // app/compoments/button.ts

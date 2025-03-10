@@ -69,8 +69,7 @@ test.group('x-tag', () => {
 
   test('nested #1', async ({ assert }) => {
     let input = '<x-foo><x-bar /></x-foo>'
-    let expected = `@component('foo', {})\n@!component('bar', {})\n@end`
-
+    let expected = `@component('foo', {})\n\n@!component('bar', {})\n\n@end`
     assert.equal(compile(input), expected)
   })
 
@@ -205,5 +204,27 @@ test.group('x-tag', () => {
     let input = '<x-diskName::button> Test </x-diskName::button>'
     let expected = `@component('diskName::button', {})\n Test \n@end`
     assert.equal(compile(input), expected)
+  })
+
+  test('whitespace', async ({ assert }) => {
+    let input = '<x-button> Test </x-button>'
+    let expected = `@component('button', {})\n Test \n@end`
+    assert.equal(compile(input), expected)
+
+    let input2 = 'a<x-button> Test </x-button>'
+    let expected2 = `a\n@component('button', {})\n Test \n@end`
+    assert.equal(compile(input2), expected2)
+
+    let input3 = '<x-button> Test </x-button>a'
+    let expected3 = `@component('button', {})\n Test \n@end\na`
+    assert.equal(compile(input3), expected3)
+
+    let input4 = 'a<x-button> Test </x-button>a'
+    let expected4 = `a\n@component('button', {})\n Test \n@end\na`
+    assert.equal(compile(input4), expected4)
+
+    let input5 = 'a<x-button />b'
+    let expected5 = `a\n@!component('button', {})\nb`
+    assert.equal(compile(input5), expected5)
   })
 })

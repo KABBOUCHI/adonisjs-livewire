@@ -339,12 +339,14 @@ export default class Livewire {
         this.app.makeURL(`./app/livewire/${jsPath}.js`),
         this.app.makeURL(`./app/livewire/${jsPath}/index.js`),
         this.app.makeURL(`./app/livewire/${jsPath}.ts`),
+        this.app.makeURL(`./app/livewire/${jsPath}.tsx`),
         this.app.makeURL(`./app/livewire/${jsPath}/index.ts`),
+        this.app.makeURL(`./app/livewire/${jsPath}/index.tsx`),
       ]
 
       for (const livewirePath of livewirePaths) {
         if (existsSync(fileURLToPath(livewirePath))) {
-          LivewireComponent = await import(livewirePath.href.replace(/\.ts$/, '.js')).then(
+          LivewireComponent = await import(livewirePath.href.replace(/\.(ts|tsx)$/, '.js')).then(
             (m) => m.default
           )
           if (this.app.inProduction) {

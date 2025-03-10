@@ -2,8 +2,9 @@ import type { ApplicationService } from '@adonisjs/core/types'
 import edge from 'edge.js'
 // import { existsSync } from 'node:fs'
 
-const SELF_CLOSING_REGEX = /<x-([a-zA-Z0-9\.\-\:]+)([^>]*)\/>/g
-const OPENING_REGEX = /<x-([a-zA-Z0-9\.\-\:]+)([^>]*)>([\s\S]*?(?:(?!<\/x-\1>).)*?)<\/x-\1>/g
+const SELF_CLOSING_REGEX = /(<*..?)?<x-([a-zA-Z0-9\.\-\:]+)([^>]*)\/>(<*..?)?/g
+const OPENING_REGEX =
+  /(<*..?)?(<x-([a-zA-Z0-9\.\-\:]+)([^>]*)>([\s\S]*?(?:(?!<\/x-\1>).)*?)<\/x-\3>)(<*..?)?/g
 
 export class ComponentTagCompiler {
   static compileSelfClosingTags(input: string, app?: ApplicationService): string {
@@ -15,8 +16,11 @@ export class ComponentTagCompiler {
     }
 
     for (const match of matches) {
-      let [_, diskName, component, props] =
-        match.match(/<x-(?:(\w+)::)?([a-zA-Z0-9\.\-]+)([^>]*)\/>/) || []
+      let [_, before, inside, diskName, component, props, after] =
+        match.match(/(<*..?)?(<x-(?:(\w+)::)?([a-zA-Z0-9\.\-]+)([^>]*)\/>)(<*..?)?/) || []
+      before = (before || '').trim()
+      after = (after || '').trim()
+
       let attributes: any = {}
       if (props) {
         let regex = /(:)?([a-zA-Z0-9\-:.]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g
@@ -84,7 +88,10 @@ export class ComponentTagCompiler {
         // }
       }
 
-      raw = raw.replace(match, `@!component('${prefix}${componentPath}', ${attrs})`)
+      raw = raw.replace(
+        inside,
+        `${before !== '' && before !== '\n' ? '\n' : ''}@!component('${prefix}${componentPath}', ${attrs})${after !== '' && after !== '\n' ? '\n' : ''}`
+      )
     }
     return raw
   }
@@ -98,10 +105,13 @@ export class ComponentTagCompiler {
       return raw
     }
     for (const match of matches) {
-      let [_, diskName, component, props, content] =
+      let [_, before, inside, diskName, component, props, content, __, after] =
         match.match(
-          /<x-(?:(\w+)::)?([a-zA-Z0-9\.\-]+)([^>]*)>([\s\S]*?(?:(?!<\/x-\1>).)*?)<\/x-\1(::)?\2>/
+          /(<*..?)?(<x-(?:(\w+)::)?([a-zA-Z0-9\.\-]+)([^>]*)>([\s\S]*?(?:(?!<\/x-\2>).)*?)<\/x-\3(::)?\4>)(<*..?)?/
         ) || []
+
+      before = (before || '').trim()
+      after = (after || '').trim()
 
       let attributes: any = {}
       if (props) {
@@ -175,8 +185,8 @@ export class ComponentTagCompiler {
         }
 
         raw = raw.replace(
-          match,
-          `@component('${prefix}${componentPath}', ${attrs})\n${content}\n@end`
+          inside,
+          `${before !== '' && before !== '\n' ? '\n' : ''}@component('${prefix}${componentPath}', ${attrs})\n${content}\n@end${after !== '' && after !== '\n' ? '\n' : ''}`
         )
       }
     }
