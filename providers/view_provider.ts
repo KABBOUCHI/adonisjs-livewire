@@ -6,7 +6,7 @@ import { basename, extname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import edge from 'edge.js'
 import { ViewComponent } from '../index.js'
-import { ComponentTagCompiler } from '../src/component_tag_compiler.js'
+import { edgeTags } from 'edge-tags'
 
 const JS_MODULES = ['.js', '.cjs', '.mjs']
 
@@ -133,10 +133,6 @@ export default class ViewProvider {
       })
     }
 
-    edge.processor.process('raw', (value) => {
-      const compiled = ComponentTagCompiler.compile(value.raw, this.app)
-
-      return compiled
-    })
+    edge.use(edgeTags)
   }
 }
