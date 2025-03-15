@@ -10,10 +10,10 @@ importers:
     dependencies:
       '@adonisjs/session':
         specifier: ^7.1.1
-        version: 7.1.1(@adonisjs/core@6.2.2(edge.js@6.2.0))(edge.js@6.2.0)
+        version: 7.1.1(@adonisjs/core@6.2.2(edge.js@6.2.1))(edge.js@6.2.1)
       '@adonisjs/shield':
         specifier: ^8.1.0
-        version: 8.1.1(@adonisjs/core@6.2.2(edge.js@6.2.0))(@adonisjs/session@7.1.1(@adonisjs/core@6.2.2(edge.js@6.2.0))(edge.js@6.2.0))(edge.js@6.2.0)
+        version: 8.1.1(@adonisjs/core@6.2.2(edge.js@6.2.1))(@adonisjs/session@7.1.1(@adonisjs/core@6.2.2(edge.js@6.2.1))(edge.js@6.2.1))(edge.js@6.2.1)
       '@poppinss/utils':
         specifier: ^6.7.3
         version: 6.7.3
@@ -24,8 +24,8 @@ importers:
         specifier: ^8.2.2
         version: 8.2.2
       edge-tags:
-        specifier: ^0.0.2
-        version: 0.0.2(edge.js@6.2.0)
+        specifier: ^0.0.3
+        version: 0.0.3(edge.js@6.2.1)
       luxon:
         specifier: ^3.5.0
         version: 3.5.0
@@ -35,7 +35,7 @@ importers:
     devDependencies:
       '@adonisjs/core':
         specifier: ^6.2.2
-        version: 6.2.2(edge.js@6.2.0)
+        version: 6.2.2(edge.js@6.2.1)
       '@adonisjs/eslint-config':
         specifier: ^1.2.1
         version: 1.2.1(eslint@8.56.0)(prettier@3.2.4)(typescript@5.3.3)
@@ -44,7 +44,7 @@ importers:
         version: 7.0.2(@adonisjs/application@8.0.3(@adonisjs/config@5.0.1)(@adonisjs/fold@10.0.1))(@adonisjs/encryption@6.0.1)(@adonisjs/events@9.0.1(@adonisjs/application@8.0.3(@adonisjs/config@5.0.1)(@adonisjs/fold@10.0.1))(@adonisjs/fold@10.0.1))(@adonisjs/fold@10.0.1)(@adonisjs/logger@6.0.1)
       '@adonisjs/lucid':
         specifier: ^21.2.0
-        version: 21.2.0(@adonisjs/core@6.2.2(edge.js@6.2.0))(luxon@3.5.0)
+        version: 21.2.0(@adonisjs/core@6.2.2(edge.js@6.2.1))(luxon@3.5.0)
       '@adonisjs/prettier-config':
         specifier: ^1.2.1
         version: 1.2.1
@@ -82,8 +82,8 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0
       edge.js:
-        specifier: ^6.2.0
-        version: 6.2.0
+        specifier: ^6.2.1
+        version: 6.2.1
       eslint:
         specifier: ^8.56.0
         version: 8.56.0
@@ -437,6 +437,10 @@ packages:
     resolution: {integrity: sha512-+qLfhQrdLa7RqJNZmGIc1ERVz2JtMD3kLI41tNfKhQBZt0wiWoYMhP/Tv+eopPnMy3NwANWgDSbqsi+teY1oig==}
     engines: {node: '>=18.16.0'}
 
+  '@poppinss/exception@1.2.1':
+    resolution: {integrity: sha512-aQypoot0HPSJa6gDPEPTntc1GT6QINrSbgRlRhadGW2WaYqUK3tK4Bw9SBMZXhmxd3GeAlZjVcODHgiu+THY7A==}
+    engines: {node: '>=18'}
+
   '@poppinss/hooks@6.0.2-0':
     resolution: {integrity: sha512-mG0hnQlxgflvxyM6t/XO8z/FwotsYRXPhtLZ3cz3iyk4t8xaNtOihSANBcvqdkxZCtGBvotNIf/GnES9hvlfSQ==}
 
@@ -459,8 +463,8 @@ packages:
     resolution: {integrity: sha512-xhhEcEvhQC8mP5oOr5hbE4CmUgmw/IPV1jhpGg2xSkzoFrt9i8YVqBQt9744EFesi5F7pBheWozg63RUBM/5JA==}
     engines: {node: '>=18.16.0'}
 
-  '@poppinss/macroable@1.0.3':
-    resolution: {integrity: sha512-B4iV6QxW//Fn17+qF1EMZRmoThIUJlCtcO85yoRDJnMyHeAthjz4ig9OTkfGGXKtQhcdPX0me75gU5K9J897+w==}
+  '@poppinss/macroable@1.0.4':
+    resolution: {integrity: sha512-ct43jurbe7lsUX5eIrj4ijO3j/6zIPp7CDnFWXDs7UPAbw1Pu1iH3oAmFdP4jcskKJBURH5M9oTtyeiUXyHX8Q==}
     engines: {node: '>=18.16.0'}
 
   '@poppinss/matchit@3.1.2':
@@ -473,9 +477,17 @@ packages:
   '@poppinss/multiparty@2.0.1':
     resolution: {integrity: sha512-Pf3V9PFyZDIkDBBiAOT2hdmA+1l/+hverHbUnMzNzwtwgO50s2ZPt5KxUydVA0hceg9gryo5unQ0WUF1SO9tkQ==}
 
+  '@poppinss/object-builder@1.1.0':
+    resolution: {integrity: sha512-FOrOq52l7u8goR5yncX14+k+Ewi5djnrt1JwXeS/FvnwAPOiveFhiczCDuvXdssAwamtrV2hp5Rw9v+n2T7hQg==}
+    engines: {node: '>=20.6.0'}
+
   '@poppinss/prompts@3.1.2':
     resolution: {integrity: sha512-wjAWTZkZz2kH5dVGbEPx9IRxJcIy6Nzn614TdGsn2kzeMI5woPaKWKxrLEQfK/teIxUrOVUmbjcorDohBkIjiw==}
     engines: {node: '>=18.16.0'}
+
+  '@poppinss/string@1.2.0':
+    resolution: {integrity: sha512-1z78zjqhfjqsvWr+pQzCpRNcZpIM+5vNY5SFOvz28GrL/LRanwtmOku5tBX7jE8/ng3oXaOVrB59lnnXFtvkug==}
+    engines: {node: '>=20.6.0'}
 
   '@poppinss/utils@6.7.1':
     resolution: {integrity: sha512-M/IiE/lp493QEcDXpFHqlJGU4Tw0mw2JLCH1NgmL2UtL9QL4aTgd0MPwjIYOtikA0ug/oJwM1e7z1NKTGig/rw==}
@@ -485,8 +497,8 @@ packages:
     resolution: {integrity: sha512-zQnhVG4Q+n6+V1vrL/TF1Oy8ZcVVGUs49Sj5OBgoari/q42UiG/rht1DRvoeWd9bT1BBDwxO2vcfxj6C0u/Dgg==}
     engines: {node: '>=18.16.0'}
 
-  '@poppinss/utils@6.8.3':
-    resolution: {integrity: sha512-YGeH7pIUm9ExONURNH3xN61dBZ0SXgVuPA9E76t7EHeZHXPNrmR8TlbXQaka6kd5n+cpBNcHG4VsVfYf59bZ7g==}
+  '@poppinss/utils@6.9.2':
+    resolution: {integrity: sha512-ypVszZxhwiehhklM5so2BI+nClQJwp7mBUSJh/R1GepeUH1vvD5GtxMz8Lp9dO9oAbKyDmq1jc4g/4E0dv8r2g==}
     engines: {node: '>=18.16.0'}
 
   '@poppinss/validator-lite@1.0.3':
@@ -591,6 +603,9 @@ packages:
 
   '@types/bytes@3.1.4':
     resolution: {integrity: sha512-A0uYgOj3zNc4hNjHc5lYUfJQ/HVyBXiUMKdXd7ysclaE6k9oJdavQzODHuwjpUu2/boCP8afjQYi8z/GtvNCWA==}
+
+  '@types/bytes@3.1.5':
+    resolution: {integrity: sha512-VgZkrJckypj85YxEsEavcMmmSOIzkUHqWmM4CCyia5dc54YwsXzJ5uT4fYxBQNEXx+oF1krlhgCbvfubXqZYsQ==}
 
   '@types/chai@4.3.11':
     resolution: {integrity: sha512-qQR1dr2rGIHYlJulmr8Ioq3De0Le9E4MJ5AiaeAETJJpndT1uUNHsGFK3L/UIu+rbkQSdj8J/w2bCsBZc/Y5fQ==}
@@ -726,8 +741,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  acorn@8.14.0:
-    resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
+  acorn@8.14.1:
+    resolution: {integrity: sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -877,8 +892,8 @@ packages:
     resolution: {integrity: sha512-zlOQ80VrQ2Ue+ymH5OuM/DlDq64mEm+B9UTdHULv5osUMD6HalNTblf2b1u/m6QecjsnOkBpqVZ+XPwIVsy7Ng==}
     engines: {node: '>=12.13'}
 
-  case-anything@3.1.0:
-    resolution: {integrity: sha512-rRYnn5Elur8RuNHKoJ2b0tgn+pjYxL7BzWom+JZ7NKKn1lt/yGV/tUNwOovxYa9l9VL5hnXQdMc+mENbhJzosQ==}
+  case-anything@3.1.2:
+    resolution: {integrity: sha512-wljhAjDDIv/hM2FzgJnYQg90AWmZMNtESCjTeLH680qTzdo0nErlCxOmgzgX4ZsZAtIvqHyD87ES8QyriXB+BQ==}
     engines: {node: '>=18'}
 
   chai@4.4.1:
@@ -1132,31 +1147,31 @@ packages:
   edge-error@3.0.0:
     resolution: {integrity: sha512-TJE2A6KFqBMIe3EPyl/5V8veGYcMfpEtSNKfZkrSkQAyz3kh27etQ2erU6o0lkAFqDjjUl11YVzBIO2ij5/Zhw==}
 
-  edge-error@4.0.1:
-    resolution: {integrity: sha512-z5mNO97k8hRVpJ6Ew1qbkMTfQ44CwuWnl+ShMCrEFgD+b324CnjBS6HbiR+Wh6Wcmw9C+/XsFBHzZ+376PpD/w==}
+  edge-error@4.0.2:
+    resolution: {integrity: sha512-jB76VYn8wapDHKHSOmP3vbKLoa77RJYsTLNmfl8+cuCD69uxZtP3h+kqV+Prw/YkYmN7yHyp4IApE15pDByk0A==}
     engines: {node: '>=18.16.0'}
 
   edge-lexer@5.0.2:
     resolution: {integrity: sha512-MSpv6JRPD96eZl0uPo8gIvE9cPAXb1eNRfZKlQpFYJ2O8cNdZDpN8RvT2zpu4XqC63HWs/c938qc3dWN+GJhFw==}
 
-  edge-lexer@6.0.2:
-    resolution: {integrity: sha512-C30wqcw66JwpepLnsTqTp0P4JqKa2xEbAfNj3dPOvBYq4zybiYuhlpSzExvNUeoAAnbjgozgVTVAQ38HctyV4g==}
+  edge-lexer@6.0.3:
+    resolution: {integrity: sha512-/s15CNnfhZv97bsW+ZgV5rtONULYjhCDYu+usbVLqZ8UQ6b/hQUNvQSIQBXA6Gql9dm72TMBB9sb/eWM2esufg==}
     engines: {node: '>=18.16.0'}
 
   edge-parser@8.2.2:
     resolution: {integrity: sha512-48iOLaOD4PAxIU0jnLRNXUL8G6ktO79bA4adOGXzNHg2M+mHfudFI7QPdF6IO8gW0NC1N0TPvwLWK3FVkE9bLQ==}
 
-  edge-parser@9.0.3:
-    resolution: {integrity: sha512-E9W+9wV8QVGLZCtrgKp6k9kIncsUxmrpa/yG+vwVGPpCMBZZZZaShJXwVDHThyL2mkHkWyYvhBpPhuucgW8kiA==}
+  edge-parser@9.0.4:
+    resolution: {integrity: sha512-vnjzfpqpjM4Mjt9typc1zLoFpC1F6kAObfcdyA6rSy+izIPji2RaQz5jWx5s5iG9hNcuyjtNyGRCLFVfoYhWcA==}
     engines: {node: '>=18.16.0'}
 
-  edge-tags@0.0.2:
-    resolution: {integrity: sha512-mmLF1O/qIiRyY0ja5nzzunZ25EQR7qVe08uA7ht1sifX49jMp8nkGKhQtrAgyEHxR8QPxP4aCyML9Rykpj8HKw==}
+  edge-tags@0.0.3:
+    resolution: {integrity: sha512-hx5dUvhD0Eo4G64l86Hv4rESWhn6M52aELVJa3LLq+QUlUU3ph8j7vAwMcaNfW3DIxcABbsta3dQsy++jdxwuw==}
     peerDependencies:
       edge.js: ^6.0.0
 
-  edge.js@6.2.0:
-    resolution: {integrity: sha512-xw82TzdPngccJiFqK6FE/79vO6mUvWVvKe6OEu/VHDOf199SIOW1q022d3UIaKGXcwf60lIXZYPIRqooQuzigA==}
+  edge.js@6.2.1:
+    resolution: {integrity: sha512-me875zh6YA0V429hywgQIpHgMvQkondv5XHaP6EsL2yIBpLcBWCl7Ba1cai0SwYhp8iD0IyV3KjpxLrnW7S2Ag==}
     engines: {node: '>=18.16.0'}
 
   ee-first@1.1.1:
@@ -2236,6 +2251,9 @@ packages:
   secure-json-parse@2.7.0:
     resolution: {integrity: sha512-6aU+Rwsezw7VR8/nyvKTx8QpWH9FrcYiXXlqC4z5d5XQBDRqtbfsRjnwGyqbi3gddNtWHuEk9OANUotL26qKUw==}
 
+  secure-json-parse@3.0.2:
+    resolution: {integrity: sha512-H6nS2o8bWfpFEV6U38sOSjS7bTbdgbCGU9wEM6W14P5H0QOsz94KCusifV44GpHDTu2nqZbuDNhTzu+mjDSw1w==}
+
   semver@5.7.2:
     resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
     hasBin: true
@@ -2710,7 +2728,7 @@ snapshots:
     dependencies:
       '@poppinss/utils': 6.7.3
 
-  '@adonisjs/core@6.2.2(edge.js@6.2.0)':
+  '@adonisjs/core@6.2.2(edge.js@6.2.1)':
     dependencies:
       '@adonisjs/ace': 13.0.0
       '@adonisjs/application': 8.0.3(@adonisjs/config@5.0.1)(@adonisjs/fold@10.0.1)
@@ -2736,7 +2754,7 @@ snapshots:
       youch: 3.3.3
       youch-terminal: 2.2.3
     optionalDependencies:
-      edge.js: 6.2.0
+      edge.js: 6.2.1
 
   '@adonisjs/encryption@6.0.1':
     dependencies:
@@ -2826,10 +2844,10 @@ snapshots:
       abstract-logging: 2.0.1
       pino: 8.17.2
 
-  '@adonisjs/lucid@21.2.0(@adonisjs/core@6.2.2(edge.js@6.2.0))(luxon@3.5.0)':
+  '@adonisjs/lucid@21.2.0(@adonisjs/core@6.2.2(edge.js@6.2.1))(luxon@3.5.0)':
     dependencies:
-      '@adonisjs/core': 6.2.2(edge.js@6.2.0)
-      '@adonisjs/presets': 2.6.1(@adonisjs/core@6.2.2(edge.js@6.2.0))
+      '@adonisjs/core': 6.2.2(edge.js@6.2.1)
+      '@adonisjs/presets': 2.6.1(@adonisjs/core@6.2.2(edge.js@6.2.1))
       '@faker-js/faker': 8.4.1
       '@poppinss/hooks': 7.2.3
       '@poppinss/macroable': 1.0.2
@@ -2855,9 +2873,9 @@ snapshots:
       - supports-color
       - tedious
 
-  '@adonisjs/presets@2.6.1(@adonisjs/core@6.2.2(edge.js@6.2.0))':
+  '@adonisjs/presets@2.6.1(@adonisjs/core@6.2.2(edge.js@6.2.1))':
     dependencies:
-      '@adonisjs/core': 6.2.2(edge.js@6.2.0)
+      '@adonisjs/core': 6.2.2(edge.js@6.2.1)
       '@poppinss/utils': 6.7.3
 
   '@adonisjs/prettier-config@1.2.1': {}
@@ -2867,22 +2885,22 @@ snapshots:
       '@poppinss/colors': 4.1.2
       string-width: 7.1.0
 
-  '@adonisjs/session@7.1.1(@adonisjs/core@6.2.2(edge.js@6.2.0))(edge.js@6.2.0)':
+  '@adonisjs/session@7.1.1(@adonisjs/core@6.2.2(edge.js@6.2.1))(edge.js@6.2.1)':
     dependencies:
-      '@adonisjs/core': 6.2.2(edge.js@6.2.0)
+      '@adonisjs/core': 6.2.2(edge.js@6.2.1)
       '@poppinss/utils': 6.7.1
     optionalDependencies:
-      edge.js: 6.2.0
+      edge.js: 6.2.1
 
-  '@adonisjs/shield@8.1.1(@adonisjs/core@6.2.2(edge.js@6.2.0))(@adonisjs/session@7.1.1(@adonisjs/core@6.2.2(edge.js@6.2.0))(edge.js@6.2.0))(edge.js@6.2.0)':
+  '@adonisjs/shield@8.1.1(@adonisjs/core@6.2.2(edge.js@6.2.1))(@adonisjs/session@7.1.1(@adonisjs/core@6.2.2(edge.js@6.2.1))(edge.js@6.2.1))(edge.js@6.2.1)':
     dependencies:
-      '@adonisjs/core': 6.2.2(edge.js@6.2.0)
-      '@adonisjs/session': 7.1.1(@adonisjs/core@6.2.2(edge.js@6.2.0))(edge.js@6.2.0)
+      '@adonisjs/core': 6.2.2(edge.js@6.2.1)
+      '@adonisjs/session': 7.1.1(@adonisjs/core@6.2.2(edge.js@6.2.1))(edge.js@6.2.1)
       '@poppinss/utils': 6.7.1
       csrf: 3.1.0
       helmet-csp: 3.4.0
     optionalDependencies:
-      edge.js: 6.2.0
+      edge.js: 6.2.1
 
   '@adonisjs/tsconfig@1.2.1': {}
 
@@ -3099,6 +3117,8 @@ snapshots:
     dependencies:
       kleur: 4.1.5
 
+  '@poppinss/exception@1.2.1': {}
+
   '@poppinss/hooks@6.0.2-0': {}
 
   '@poppinss/hooks@7.2.2': {}
@@ -3111,7 +3131,7 @@ snapshots:
 
   '@poppinss/macroable@1.0.2': {}
 
-  '@poppinss/macroable@1.0.3': {}
+  '@poppinss/macroable@1.0.4': {}
 
   '@poppinss/matchit@3.1.2':
     dependencies:
@@ -3125,11 +3145,24 @@ snapshots:
       safe-buffer: 5.2.1
       uid-safe: 2.1.5
 
+  '@poppinss/object-builder@1.1.0': {}
+
   '@poppinss/prompts@3.1.2':
     dependencies:
       '@poppinss/colors': 4.1.2
       '@poppinss/utils': 6.7.3
       enquirer: 2.4.1
+
+  '@poppinss/string@1.2.0':
+    dependencies:
+      '@lukeed/ms': 2.0.2
+      '@types/bytes': 3.1.5
+      '@types/pluralize': 0.0.33
+      bytes: 3.1.2
+      case-anything: 3.1.2
+      pluralize: 8.0.0
+      slugify: 1.6.6
+      truncatise: 0.0.8
 
   '@poppinss/utils@6.7.1':
     dependencies:
@@ -3161,20 +3194,14 @@ snapshots:
       slugify: 1.6.6
       truncatise: 0.0.8
 
-  '@poppinss/utils@6.8.3':
+  '@poppinss/utils@6.9.2':
     dependencies:
-      '@lukeed/ms': 2.0.2
-      '@types/bytes': 3.1.4
-      '@types/pluralize': 0.0.33
-      bytes: 3.1.2
-      case-anything: 3.1.0
+      '@poppinss/exception': 1.2.1
+      '@poppinss/object-builder': 1.1.0
+      '@poppinss/string': 1.2.0
       flattie: 1.1.1
-      pluralize: 8.0.0
       safe-stable-stringify: 2.5.0
-      secure-json-parse: 2.7.0
-      slash: 5.1.0
-      slugify: 1.6.6
-      truncatise: 0.0.8
+      secure-json-parse: 3.0.2
 
   '@poppinss/validator-lite@1.0.3':
     dependencies:
@@ -3245,6 +3272,8 @@ snapshots:
   '@tsconfig/node16@1.0.4': {}
 
   '@types/bytes@3.1.4': {}
+
+  '@types/bytes@3.1.5': {}
 
   '@types/chai@4.3.11': {}
 
@@ -3394,7 +3423,7 @@ snapshots:
 
   acorn@8.11.3: {}
 
-  acorn@8.14.0: {}
+  acorn@8.14.1: {}
 
   aggregate-error@4.0.1:
     dependencies:
@@ -3546,7 +3575,7 @@ snapshots:
 
   case-anything@2.1.13: {}
 
-  case-anything@3.1.0: {}
+  case-anything@3.1.2: {}
 
   chai@4.4.1:
     dependencies:
@@ -3782,15 +3811,15 @@ snapshots:
 
   edge-error@3.0.0: {}
 
-  edge-error@4.0.1: {}
+  edge-error@4.0.2: {}
 
   edge-lexer@5.0.2:
     dependencies:
       edge-error: 3.0.0
 
-  edge-lexer@6.0.2:
+  edge-lexer@6.0.3:
     dependencies:
-      edge-error: 4.0.1
+      edge-error: 4.0.2
 
   edge-parser@8.2.2:
     dependencies:
@@ -3800,27 +3829,27 @@ snapshots:
       edge-lexer: 5.0.2
       js-stringify: 1.0.2
 
-  edge-parser@9.0.3:
+  edge-parser@9.0.4:
     dependencies:
-      acorn: 8.14.0
+      acorn: 8.14.1
       astring: 1.9.0
-      edge-error: 4.0.1
-      edge-lexer: 6.0.2
+      edge-error: 4.0.2
+      edge-lexer: 6.0.3
       js-stringify: 1.0.2
 
-  edge-tags@0.0.2(edge.js@6.2.0):
+  edge-tags@0.0.3(edge.js@6.2.1):
     dependencies:
-      edge.js: 6.2.0
+      edge.js: 6.2.1
 
-  edge.js@6.2.0:
+  edge.js@6.2.1:
     dependencies:
       '@poppinss/inspect': 1.0.1
-      '@poppinss/macroable': 1.0.3
-      '@poppinss/utils': 6.8.3
+      '@poppinss/macroable': 1.0.4
+      '@poppinss/utils': 6.9.2
       classnames: 2.5.1
-      edge-error: 4.0.1
-      edge-lexer: 6.0.2
-      edge-parser: 9.0.3
+      edge-error: 4.0.2
+      edge-lexer: 6.0.3
+      edge-parser: 9.0.4
       fs-readdir-recursive: 1.1.0
       he: 1.2.0
       js-stringify: 1.0.2
@@ -4882,6 +4911,8 @@ snapshots:
   safer-buffer@2.1.2: {}
 
   secure-json-parse@2.7.0: {}
+
+  secure-json-parse@3.0.2: {}
 
   semver@5.7.2: {}
 

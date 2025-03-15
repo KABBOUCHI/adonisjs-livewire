@@ -217,6 +217,8 @@ Define component logic using `<script server>` tag inside livewire edge componen
 
 ### Edge tag compiler (Experimental)
 
+This package includes Edge tags support via [edge-tags](https://github.com/KABBOUCHI/edge-tags).
+
 ```edge
 <x-button class="bg-red" a="b" :foo="bar" baz="{{ 1 + 2 }}">
   Hello
