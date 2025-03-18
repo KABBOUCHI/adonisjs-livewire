@@ -457,6 +457,11 @@ export default class Livewire {
 
     const [value, meta] = data
 
+    // Nested properties get set as `__rm__` when they are removed. We don't want to hydrate these.
+    if (value === '__rm__' && path.includes('.')) {
+      return value
+    }
+
     const synth = this.propertySynth(meta['s'], context, path)
 
     return await synth.hydrate(value, meta, async (name: string, child: any) => {
