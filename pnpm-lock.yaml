@@ -24,8 +24,8 @@ importers:
         specifier: ^8.2.2
         version: 8.2.2
       edge-tags:
-        specifier: ^0.0.3
-        version: 0.0.3(edge.js@6.2.1)
+        specifier: ^0.0.5
+        version: 0.0.5(edge.js@6.2.1)
       luxon:
         specifier: ^3.5.0
         version: 3.5.0
@@ -1165,8 +1165,8 @@ packages:
     resolution: {integrity: sha512-vnjzfpqpjM4Mjt9typc1zLoFpC1F6kAObfcdyA6rSy+izIPji2RaQz5jWx5s5iG9hNcuyjtNyGRCLFVfoYhWcA==}
     engines: {node: '>=18.16.0'}
 
-  edge-tags@0.0.3:
-    resolution: {integrity: sha512-hx5dUvhD0Eo4G64l86Hv4rESWhn6M52aELVJa3LLq+QUlUU3ph8j7vAwMcaNfW3DIxcABbsta3dQsy++jdxwuw==}
+  edge-tags@0.0.5:
+    resolution: {integrity: sha512-yQht+bsC8C9RL+5+dtxHCQ3HTCIQYvNeC3sfM/p3oMymnly+saiwefoPUuvCzGlVdZmtvAeQ0EkMPiqdLRdnYQ==}
     peerDependencies:
       edge.js: ^6.0.0
 
@@ -3837,7 +3837,7 @@ snapshots:
       edge-lexer: 6.0.3
       js-stringify: 1.0.2
 
-  edge-tags@0.0.3(edge.js@6.2.1):
+  edge-tags@0.0.5(edge.js@6.2.1):
     dependencies:
       edge.js: 6.2.1
 
