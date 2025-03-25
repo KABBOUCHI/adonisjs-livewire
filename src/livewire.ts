@@ -237,7 +237,7 @@ export default class Livewire {
 
       await this.trigger('dehydrate', component, context)
 
-      let snapshot = this.snapshot(component, context)
+      let snapshot = await this.snapshot(component, context)
 
       for (const key of Object.keys(params)) {
         if (key.startsWith('@')) {
@@ -524,7 +524,7 @@ export default class Livewire {
 
       await this.trigger('dehydrate', component, context)
 
-      let newSnapshot = this.snapshot(component, context)
+      let newSnapshot = await this.snapshot(component, context)
 
       return [newSnapshot, context.effects] as const
     })
@@ -631,7 +631,7 @@ export default class Livewire {
       : this.getSynthesizerByTarget(keyOrTarget, context, path)
   }
 
-  dehydrate(target: any, context: ComponentContext, path: string) {
+  async dehydrate(target: any, context: ComponentContext, path: string) {
     const isPrimitive = (v: any) =>
       v === null ||
       ['string', 'number', 'boolean', 'undefined'].includes(typeof v) ||
@@ -648,8 +648,8 @@ export default class Livewire {
     try {
       const synth = this.propertySynth(target, context, path)
 
-      const [data, meta] = synth.dehydrate(target, (name: string, child: any) => {
-        return this.dehydrate(child, context, `${path}.${name}`)
+      const [data, meta] = await synth.dehydrate(target, async (name: string, child: any) => {
+        return await this.dehydrate(child, context, `${path}.${name}`)
       })
 
       //@ts-ignore
@@ -662,7 +662,7 @@ export default class Livewire {
     }
   }
 
-  dehydrateProperties(component: any, context: ComponentContext) {
+  async dehydrateProperties(component: any, context: ComponentContext) {
     const data = {}
     for (let key in component) {
       if (key.startsWith('__')) {
@@ -681,7 +681,7 @@ export default class Livewire {
     }
 
     for (let key in data) {
-      data[key] = this.dehydrate(data[key], context, key)
+      data[key] = await this.dehydrate(data[key], context, key)
     }
 
     return data
@@ -695,10 +695,10 @@ export default class Livewire {
     // )
   }
 
-  snapshot(component: any, context: any = null): any {
+  async snapshot(component: any, context: any = null): Promise<any> {
     context = context ?? new ComponentContext(component)
 
-    let data = this.dehydrateProperties(component, context)
+    let data = await this.dehydrateProperties(component, context)
 
     const s = store(component)
 
@@ -765,7 +765,16 @@ export default class Livewire {
       let property = segments[0]
       if (!(property in component)) return
 
-      const child = updates[key]
+      let child = updates[key]
+
+      if (isSyntheticTuple(data[property])) {
+        child = await this.hydrate(updates[key], context, key)
+      }
+
+      if (Array.isArray(data[property]) && segments.length === 2 && child === '__rm__') {
+        component[property].splice(segments[1], 1)
+        continue
+      }
 
       // await this.trigger('update', component, key, key, child)
 

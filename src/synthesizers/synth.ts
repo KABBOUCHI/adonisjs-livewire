@@ -36,10 +36,10 @@ export abstract class Synth {
     return false
   }
 
-  dehydrate(target: any, hydrateChild: any) {
+  async dehydrate(target: any, hydrateChild: any) {
     return [target, {}]
   }
-  hydrate(value: any, meta: any, hydrateChild: any) {
+  async hydrate(value: any, meta: any, hydrateChild: any) {
     return value
   }
   // abstract hydrateFromType(type, value)

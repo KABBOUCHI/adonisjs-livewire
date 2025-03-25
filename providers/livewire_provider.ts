@@ -16,6 +16,7 @@ import { Config, defaultConfig } from '../src/define_config.js'
 import type Livewire from '../src/livewire.js'
 import { EventBus } from '../src/event_bus.js'
 import { ModelSynth } from '../src/synthesizers/model.js'
+import { ArraySynth } from '../src/synthesizers/array.js'
 
 const currentDirname = dirname(fileURLToPath(import.meta.url))
 
@@ -296,6 +297,6 @@ export default class LivewireProvider {
       }
     }
 
-    Livewire.registerPropertySynthesizer([ModelSynth])
+    Livewire.registerPropertySynthesizer([ModelSynth, ArraySynth])
   }
 }

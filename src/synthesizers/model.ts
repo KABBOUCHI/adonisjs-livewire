@@ -9,7 +9,7 @@ export class ModelSynth extends Synth {
     return target instanceof BaseModel
   }
 
-  dehydrate(target: any) {
+  async dehydrate(target: any) {
     return [null, { key: target.$primaryKeyValue, model: target.constructor.name }]
   }
 
