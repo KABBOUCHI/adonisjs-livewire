@@ -50,7 +50,7 @@ export class SupportLazyLoading extends ComponentHook {
   async generatePlaceholderHtml(params) {
     const Livewire = await this.app.container.make('livewire')
     let { context } = getLivewireContext()!
-    let placeholder = await this.getPlaceholderHtml()
+    let placeholder = await this.getPlaceholderHtml(params)
 
     context.addMemo('__for_mount', params)
 
@@ -61,12 +61,12 @@ export class SupportLazyLoading extends ComponentHook {
     })
   }
 
-  async getPlaceholderHtml() {
+  async getPlaceholderHtml(params) {
     if (!this.component['placeholder']) {
       return '<div></div>'
     }
 
-    return await this.component.view.renderRaw(await this.component['placeholder']())
+    return await this.component.view.renderRaw(await this.component['placeholder'](params))
   }
 
   async call(method, params, _returnEarly) {
