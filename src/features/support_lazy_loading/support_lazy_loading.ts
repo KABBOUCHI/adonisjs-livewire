@@ -109,6 +109,12 @@ export class SupportLazyLoading extends ComponentHook {
 
         //@ts-ignore
         await component.mount(...resolvedParams)
+      } else {
+        for (let paramKey in data.memo.__for_mount) {
+          if (paramKey in component) {
+            component[paramKey] = data.memo.__for_mount[paramKey]
+          }
+        }
       }
 
       delete data.memo.for_mount

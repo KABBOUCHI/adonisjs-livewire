@@ -196,36 +196,44 @@ export default class Livewire {
 
       let skipMount = s.get('skipMount') ?? false
       skipMount = Array.isArray(skipMount) ? skipMount[0] : skipMount
-      //@ts-ignore
-      if (!skipMount && typeof component.mount === 'function') {
-        const resolvedParams = [params]
+      if (!skipMount) {
+        //@ts-ignore
+        if (typeof component.mount === 'function') {
+          const resolvedParams = [params]
 
-        const isResourceModel = (value: any) => {
-          if (!value) {
-            return false
+          const isResourceModel = (value: any) => {
+            if (!value) {
+              return false
+            }
+
+            return (
+              typeof value['findForRequest'] === 'function' ||
+              typeof value['findOrFail'] === 'function' ||
+              typeof value['findRelatedForRequest'] === 'function'
+            )
           }
 
-          return (
-            typeof value['findForRequest'] === 'function' ||
-            typeof value['findOrFail'] === 'function' ||
-            typeof value['findRelatedForRequest'] === 'function'
-          )
-        }
+          if (component['bindings'] && component['bindings']['mount']) {
+            for (let index = 1; index < component['bindings']['mount'].length; index++) {
+              const binding = component['bindings']['mount'][index]
 
-        if (component['bindings'] && component['bindings']['mount']) {
-          for (let index = 1; index < component['bindings']['mount'].length; index++) {
-            const binding = component['bindings']['mount'][index]
+              if (isResourceModel(binding.type)) {
+                resolvedParams.push(await binding.type.findOrFail(params[binding.name]))
+              } else {
+                resolvedParams.push(params[binding.name])
+              }
+            }
+          }
 
-            if (isResourceModel(binding.type)) {
-              resolvedParams.push(await binding.type.findOrFail(params[binding.name]))
-            } else {
-              resolvedParams.push(params[binding.name])
+          //@ts-ignore
+          await component.mount(...resolvedParams)
+        } else {
+          for (let paramKey in params) {
+            if (paramKey in component) {
+              component[paramKey] = params[paramKey]
             }
           }
         }
-
-        //@ts-ignore
-        await component.mount(...resolvedParams)
       }
 
       // pickup newely added props, like ts declared props
