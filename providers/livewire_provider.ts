@@ -90,7 +90,7 @@ export default class LivewireProvider {
         buffer.outputExpression(
           '`<script src="/livewire.js?v=' +
             packageJson.version +
-            '" data-csrf="${state.request.csrfToken}" data-update-uri="/livewire/update" data-navigate-once="true"></script>`',
+            '" data-csrf="${state.request.csrfToken ?? \'\'}" data-update-uri="/livewire/update" data-navigate-once="true"></script>`',
           token.filename,
           token.loc.start.line,
           false
