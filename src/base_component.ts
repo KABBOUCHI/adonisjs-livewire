@@ -41,7 +41,7 @@ export class BaseComponent {
         this.__view_data = Object.assign({}, this.__view_data || {}, state || {})
         return this.__view.renderRawSync(contents, state, templatePath)
       },
-    } as any
+    } as unknown as ReturnType<Edge['createRenderer']>
   }
 
   setId(id: string) {
