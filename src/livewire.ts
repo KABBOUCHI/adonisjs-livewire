@@ -774,6 +774,13 @@ export default class Livewire {
       if (!(property in component)) return
 
       let child = updates[key]
+      let modifiers: string[] = []
+
+      // Check if the update payload includes modifiers
+      if (typeof child === 'object' && child !== null && 'value' in child && 'modifiers' in child) {
+        modifiers = child.modifiers
+        child = child.value // Extract the actual value
+      }
 
       if (isSyntheticTuple(data[property])) {
         child = await this.hydrate(updates[key], context, key)
@@ -782,6 +789,15 @@ export default class Livewire {
       if (Array.isArray(data[property]) && segments.length === 2 && child === '__rm__') {
         component[property].splice(segments[1], 1)
         continue
+      }
+
+      // Check if the component uses the Form mixin and the updated property is part of the form
+      // AND if the 'live' modifier is present.
+      if ('form' in component && 'validate' in component && key.startsWith('form.')) {
+        if (modifiers.includes('live') || modifiers.includes('blur')) {
+          const fieldName = key.split('.')[1] // Extract the field name (e.g., 'message' from 'form.message')
+          await (component as any).validate(fieldName)
+        }
       }
 
       // await this.trigger('update', component, key, key, child)
