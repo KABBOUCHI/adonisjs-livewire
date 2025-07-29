@@ -2,7 +2,7 @@ import vine, { VineObject } from '@vinejs/vine'
 import { InferInput } from '@vinejs/vine/types'
 import { SchemaTypes } from '@vinejs/vine/types'
 import { compareValues } from '@adonisjs/lucid/utils'
-import { BaseComponent } from '../../base_component.js'
+import { BaseComponent } from './base_component.js'
 
 export function Form<T extends SchemaTypes>(schema: T) {
   interface FormHandler extends BaseComponent {}

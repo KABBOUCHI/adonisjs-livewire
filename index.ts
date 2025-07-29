@@ -10,6 +10,7 @@
 export { configure } from './configure.js'
 export { stubsRoot } from './stubs/main.js'
 export { defineConfig } from './src/define_config.js'
+export { Form } from './src/form.js'
 export { Component } from './src/component.js'
 export { EventBus } from './src/event_bus.js'
 export { Synth } from './src/synthesizers/synth.js'
