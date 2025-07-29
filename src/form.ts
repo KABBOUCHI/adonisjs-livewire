@@ -26,12 +26,9 @@ export function Form<T extends SchemaTypes>(schema: T) {
       >
     > = {}
 
-    #defaultFormValues: Partial<InferInput<T>> = {}
-
-    #schema?: VineObject<any, any, any, any>
-
-    constructor() {
-      this.#schema = schema as any
+    __form = {
+      defaultFormValues: {} as Partial<InferInput<T>>,
+      schema: schema as unknown as VineObject<any, any, any, any>,
     }
 
     /**
@@ -44,7 +41,7 @@ export function Form<T extends SchemaTypes>(schema: T) {
 
       Object.keys(this.form).forEach((key) => {
         const currentValue = this.form[key as keyof InferInput<T>]
-        const originalValue = this.#defaultFormValues[key as keyof InferInput<T>]
+        const originalValue = this.__form.defaultFormValues[key as keyof InferInput<T>]
 
         if (!compareValues(originalValue, currentValue)) {
           dirty[key as keyof InferInput<T>] = currentValue
@@ -78,7 +75,7 @@ export function Form<T extends SchemaTypes>(schema: T) {
      * Get a copy of the form data
      */
     data(): InferInput<T> {
-      return { ...this.#defaultFormValues, ...this.form }
+      return { ...this.__form.defaultFormValues, ...this.form }
     }
 
     /**
@@ -104,20 +101,20 @@ export function Form<T extends SchemaTypes>(schema: T) {
     defaults(fields: Partial<InferInput<T>>): this
     defaults(fieldOrFields?: keyof InferInput<T> | Partial<InferInput<T>>, maybeValue?: any): this {
       if (typeof fieldOrFields === 'undefined') {
-        this.#defaultFormValues = { ...this.form }
+        this.__form.defaultFormValues = { ...this.form }
       } else if (typeof fieldOrFields === 'string') {
-        this.#defaultFormValues = {
-          ...this.#defaultFormValues,
+        this.__form.defaultFormValues = {
+          ...this.__form.defaultFormValues,
           [fieldOrFields]: maybeValue,
         }
       } else {
-        this.#defaultFormValues = {
-          ...this.#defaultFormValues,
+        this.__form.defaultFormValues = {
+          ...this.__form.defaultFormValues,
           ...(fieldOrFields as Partial<InferInput<T>>),
         }
       }
 
-      this.form = this.compact(this.#defaultFormValues).data()
+      this.form = this.compact(this.__form.defaultFormValues).data()
 
       return this
     }
@@ -127,23 +124,25 @@ export function Form<T extends SchemaTypes>(schema: T) {
      */
     reset(...fields: (keyof InferInput<T>)[]): this {
       if (fields.length === 0) {
-        if (Object.keys(this.#defaultFormValues).length === 0) {
+        if (Object.keys(this.__form.defaultFormValues).length === 0) {
           // If no default values are set, reset the form to initial state
           this.form = {} as InferInput<T>
         }
 
         // Reset all fields
-        Object.keys(this.#defaultFormValues).forEach((key) => {
+        Object.keys(this.__form.defaultFormValues).forEach((key) => {
           const typedKey = key as keyof InferInput<T>
-          this.form[typedKey] = this.#defaultFormValues[
+          this.form[typedKey] = this.__form.defaultFormValues[
             typedKey
           ] as InferInput<T>[keyof InferInput<T>]
         })
       } else {
         // Reset specific fields
         fields.forEach((field) => {
-          if (field in this.#defaultFormValues) {
-            this.form[field] = this.#defaultFormValues[field] as InferInput<T>[keyof InferInput<T>]
+          if (field in this.__form.defaultFormValues) {
+            this.form[field] = this.__form.defaultFormValues[
+              field
+            ] as InferInput<T>[keyof InferInput<T>]
           }
         })
       }
@@ -201,18 +200,18 @@ export function Form<T extends SchemaTypes>(schema: T) {
     }
 
     async validate(field?: keyof InferInput<T>): Promise<InferInput<T>> {
-      if (!this.#schema) {
+      if (!this.__form) {
         throw new Error('Validation schema not provided. Cannot validate form.')
       }
 
-      let schematic = this.#schema
+      let schematic = this.__form.schema
       let data = this.data()
 
       if (field) {
         this.clearErrors(field)
         // Validate only the specified field
         schematic = vine.object({
-          [field]: this.#schema.getProperties()[field],
+          [field]: this.__form.schema.getProperties()[field],
         })
         data = { [field]: this.data()[field] }
       }
