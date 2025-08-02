@@ -262,3 +262,77 @@ export default class Button extends ViewComponent {
   }
 }
 ```
+
+## Forms
+
+Create form components with automatic validation and error handling using VineJS schemas.
+
+```ts
+// app/livewire/contact-form.ts
+import vine from '@vinejs/vine'
+import { Component, Form, Mixin } from 'adonisjs-livewire'
+
+const schema = vine.object({
+  name: vine.string().minLength(2),
+  email: vine.string().email(),
+  message: vine.string().minLength(10),
+})
+
+class ContactForm extends Form(schema) {
+  async submit() {
+    const { name, email, message } = await this.validate()
+    
+    // Send email or save to database
+    console.log('Contact form submitted:', { name, email, message })
+    
+    this.resetAndClearErrors()
+  }
+}
+
+export default class ContactPage extends Mixin(Component, ContactForm) {
+  async mount() {
+    this.defaults({
+      name: '',
+      email: '',
+      message: '',
+    })
+  }
+
+  async render() {
+    return this.view.render('livewire/contact-form')
+  }
+}
+```
+
+Template with validation errors:
+
+```edge
+{{-- resources/views/livewire/contact-form.edge --}}
+<form wire:submit="submit">
+  <div>
+    <label for="name">Name</label>
+    <input wire:model="name" type="text" id="name" />
+    @validationError('name')
+      <span class="error">{{ $message }}</span>
+    @end
+  </div>
+
+  <div>
+    <label for="email">Email</label>
+    <input wire:model="email" type="email" id="email" />
+    @validationError('email')
+      <span class="error">{{ $message }}</span>
+    @end
+  </div>
+
+  <div>
+    <label for="message">Message</label>
+    <textarea wire:model="message" id="message"></textarea>
+    @validationError('message')
+      <span class="error">{{ $message }}</span>
+    @end
+  </div>
+
+  <button type="submit">Send Message</button>
+</form>
+```
