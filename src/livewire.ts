@@ -492,6 +492,34 @@ export default class Livewire {
         component[key] = child
       }
     }
+
+    // Handle Form component hydration - preserve current form values
+    if ('form' in component && '__form' in component) {
+      const formComponent = component as any
+
+      // If the form has defaultFormValues set, ensure we don't overwrite current form values
+      if (
+        formComponent.__form?.defaultFormValues &&
+        Object.keys(formComponent.__form.defaultFormValues).length > 0
+      ) {
+        // Preserve current form values, only set defaults for missing fields
+        const currentForm = { ...formComponent.form }
+        const defaults = formComponent.__form.defaultFormValues
+
+        // Only apply defaults to fields that don't exist or are undefined/null
+        for (const [key, defaultValue] of Object.entries(defaults)) {
+          if (
+            !(key in currentForm) ||
+            currentForm[key] === undefined ||
+            currentForm[key] === null
+          ) {
+            currentForm[key] = defaultValue
+          }
+        }
+
+        formComponent.form = currentForm
+      }
+    }
   }
 
   async update(snapshot: any, updates: any, calls: any) {
@@ -774,13 +802,6 @@ export default class Livewire {
       if (!(property in component)) return
 
       let child = updates[key]
-      let modifiers: string[] = []
-
-      // Check if the update payload includes modifiers
-      if (typeof child === 'object' && child !== null && 'value' in child && 'modifiers' in child) {
-        modifiers = child.modifiers
-        child = child.value // Extract the actual value
-      }
 
       if (isSyntheticTuple(data[property])) {
         child = await this.hydrate(updates[key], context, key)
@@ -792,13 +813,30 @@ export default class Livewire {
       }
 
       // Check if the component uses the Form mixin and the updated property is part of the form
-      // AND if the 'live' modifier is present.
-      if ('form' in component && 'validate' in component && key.startsWith('form.')) {
-        if (modifiers.includes('live') || modifiers.includes('blur')) {
-          const fieldName = key.split('.')[1] // Extract the field name (e.g., 'message' from 'form.message')
-          await (component as any).validate(fieldName)
+      if ('form' in component && key.startsWith('form.')) {
+        const fieldName = key.split('.')[1] // Extract the field name (e.g., 'message' from 'form.message')
+
+        // Mark field as initialized/touched by user to prevent defaults from overriding
+        if ('markFieldAsInitialized' in component) {
+          ;(component as any).markFieldAsInitialized(fieldName)
+        }
+
+        // For Form components, validate on every update from frontend
+        // This covers both .live and .blur since we can't detect modifiers reliably
+        if ('validate' in component) {
+          try {
+            await (component as any).validate(fieldName, child)
+
+            // Optional: Trigger custom validation event for features/hooks
+            await this.trigger('form:field-validated', component, fieldName, key)
+          } catch (error) {
+            // Validation errors are already handled in the Form.validate method
+            // Just continue with the flow
+          }
         }
       }
+
+      // await this.trigger('update', component, key, key, child)
 
       // await this.trigger('update', component, key, key, child)
 
