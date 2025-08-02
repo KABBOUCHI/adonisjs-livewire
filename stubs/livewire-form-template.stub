@@ -1,0 +1,18 @@
+{{{
+  exports({ to: app.viewsPath('livewire/' + filename + '.edge') })
+}}}
+<form wire:submit="submit">
+  
+    <!-- Add your form fields here -->
+    <!-- Example field:
+    <div>
+        <label for="name">Name</label>
+        <input wire:model="name" type="text" id="name" />
+        @validationError('name', 'required')
+        <span class="error">{{ '\{\{ $message \}\}' }}</span>
+        @end
+    </div>
+    -->
+
+  <button type="submit">Submit</button>
+</form>
