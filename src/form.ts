@@ -2,7 +2,7 @@ import vine, { VineObject } from '@vinejs/vine'
 import { InferInput, Infer } from '@vinejs/vine/types'
 import { SchemaTypes } from '@vinejs/vine/types'
 import { compareValues } from '@adonisjs/lucid/utils'
-import { BaseComponent } from './base_component.js'
+import { Component } from './component.js'
 
 /**
  * Form Mixin Factory
@@ -45,7 +45,7 @@ import { BaseComponent } from './base_component.js'
  * @returns Form handler class with type-safe form management capabilities
  */
 export function Form<T extends SchemaTypes>(schema: T) {
-  interface FormHandler extends BaseComponent {}
+  interface FormHandler extends Component {}
 
   type ValidationErrors = Partial<
     Record<
@@ -62,11 +62,12 @@ export function Form<T extends SchemaTypes>(schema: T) {
    *
    * Provides form management with validation, error handling, and state tracking.
    */
-  class FormHandler {
+  abstract class FormHandler {
     // Livewire component properties
-    declare __id: string
-    declare __name: string
-    declare __view_path: string
+    abstract __id: string
+    abstract __name: string
+    abstract __view_path: string
+    abstract js(): void
 
     /**
      * Form data object containing current form values
@@ -80,6 +81,7 @@ export function Form<T extends SchemaTypes>(schema: T) {
 
     /**
      * Internal form management state
+     * @private
      */
     __form = {
       defaultFormValues: {} as Partial<InferInput<T>>,
@@ -89,6 +91,7 @@ export function Form<T extends SchemaTypes>(schema: T) {
 
     /**
      * Check if a form field value is considered "empty" for defaults purposes
+     * @private
      */
     isFieldEmpty(value: any): boolean {
       return value === undefined || value === null
@@ -96,6 +99,7 @@ export function Form<T extends SchemaTypes>(schema: T) {
 
     /**
      * Check if a field has been initialized/touched by the user
+     * @private
      */
     isFieldInitialized(fieldName: keyof InferInput<T>): boolean {
       return this.__form.initializedFields.has(fieldName)
@@ -103,6 +107,7 @@ export function Form<T extends SchemaTypes>(schema: T) {
 
     /**
      * Mark a field as initialized/touched by the user
+     * @private
      */
     markFieldAsInitialized(fieldName: keyof InferInput<T>): void {
       this.__form.initializedFields.add(fieldName)
@@ -266,7 +271,21 @@ export function Form<T extends SchemaTypes>(schema: T) {
         Object.assign(this.errors, fieldOrErrors)
       }
 
+      // Also store errors in flash messages for the @validationError tag
+      this.storeErrorsInFlash()
+
       return this
+    }
+
+    /**
+     * Store current errors in flash messages
+     *
+     * @private
+     */
+    storeErrorsInFlash(): void {
+      if (this.ctx && 'session' in this.ctx) {
+        ;(this.ctx as any).session.flash('validationErrorsBags', this.errors)
+      }
     }
 
     /**
@@ -280,6 +299,10 @@ export function Form<T extends SchemaTypes>(schema: T) {
           delete this.errors[field]
         })
       }
+
+      // Also update flash messages
+      this.storeErrorsInFlash()
+
       return this
     }
 
