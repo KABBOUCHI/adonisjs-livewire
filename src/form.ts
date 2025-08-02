@@ -1,8 +1,56 @@
 import vine, { VineObject } from '@vinejs/vine'
 import { InferInput, Infer } from '@vinejs/vine/types'
 import { SchemaTypes } from '@vinejs/vine/types'
-import { compareValues } from '@adonisjs/lucid/utils'
+import { compareValues, isObject } from '@adonisjs/lucid/utils'
 import { Component } from './component.js'
+
+type ErrorField = {
+  message: string
+  rule?: string
+}
+
+export type ValidationErrors<T extends SchemaTypes> = Partial<
+  Record<keyof InferInput<T>, Array<ErrorField>>
+>
+
+export class FormStore<Schema extends SchemaTypes> {
+  defaultValues: Partial<InferInput<Schema>> = {}
+  values: InferInput<Schema> = {} as InferInput<Schema>
+  errors: Partial<Record<keyof InferInput<Schema>, Array<ErrorField>>> = {}
+  initializedFields: Set<keyof InferInput<Schema>> = new Set()
+
+  keys: (keyof InferInput<Schema>)[] = []
+
+  constructor(public schema: VineObject<any, any, any, any>) {
+    this.keys = Object.keys(schema.getProperties()) as (keyof InferInput<Schema>)[]
+    this.values = this.keys.reduce((acc, key) => {
+      acc[key] = undefined as InferInput<Schema>[keyof InferInput<Schema>]
+      return acc
+    }, {} as InferInput<Schema>)
+    this.defaultValues = { ...this.values }
+  }
+
+  /**
+   * Check if a form field value is considered "empty" for defaults purposes
+   */
+  isFieldEmpty(value: any): boolean {
+    return value === undefined || value === null
+  }
+
+  /**
+   * Check if a field has been initialized/touched by the user
+   */
+  isFieldInitialized(fieldName: keyof InferInput<Schema>): boolean {
+    return this.initializedFields.has(fieldName)
+  }
+
+  /**
+   * Mark a field as initialized/touched by the user
+   */
+  markFieldAsInitialized(fieldName: keyof InferInput<Schema>): void {
+    this.initializedFields.add(fieldName)
+  }
+}
 
 /**
  * Form Mixin Factory
@@ -44,18 +92,8 @@ import { Component } from './component.js'
  * @param schema - VineJS schema for form validation
  * @returns Form handler class with type-safe form management capabilities
  */
-export function Form<T extends SchemaTypes>(schema: T) {
+export function Form<T extends SchemaTypes, Meta = Record<string, any>>(schema: T) {
   interface FormHandler extends Component {}
-
-  type ValidationErrors = Partial<
-    Record<
-      keyof InferInput<T>,
-      Array<{
-        message: string
-        rule?: string
-      }>
-    >
-  >
 
   /**
    * Form Handler Class
@@ -70,48 +108,57 @@ export function Form<T extends SchemaTypes>(schema: T) {
     abstract js(): void
 
     /**
+     * Internal form management state
+     */
+    __form = new FormStore<T>(schema as any)
+
+    /**
      * Form data object containing current form values
      */
-    form: InferInput<T> = {} as InferInput<T>
+    form: InferInput<T> = new Proxy(this.__form.values, {
+      set: (target, prop, value) => {
+        // Handle symbols and non-string properties
+        if (typeof prop !== 'string') {
+          target[prop] = value
+          return true
+        }
 
-    /**
-     * Form validation errors
-     */
-    errors: ValidationErrors = {}
+        const typedProp = prop as keyof InferInput<T>
+        if (typedProp in target || this.__form.keys.includes(typedProp)) {
+          target[typedProp] = value as InferInput<T>[keyof InferInput<T>]
 
-    /**
-     * Internal form management state
-     * @private
-     */
-    __form = {
-      defaultFormValues: {} as Partial<InferInput<T>>,
-      schema: schema as unknown as VineObject<any, any, any, any>,
-      initializedFields: new Set<keyof InferInput<T>>(), // Track which fields have been set by user
-    }
+          // Mark field as initialized/touched by user
+          if (!this.__form.isFieldEmpty(value)) {
+            this.__form.markFieldAsInitialized(typedProp)
+          }
 
-    /**
-     * Check if a form field value is considered "empty" for defaults purposes
-     * @private
-     */
-    isFieldEmpty(value: any): boolean {
-      return value === undefined || value === null
-    }
+          return true
+        }
 
-    /**
-     * Check if a field has been initialized/touched by the user
-     * @private
-     */
-    isFieldInitialized(fieldName: keyof InferInput<T>): boolean {
-      return this.__form.initializedFields.has(fieldName)
-    }
+        return false
+      },
+      get: (target, prop) => {
+        // Handle non-string properties
+        if (typeof prop !== 'string') {
+          return target[prop]
+        }
 
-    /**
-     * Mark a field as initialized/touched by the user
-     * @private
-     */
-    markFieldAsInitialized(fieldName: keyof InferInput<T>): void {
-      this.__form.initializedFields.add(fieldName)
-    }
+        const typedProp = prop as keyof InferInput<T>
+
+        // First check if the property exists in the target (current values)
+        if (typedProp in target) {
+          return target[typedProp]
+        }
+
+        // Then check if it's a valid schema field and return default value
+        if (this.__form.keys.includes(typedProp)) {
+          return this.__form.defaultValues[typedProp]
+        }
+
+        // For any other property, return undefined
+        return undefined
+      },
+    })
 
     /**
      * Get the current form values that have been modified compared to the default values
@@ -121,7 +168,7 @@ export function Form<T extends SchemaTypes>(schema: T) {
 
       Object.keys(this.form).forEach((key) => {
         const currentValue = this.form[key as keyof InferInput<T>]
-        const originalValue = this.__form.defaultFormValues[key as keyof InferInput<T>]
+        const originalValue = this.__form.defaultValues[key as keyof InferInput<T>]
 
         if (!compareValues(originalValue, currentValue)) {
           dirty[key as keyof InferInput<T>] = currentValue
@@ -135,7 +182,7 @@ export function Form<T extends SchemaTypes>(schema: T) {
      * Check if the form has any validation errors
      */
     get hasErrors(): boolean {
-      return Object.keys(this.errors).length > 0
+      return Object.keys(this.__form.errors).length > 0
     }
 
     /**
@@ -154,7 +201,7 @@ export function Form<T extends SchemaTypes>(schema: T) {
      * Get a complete copy of the form data
      */
     data(): InferInput<T> {
-      return { ...this.__form.defaultFormValues, ...this.form }
+      return { ...this.__form.defaultValues, ...this.form }
     }
 
     /**
@@ -182,23 +229,24 @@ export function Form<T extends SchemaTypes>(schema: T) {
     defaults(fields: Partial<InferInput<T>>): this
     defaults(fieldOrFields?: keyof InferInput<T> | Partial<InferInput<T>>, maybeValue?: any): this {
       if (typeof fieldOrFields === 'undefined') {
-        this.__form.defaultFormValues = { ...this.form }
+        this.__form.defaultValues = { ...this.form }
       } else if (typeof fieldOrFields === 'string') {
-        this.__form.defaultFormValues = {
-          ...this.__form.defaultFormValues,
+        this.__form.defaultValues = {
+          ...this.__form.defaultValues,
           [fieldOrFields]: maybeValue,
         }
 
         // Only set the actual form value if it doesn't exist or is empty AND hasn't been initialized by user
         if (
           !(fieldOrFields in this.form) ||
-          (this.isFieldEmpty(this.form[fieldOrFields]) && !this.isFieldInitialized(fieldOrFields))
+          (this.__form.isFieldEmpty(this.form[fieldOrFields]) &&
+            !this.__form.isFieldInitialized(fieldOrFields))
         ) {
           this.form[fieldOrFields] = maybeValue
         }
       } else {
-        this.__form.defaultFormValues = {
-          ...this.__form.defaultFormValues,
+        this.__form.defaultValues = {
+          ...this.__form.defaultValues,
           ...(fieldOrFields as Partial<InferInput<T>>),
         }
 
@@ -207,7 +255,8 @@ export function Form<T extends SchemaTypes>(schema: T) {
           const typedKey = key as keyof InferInput<T>
           if (
             !(typedKey in this.form) ||
-            (this.isFieldEmpty(this.form[typedKey]) && !this.isFieldInitialized(typedKey))
+            (this.__form.isFieldEmpty(this.form[typedKey]) &&
+              !this.__form.isFieldInitialized(typedKey))
           ) {
             this.form[typedKey] = value as InferInput<T>[keyof InferInput<T>]
           }
@@ -222,23 +271,23 @@ export function Form<T extends SchemaTypes>(schema: T) {
      */
     reset(...fields: (keyof InferInput<T>)[]): this {
       if (fields.length === 0) {
-        if (Object.keys(this.__form.defaultFormValues).length === 0) {
+        if (Object.keys(this.__form.defaultValues).length === 0) {
           // If no default values are set, reset the form to initial state
           this.form = {} as InferInput<T>
         }
 
         // Reset all fields
-        Object.keys(this.__form.defaultFormValues).forEach((key) => {
+        Object.keys(this.__form.defaultValues).forEach((key) => {
           const typedKey = key as keyof InferInput<T>
-          this.form[typedKey] = this.__form.defaultFormValues[
+          this.form[typedKey] = this.__form.defaultValues[
             typedKey
           ] as InferInput<T>[keyof InferInput<T>]
         })
       } else {
         // Reset specific fields
         fields.forEach((field) => {
-          if (field in this.__form.defaultFormValues) {
-            this.form[field] = this.__form.defaultFormValues[
+          if (field in this.__form.defaultValues) {
+            this.form[field] = this.__form.defaultValues[
               field
             ] as InferInput<T>[keyof InferInput<T>]
           }
@@ -250,25 +299,25 @@ export function Form<T extends SchemaTypes>(schema: T) {
     /**
      * Set form validation errors
      */
-    setError(field: keyof InferInput<T>, value: { message: string; rule?: string }): this
-    setError(errors: Record<keyof InferInput<T>, Array<{ message: string; rule?: string }>>): this
+    setError(field: keyof InferInput<T>, value: { message: string; rule: string }): this
+    setError(errors: Record<keyof InferInput<T>, Array<{ message: string; rule: string }>>): this
     setError(
       fieldOrErrors:
         | keyof InferInput<T>
-        | Record<keyof InferInput<T>, Array<{ message: string; rule?: string }>>,
-      maybeValue?: { message: string; rule?: string }
+        | Record<keyof InferInput<T>, Array<{ message: string; rule: string }>>,
+      maybeValue?: { message: string; rule: string }
     ): this {
       if (typeof fieldOrErrors === 'string') {
-        if (fieldOrErrors in this.errors && this.errors[fieldOrErrors]) {
-          this.errors[fieldOrErrors]!.push(maybeValue!)
+        if (fieldOrErrors in this.__form.errors && this.__form.errors[fieldOrErrors]) {
+          this.__form.errors[fieldOrErrors]!.push(maybeValue!)
         } else {
-          this.errors = {
-            ...this.errors,
+          this.__form.errors = {
+            ...this.__form.errors,
             [fieldOrErrors]: [maybeValue!],
           }
         }
       } else {
-        Object.assign(this.errors, fieldOrErrors)
+        Object.assign(this.__form.errors, fieldOrErrors)
       }
 
       // Also store errors in flash messages for the @validationError tag
@@ -284,7 +333,7 @@ export function Form<T extends SchemaTypes>(schema: T) {
      */
     storeErrorsInFlash(): void {
       if (this.ctx && 'session' in this.ctx) {
-        ;(this.ctx as any).session.flash('validationErrorsBags', this.errors)
+        ;(this.ctx as any).session.flash('validationErrorsBags', this.__form.errors)
       }
     }
 
@@ -293,10 +342,10 @@ export function Form<T extends SchemaTypes>(schema: T) {
      */
     clearErrors(...fields: (keyof InferInput<T>)[]): this {
       if (fields.length === 0) {
-        this.errors = {}
+        this.__form.errors = {}
       } else {
         fields.forEach((field) => {
-          delete this.errors[field]
+          delete this.__form.errors[field]
         })
       }
 
@@ -322,34 +371,42 @@ export function Form<T extends SchemaTypes>(schema: T) {
      * Automatically manages error state and integrates with Livewire's view system.
      */
     async validate(): Promise<Infer<T>>
+    async validate(meta: Meta): Promise<Infer<T>>
     async validate<K extends keyof InferInput<T>>(field: K): Promise<Infer<T>[K]>
     async validate<K extends keyof InferInput<T>>(
       field: K,
       value: InferInput<T>[K]
     ): Promise<Infer<T>[K]>
-    async validate(field?: keyof InferInput<T>, value?: any): Promise<InferInput<T>> {
-      if (!this.__form) {
+    async validate(field?: any, value?: any) {
+      if (!this.__form.schema) {
         throw new Error('Validation schema not provided. Cannot validate form.')
       }
 
       let schematic = this.__form.schema
       let data = this.data()
 
-      if (field) {
-        this.clearErrors(field)
-        // Validate only the specified field
-        schematic = vine.object({
-          [field]: this.__form.schema.getProperties()[field],
-        })
-        data = { [field]: value ?? this.data()[field] }
+      if (field && !isObject(field)) {
+        if (field) {
+          this.clearErrors(field)
+          // Validate only the specified field
+          schematic = vine.object({
+            [field]: this.__form.schema.getProperties()[field],
+          })
+          data = { [field]: value ?? this.data()[field] }
+        }
       }
 
       return vine
         .compile(schematic)
-        .validate(data)
+        .validate(data, isObject(field) ? { meta: field } : {})
         .then((validatedData) => {
           this.clearErrors()
-          return field ? validatedData[field] : validatedData
+          // return field ? validatedData[field] : validatedData
+          if (field) {
+            return isObject(field) ? validatedData : validatedData[field]
+          }
+
+          return validatedData
         })
         .catch((error) => {
           for (const { field: errorField, rule, message } of error.messages) {
@@ -363,3 +420,5 @@ export function Form<T extends SchemaTypes>(schema: T) {
 
   return FormHandler
 }
+
+export type Form<T extends SchemaTypes> = ReturnType<typeof Form<T>>['prototype']
