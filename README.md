@@ -45,6 +45,16 @@ node ace make:livewire Counter
 node ace make:livewire Counter --inline
 ```
 
+## Create a Livewire form component
+
+```sh
+node ace livewire:form ContactForm
+
+# or inline
+
+node ace livewire:form ContactForm --inline
+```
+
 ## Basic Usage
 
 ```blade
