@@ -12,7 +12,7 @@ import { Secret } from '@adonisjs/core/helpers'
 import type { Config } from './define_config.js'
 import { EventBus } from './event_bus.js'
 import edge from 'edge.js'
-import { Synth } from '../index.js'
+import { Form, Synth } from '../index.js'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
@@ -495,16 +495,16 @@ export default class Livewire {
 
     // Handle Form component hydration - preserve current form values
     if ('form' in component && '__form' in component) {
-      const formComponent = component as any
+      const formComponent = component as Form<any>
 
-      // If the form has defaultFormValues set, ensure we don't overwrite current form values
+      // If the form has defaultValues set, ensure we don't overwrite current form values
       if (
-        formComponent.__form?.defaultFormValues &&
-        Object.keys(formComponent.__form.defaultFormValues).length > 0
+        formComponent.__form?.defaultValues &&
+        Object.keys(formComponent.__form.defaultValues).length > 0
       ) {
         // Preserve current form values, only set defaults for missing fields
         const currentForm = { ...formComponent.form }
-        const defaults = formComponent.__form.defaultFormValues
+        const defaults = formComponent.__form.defaultValues
 
         // Only apply defaults to fields that don't exist or are undefined/null
         for (const [key, defaultValue] of Object.entries(defaults)) {
@@ -817,9 +817,9 @@ export default class Livewire {
         const fieldName = key.split('.')[1] // Extract the field name (e.g., 'message' from 'form.message')
 
         // Mark field as initialized/touched by user to prevent defaults from overriding
-        if ('markFieldAsInitialized' in component) {
-          ;(component as any).markFieldAsInitialized(fieldName)
-        }
+        // if ('markFieldAsInitialized' in component) {
+        //   ;(component as any).markFieldAsInitialized(fieldName)
+        // }
 
         // For Form components, validate on every update from frontend
         // This covers both .live and .blur since we can't detect modifiers reliably
