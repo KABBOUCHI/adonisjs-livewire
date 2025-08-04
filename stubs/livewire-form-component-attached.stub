@@ -1,0 +1,39 @@
+{{{
+  exports({ to: app.makePath('app/livewire/' + filename + '.ts') })
+}}}
+import vine from '@vinejs/vine'
+import { Component, Form as FormBase, Mixin } from 'adonisjs-livewire'
+
+const validator = vine.object({
+  // Add your form fields here
+  // Example:
+  // name: vine.string().minLength(2),
+  // email: vine.string().email(),
+})
+
+class Form extends FormBase(validator) {
+  async submit() {
+    const data = await this.validate()
+    
+    // Handle form submission here
+    console.log('Form submitted:', data)
+    
+    // Reset form after successful submission
+    this.resetAndClearErrors()
+  }
+}
+
+export default class extends Mixin(Component, Form) {
+  async mount() {
+    this.defaults({
+      // Set default values here
+      // Example:
+      // name: '',
+      // email: '',
+    })
+  }
+
+  async render() {
+    return this.view.render('livewire/{{ dashedFilename }}')
+  }
+}

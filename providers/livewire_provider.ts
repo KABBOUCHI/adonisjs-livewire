@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 import type { ApplicationService } from '@adonisjs/core/types'
 import fs from 'node:fs'
 import { Route } from '@adonisjs/core/http'
@@ -62,6 +63,7 @@ export default class LivewireProvider {
 
     const Livewire = await import('../src/livewire.js').then((m) => m.default)
     const LivewireTag = await import('../src/livewire_tag.js').then((m) => m.default)
+    const ValidationErrorTag = await import('../src/validation_error_tag.js').then((m) => m.default)
 
     const config = this.app.config.get<Config>('livewire', defaultConfig)
     const livewire = new Livewire(app, config)
@@ -72,6 +74,7 @@ export default class LivewireProvider {
 
     edge.global('livewire', livewire)
     edge.registerTag(new LivewireTag())
+    edge.registerTag(new ValidationErrorTag())
 
     edge.registerTag({
       tagName: 'livewireStyles',
@@ -115,7 +118,7 @@ export default class LivewireProvider {
       }
 
       for (const match of matches) {
-        let [_, component, props] = match.match(/<livewire:([a-zA-Z0-9\.\-:.]+)([^>]*)\/>/) || []
+        let [, component, props] = match.match(/<livewire:([a-zA-Z0-9\.\-:.]+)([^>]*)\/>/) || []
         let attributes: any = {}
         let options: any = {}
         if (props) {
