@@ -16,8 +16,9 @@ import { Synth } from '../index.js'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
+import { Testable } from './features/support_testing/testable.ts'
 
-const isSyntheticTuple = (data) => Array.isArray(data) && data.length === 2 && !!data[1]['s']
+export const isSyntheticTuple = (data) => Array.isArray(data) && data.length === 2 && !!data[1]['s']
 
 export default class Livewire {
   app: ApplicationService
@@ -27,12 +28,47 @@ export default class Livewire {
   static FEATURES: any[] = []
   static PROPERTY_SYNTHESIZERS: Array<typeof Synth> = []
 
+  protected queryParamsForTesting: Record<string, any> = {}
+  protected cookiesForTesting: Record<string, any> = {}
+  protected headersForTesting: Record<string, any> = {}
+
   constructor(app: ApplicationService, config: Config) {
     this.app = app
     this.config = config
     this.checksum = new Checksum(
       this.app.config.get<Secret<string>>('app.appKey', 'appKey').release()
     )
+  }
+
+  test(name: any, params: Record<string, any> = {}) {
+    const testable = Testable.create(
+      name,
+      params,
+      this.queryParamsForTesting,
+      this.cookiesForTesting,
+      this.headersForTesting
+    )
+
+    this.queryParamsForTesting = {}
+    this.cookiesForTesting = {}
+    this.headersForTesting = {}
+
+    return testable
+  }
+
+  withQueryParams(params: Record<string, any>) {
+    this.queryParamsForTesting = { ...this.queryParamsForTesting, ...params }
+    return this
+  }
+
+  withCookies(cookies: Record<string, any>) {
+    this.cookiesForTesting = { ...this.cookiesForTesting, ...cookies }
+    return this
+  }
+
+  withHeaders(headers: Record<string, any>) {
+    this.headersForTesting = { ...this.headersForTesting, ...headers }
+    return this
   }
 
   static componentHook(feature: any) {
