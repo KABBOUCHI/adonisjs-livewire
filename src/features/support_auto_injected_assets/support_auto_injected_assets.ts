@@ -1,12 +1,12 @@
 import type { ApplicationService } from '@adonisjs/core/types'
 import ComponentHook from '../../component_hook.js'
-import { Response } from '@adonisjs/core/http'
+import { HttpResponse } from '@adonisjs/core/http'
 import { SupportScriptsAndAssets } from '../support_scripts_and_assets/support_scripts_and_assets.js'
 
 export class SupportAutoInjectedAssets extends ComponentHook {
   static async provide(app: ApplicationService) {
     //@ts-ignore
-    Response.getter('content', function () {
+    HttpResponse.getter('content', function () {
       //@ts-ignore
       let self = this
       let reqId = self.ctx.request.id()
@@ -41,13 +41,22 @@ export class SupportAutoInjectedAssets extends ComponentHook {
   }
   async dehydrate() {}
 
-  static injectAssets(html: string, assetsHead: string, assetsBody: string) {
-    let head = html.split('</head>')
-    let body = head[1].split('</body>')
+  /**
+   * Injects assets before </head> and </body>. If HTML has no </head> or </body>,
+   * injects before </html> / after <html> (fallback). Matches PHP SupportAutoInjectedAssets.
+   */
+  static injectAssets(html: string, assetsHead: string, assetsBody: string): string {
+    const hasHead = /<\s*\/\s*head\s*>/i.test(html)
+    const hasBody = /<\s*\/\s*body\s*>/i.test(html)
 
-    head[1] = assetsHead + body[0]
-    body[0] = assetsBody
+    if (hasHead && hasBody) {
+      return html
+        .replace(/(<\s*\/\s*head\s*>)/gi, assetsHead + '$1')
+        .replace(/(<\s*\/\s*body\s*>)/gi, assetsBody + '$1')
+    }
 
-    return head.join('</head>') + body.join('</body>')
+    return html
+      .replace(/(<\s*html(?:\s[^>])*>)/gi, '$1' + assetsHead)
+      .replace(/(<\s*\/\s*html\s*>)/gi, assetsBody + '$1')
   }
 }

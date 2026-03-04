@@ -51,4 +51,16 @@ export abstract class Synth {
 
     return target[key]
   }
+
+  /**
+   * Set a property value on the target
+   * Can be overridden by specific synthesizers (e.g., FormObjectSynth)
+   */
+  set(target: any, key: string, value: any): void {
+    if (Array.isArray(target)) {
+      target[key] = value
+    } else {
+      target[key] = value
+    }
+  }
 }

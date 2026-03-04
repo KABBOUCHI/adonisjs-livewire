@@ -9,7 +9,7 @@ export default class On extends Decorator {
     super()
   }
 
-  boot() {
+  async boot() {
     store(this.component).push('listeners', {
       name: this.name,
       event: this.event,
