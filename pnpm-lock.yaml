@@ -14,6 +14,9 @@ dependencies:
   edge-parser:
     specifier: ^9.0.4
     version: 9.1.0
+  edge-tags:
+    specifier: ^0.0.5
+    version: 0.0.5(edge.js@6.5.0)
   luxon:
     specifier: ^3.6.1
     version: 3.7.2
@@ -91,9 +94,6 @@ devDependencies:
   del-cli:
     specifier: ^5.1.0
     version: 5.1.0
-  edge-tags:
-    specifier: ^0.0.5
-    version: 0.0.5(edge.js@6.5.0)
   edge.js:
     specifier: ^6.5.0
     version: 6.5.0
@@ -1011,7 +1011,6 @@ packages:
 
   /@poppinss/inspect@1.0.1:
     resolution: {integrity: sha512-kLeEaBSGhlleyYvKc7c9s3uE6xv7cwyulE0EgHf4jU/CL96h0yC4mkdw1wvC1l1PYYQozCGy46FwMBAAMOobCA==}
-    dev: true
 
   /@poppinss/macroable@1.1.0:
     resolution: {integrity: sha512-y/YKzZDuG8XrpXpM7Z1RdQpiIc0MAKyva24Ux1PB4aI7RiSI/79K8JVDcdyubriTm7vJ1LhFs8CrZpmPnx/8Pw==}
@@ -1070,7 +1069,6 @@ packages:
 
   /@poppinss/types@1.2.1:
     resolution: {integrity: sha512-qUYnzl0m9HJTWsXtr8Xo7CwDx6wcjrvo14bOVbIMIlKJCzKrm3LX55dRTDr1/x4PpSvKVgmxvC6Ly2YiqXKOvQ==}
-    dev: true
 
   /@poppinss/utils@6.10.1:
     resolution: {integrity: sha512-da+MMyeXhBaKtxQiWPfy7+056wk3lVIhioJnXHXkJ2/OHDaZfFcyKHNl1R06sdYO8lIRXcXdoZ6LO2ARmkAREA==}
@@ -1092,7 +1090,6 @@ packages:
       '@poppinss/string': 1.7.1
       '@poppinss/types': 1.2.1
       flattie: 1.1.1
-    dev: true
 
   /@poppinss/validator-lite@2.1.2:
     resolution: {integrity: sha512-UhSG1ouT6r67VbEFHK/8ax3EMZYHioew9PqGmEZjV41G15aPZi6cyhXtBVvF9xqkHMflA5V680k7bQzV0kfD5w==}
@@ -2288,7 +2285,7 @@ packages:
       edge.js: ^6.0.0
     dependencies:
       edge.js: 6.5.0
-    dev: true
+    dev: false
 
   /edge.js@6.5.0:
     resolution: {integrity: sha512-WEXNseOSK6n5+Maf6dBPCMgsOuw4mpOqItMniXmdILVCH5PcjQ/CZDfw8IYyMwAjhshoznG+8WjsERy4+56xhA==}
@@ -2303,7 +2300,6 @@ packages:
       he: 1.2.0
       property-information: 7.1.0
       stringify-attributes: 4.0.0
-    dev: true
 
   /edgejs-parser@0.2.18:
     resolution: {integrity: sha512-O1Xg3ISESg2bl8DqP5q3x1b88cqTSgLmEBqNhGH482JdAIexDY7gh7FA9Y5kHOFwRNsTLFoziwQou0lprJ1MYQ==}
@@ -2399,7 +2395,6 @@ packages:
   /escape-goat@4.0.0:
     resolution: {integrity: sha512-2Sd4ShcWxbx6OY1IHyla/CVNwvg7XwZVoXZHcSu9w9SReNP1EzzD5T8NWKIR38fIqEns9kDWKUQTXXAmlDrdPg==}
     engines: {node: '>=12'}
-    dev: true
 
   /escape-string-regexp@1.0.5:
     resolution: {integrity: sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==}
@@ -2929,7 +2924,6 @@ packages:
   /he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
-    dev: true
 
   /hosted-git-info@4.1.0:
     resolution: {integrity: sha512-kyCuEOWjJqZuDbRHzL8V93NzQhwIB71oFWSyzVo+KPZI+pnQPPxucdkrOZvkLRnrf5URsQM+IJ09Dw29cRALIA==}
@@ -3791,7 +3785,6 @@ packages:
 
   /property-information@7.1.0:
     resolution: {integrity: sha512-TwEZ+X+yCJmYfL7TPUOcvBZ4QfoT5YenQiJuX//0th53DE6w0xxLEtfK3iyryQFddXuvkIk51EEgrJQ0WJkOmQ==}
-    dev: true
 
   /proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
@@ -4223,7 +4216,6 @@ packages:
     engines: {node: '>=14.16'}
     dependencies:
       escape-goat: 4.0.0
-    dev: true
 
   /strip-ansi@6.0.1:
     resolution: {integrity: sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==}

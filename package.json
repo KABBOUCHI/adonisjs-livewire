@@ -61,7 +61,6 @@
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
     "del-cli": "^5.1.0",
-    "edge-tags": "^0.0.5",
     "edge.js": "^6.5.0",
     "eslint": "^8.56.0",
     "get-port": "^7.1.0",
@@ -74,6 +73,7 @@
   "dependencies": {
     "@poppinss/macroable": "^1.1.0",
     "@poppinss/utils": "^6.9.2",
+    "edge-tags": "^0.0.5",
     "edge-parser": "^9.0.4",
     "luxon": "^3.6.1"
   },
