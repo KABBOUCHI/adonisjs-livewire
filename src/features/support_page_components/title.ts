@@ -5,7 +5,9 @@ export default class Title extends Decorator {
     super()
   }
 
-  async render(view) {
+  async render(...params: any[]) {
+    const [view] = params
+
     view.share({
       title: this.title,
     })

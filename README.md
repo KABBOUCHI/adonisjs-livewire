@@ -215,23 +215,41 @@ Define component logic using `<script server>` tag inside livewire edge componen
 
 ## Helpers
 
-### Edge tag compiler (Experimental)
+### Livewire Component Processor
 
-This package includes Edge tags support via [edge-tags](https://github.com/KABBOUCHI/edge-tags).
-
-```edge
-<x-button class="bg-red" a="b" :foo="bar" baz="{{ 1 + 2 }}">
-  Hello
-</x-button>
-```
-
-will be compiled to
+This package includes a processor that converts HTML-like syntax for Livewire components to Edge tag syntax.
 
 ```edge
-@component('button or components/button or components/button/index', { class: 'bg-red', a: 'b', foo: bar, baz: `${1 + 2}` })
-  Hello
-@end
+{{-- This syntax: --}}
+<livewire:counter count="5" wire:click="increment" class="btn" />
+
+{{-- Gets converted to: --}}
+@livewire('counter', { count: '5', wire:click: 'increment', class: 'btn' }, {})
 ```
+
+#### Dynamic Components
+
+You can use dynamic components with the `is` attribute:
+
+```edge
+{{-- Static component name --}}
+<livewire:is component="counter" />
+
+{{-- Dynamic component with Edge binding --}}
+<livewire:is :is="componentName" />
+```
+
+Both will be converted to `@livewire(componentName, {}, {})` where `componentName` is treated as an Edge variable.
+
+#### Supported Attributes
+
+- **Regular attributes**: `count="5"` → `{ count: '5' }`
+- **Edge bindings**: `:foo="bar"` → `{ foo: bar }` (treated as Edge variable)
+- **Wire attributes**: `wire:click="increment"` → `{ wire:click: 'increment' }`
+- **Wire model**: `wire:model="name"` → `{ wire:model: '$parent.name' }`
+- **Wire key**: `wire:key="item.id"` → options: `{ key: 'item.id' }`
+- **Mustache expressions**: `title="{{ user.name }}"` → `{ title: \`${user.name}\` }`
+- **Boolean attributes**: `disabled` → `{ disabled: true }`
 
 ### Edge component class (Experimental)
 

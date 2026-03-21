@@ -6,10 +6,9 @@ export default class Locked extends Decorator {
     super()
   }
 
-  update(property: string) {
-    if (this.name !== property) {
-      return
+  async update(propertyName: string, __fullPath: string = propertyName, _newValue?: unknown) {
+    if (propertyName === this.name) {
+      throw new CannotUpdateLockedPropertyException(this.name)
     }
-    throw new CannotUpdateLockedPropertyException(this.name)
   }
 }

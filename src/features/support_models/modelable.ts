@@ -9,7 +9,7 @@ export default class Modelable extends Decorator {
     super()
   }
 
-  mount() {
+  async mount() {
     store(this.component).push('bindings', {
       outer: this.outer,
       inner: this.inner,

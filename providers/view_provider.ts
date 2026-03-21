@@ -1,4 +1,5 @@
-import { fsReadAll, slash } from '@adonisjs/core/helpers'
+import stringHelpers from '@adonisjs/core/helpers/string'
+import { fsReadAll } from '@adonisjs/core/helpers'
 import { importDefault } from '@poppinss/utils'
 
 import type { ApplicationService } from '@adonisjs/core/types'
@@ -45,7 +46,7 @@ export default class ViewProvider {
         file = file.replace(/\.ts$/, '.js')
       }
 
-      const relativeFileName = slash(
+      const relativeFileName = stringHelpers.toUnixSlash(
         relative(this.app.relativePath('app/components'), fileURLToPath(file))
       )
 

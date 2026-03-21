@@ -2,7 +2,13 @@ import ComponentHook from '../../component_hook.js'
 import { store } from '../../store.js'
 
 export class SupportEvents extends ComponentHook {
-  async call(method: string, params: any[], _returnEarly: boolean) {
+  async call(
+    method: string,
+    params: any[],
+    _returnEarly?: (value?: any) => void | boolean,
+    _metadata?: any,
+    _componentContext?: any
+  ) {
     if (method === '__dispatch') {
       let [name, args] = params
       let ev = store(this.component)

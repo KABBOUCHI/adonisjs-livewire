@@ -3,9 +3,14 @@
   "compilerOptions": {
     "rootDir": "./",
     "outDir": "./build",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
     "noImplicitAny": false,
     "noUnusedParameters": false,
     "skipLibCheck": true,
-  },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
+  }
 }

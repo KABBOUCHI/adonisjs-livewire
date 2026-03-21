@@ -2,15 +2,14 @@ import ComponentHook from '../../component_hook.js'
 import { store } from '../../store.js'
 
 export class SupportRedirects extends ComponentHook {
-  async dehydrate(context) {
-    let s = store(this.component)
+  async dehydrate(context: { addEffect: (k: string, v: any) => void }) {
+    const s = store(this.component)
+    if (!s.has('redirect')) return
 
-    let to = s.get('redirect')[0]
+    const to = s.get('redirect')
+    if (!to) return
 
-    if (to) {
-      context.addEffect('redirect', to)
-    }
-
+    context.addEffect('redirect', to)
     if (s.has('redirectUsingNavigate')) {
       context.addEffect('redirectUsingNavigate', true)
     }
