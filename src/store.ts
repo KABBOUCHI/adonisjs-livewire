@@ -1,14 +1,17 @@
 import { AsyncLocalStorage } from 'node:async_hooks'
+import type { HttpContext } from '@adonisjs/core/http'
 import { Component } from './component.js'
 import { BaseComponent } from './base_component.js'
 import ComponentContext from './component_context.js'
 import ComponentHook from './component_hook.js'
+import debug from './debug.js'
 
 export class DataStore {
   lookup: WeakMap<Component | any, any> = new WeakMap()
   constructor(public id: string) {}
 
   push(component: Component | BaseComponent, key: string, value: any, iKey?: string) {
+    debug('store.push: key=%s iKey=%s', key, iKey ?? 'none')
     if (!this.lookup.has(component)) this.lookup.set(component, {})
     if (!this.lookup.get(component)[key] && !iKey) this.lookup.get(component)[key] = []
     if (!this.lookup.get(component)[key] && iKey) this.lookup.get(component)[key] = {}
@@ -21,16 +24,23 @@ export class DataStore {
   }
 
   set(component: Component | BaseComponent, key: string, value: any) {
+    debug('store.set: key=%s', key)
     if (!this.lookup.has(component)) this.lookup.set(component, {})
     this.lookup.get(component)[key] = value
   }
 
   get(component: Component | BaseComponent, key: string) {
-    return this.lookup.get(component)?.[key] || []
+    const componentData = this.lookup.get(component)
+    if (!componentData) {
+      debug('store.get: key=%s (no component data)', key)
+      return []
+    }
+    debug('store.get: key=%s found=%s', key, key in componentData)
+    return key in componentData ? componentData[key] : []
   }
 
   has(component: Component | BaseComponent, key: string) {
-    return (this.lookup.has(component) && this.lookup.get(component)?.[key]) || false
+    return !!(this.lookup.has(component) && this.lookup.get(component)?.[key] !== undefined)
   }
 }
 
@@ -38,6 +48,7 @@ export const livewireContext = new AsyncLocalStorage<{
   dataStore: DataStore
   context: ComponentContext
   features: ComponentHook[]
+  ctx: HttpContext
 }>()
 
 export const getLivewireContext = () => livewireContext.getStore()

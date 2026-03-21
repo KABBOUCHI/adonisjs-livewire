@@ -17,11 +17,11 @@ export default class ComponentContext {
   }
 
   pushEffect(key: string, value: any, iKey?: string | number): void {
-    if (!this.effects[key]) this.effects[key] = {}
-
     if (iKey !== undefined) {
+      if (!this.effects[key]) this.effects[key] = {}
       this.effects[key][iKey] = value
     } else {
+      if (!this.effects[key]) this.effects[key] = []
       this.effects[key].push(value)
     }
   }
@@ -31,11 +31,11 @@ export default class ComponentContext {
   }
 
   pushMemo(key: string, value: any, iKey?: string | number): void {
-    if (!this.memo[key]) this.memo[key] = []
-
     if (iKey !== undefined) {
+      if (!this.memo[key]) this.memo[key] = {}
       this.memo[key][iKey] = value
     } else {
+      if (!this.memo[key]) this.memo[key] = []
       this.memo[key].push(value)
     }
   }

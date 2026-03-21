@@ -1,4 +1,6 @@
 import { BaseComponent } from '../../base_component.js'
+import { Constructor } from '../../types.js'
 
-export interface HandlesPageComponents extends BaseComponent {}
-export class HandlesPageComponents {}
+export function HandlesPageComponents<T extends Constructor<BaseComponent>>(Base: T) {
+  return class extends Base {}
+}

@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { Component } from '../component.js'
 import Computed from '../features/support_computed/computed.js'
 import On from '../features/support_events/on.js'
@@ -8,6 +9,12 @@ import Layout from '../features/support_page_components/layout.js'
 import Title from '../features/support_page_components/title.js'
 import Url from '../features/support_query_string/url.js'
 import Renderless from '../features/support_renderless/renderless.js'
+import Validator from '../features/support_validation/validator.js'
+import type { HasValidate } from '../features/support_validation/types.js'
+import type { ConstructableSchema, Infer } from '@vinejs/vine/types'
+
+// Re-export form decorator from support_form_objects
+export { form } from '../features/support_form_objects/form_decorator.js'
 
 export function title(value: string) {
   return function (constructor: typeof Component) {
@@ -96,4 +103,36 @@ export function renderless() {
   return function (target: Component, propertyKey: string) {
     target.addDecorator(new Renderless())
   }
+}
+
+/**
+ * Validator decorator for properties
+ *
+ * Forces the property to be typed as HasValidate<T> where T is inferred from the schema.
+ * The schema factory function is called when building the validation schema.
+ *
+ * @param schemaFactory - Function that returns a Vine.js schema for this property
+ * @param options - Optional configuration (onUpdate: whether to validate on property update)
+ *
+ * @example
+ * ```typescript
+ * class MyComponent extends Component {
+ *   @validator(() => vine.string().minLength(3))
+ *   declare name: HasValidate<string>
+ *
+ *   @validator(() => vine.string().email(), { onUpdate: false })
+ *   declare email: HasValidate<string>
+ * }
+ * ```
+ */
+export function validator<TSchema extends ConstructableSchema<any, any, any>>(
+  schemaFactory: () => TSchema,
+  options?: { onUpdate?: boolean }
+): <TKey extends string>(
+  target: { [K in TKey]: HasValidate<Infer<TSchema>> },
+  propertyKey: TKey
+) => void {
+  return function (target: Component, propertyKey: string) {
+    target.addDecorator(new Validator(propertyKey, schemaFactory, options?.onUpdate ?? true))
+  } as any
 }

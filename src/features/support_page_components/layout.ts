@@ -9,7 +9,7 @@ export default class Layout extends Decorator {
     super()
   }
 
-  boot() {
+  async boot() {
     store(this.component).push('layout', {
       name: this.name,
       props: this.props,

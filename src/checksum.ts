@@ -1,4 +1,5 @@
-import CryptoJS from 'crypto-js'
+import { createHmac } from 'node:crypto'
+import debug from './debug.js'
 
 class CorruptComponentPayloadException extends Error {
   constructor() {
@@ -9,19 +10,37 @@ Ensure that the [name, id, data] of the Livewire component wasn't tampered with 
 }
 
 export class Checksum {
-  constructor(private key: string) {}
+  constructor(private key: string) {
+    debug(
+      'Checksum initialized with key length: %d, key preview: %s',
+      key.length,
+      key.substring(0, 10) + '...'
+    )
+  }
 
   verify(snapshot: any) {
     let checksum = snapshot['checksum']
 
     delete snapshot['checksum']
 
-    if (checksum !== this.generate(snapshot)) {
+    const generated = this.generate(snapshot)
+    debug(
+      'Checksum verify: received=%s, generated=%s, match=%s',
+      checksum,
+      generated,
+      checksum === generated
+    )
+
+    if (checksum !== generated) {
+      debug('Checksum MISMATCH - snapshot JSON: %s', JSON.stringify(snapshot))
       throw new CorruptComponentPayloadException()
     }
   }
 
   generate(snapshot: any) {
-    return CryptoJS.HmacSHA256(JSON.stringify(snapshot), this.key).toString()
+    const json = JSON.stringify(snapshot)
+    const result = createHmac('sha256', this.key).update(json).digest('hex')
+    debug('Checksum generate: json length=%d, result=%s, json=%s', json.length, result, json)
+    return result
   }
 }
