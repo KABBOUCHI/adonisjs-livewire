@@ -94,5 +94,6 @@
     "livewire",
     "components"
   ],
-  "prettier": "@adonisjs/prettier-config"
+  "prettier": "@adonisjs/prettier-config",
+  "packageManager": "pnpm@10.13.1"
 }
