@@ -538,6 +538,37 @@ export default class Livewire {
     })
   }
 
+  protected getPublicMethods(component: Component): string[] {
+    const methods: string[] = []
+    let prototype = Object.getPrototypeOf(component)
+
+    while (prototype && prototype !== Object.prototype) {
+      const props = Object.getOwnPropertyNames(prototype)
+
+      for (const prop of props) {
+        if (prop === 'constructor') continue
+        if (prop === 'render') continue
+        if (prop.startsWith('_')) continue
+
+        const descriptor = Object.getOwnPropertyDescriptor(prototype, prop)
+        if (descriptor && typeof descriptor.value === 'function') {
+          methods.push(prop)
+        }
+      }
+
+      prototype = Object.getPrototypeOf(prototype)
+    }
+
+    // Add internal dispatch methods
+    methods.push('__dispatch')
+    methods.push('__lazyLoad')
+    methods.push('$refresh')
+    methods.push('$commit')
+    methods.push('$set')
+
+    return methods
+  }
+
   async callMethods(component: Component, calls: any, context: ComponentContext) {
     let returns: any[] = []
 
@@ -546,13 +577,13 @@ export default class Livewire {
         let method = call['method']
         let params = call['params']
 
-        // let methods = getPublicMethods(component)
-        // methods = methods.filter((m) => m !== 'render')
-        // methods.push('__dispatch')
-        // methods.push('__lazyLoad')
-        // if (methods.includes(method) === false) {
-        //   throw new Error(`Method \`${method}\` does not exist on component ${component.getName()}`)
-        // }
+        const publicMethods = this.getPublicMethods(component)
+
+        if (!publicMethods.includes(method)) {
+          throw new Error(
+            `Method \`${method}\` does not exist or is not callable on component ${component.getName()}`
+          )
+        }
 
         let earlyReturnCalled = false
         let earlyReturn: any = null
